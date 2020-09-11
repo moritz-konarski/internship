@@ -19,7 +19,29 @@ def parse_url_file(file: str) -> [(str, str)]:
     return url_list
 
 
-def download(url_file: str, dest_folder: str):
+def download(url: str, filename: str, dest_folder: str,
+             response: requests.request):
+    # print downloading information
+    print('Downloading ' + filename + '\nFrom: ' + url)
+
+    # get https response
+    total_size_in_bytes = int(response.headers.get('content-length', 0))
+    # 1 Kibibyte
+    block_size = 1024
+    progress_bar = tqdm(total=total_size_in_bytes, unit='iB',
+                        unit_scale=True)
+    with open(dest_folder + filename, 'wb') as file:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            file.write(data)
+    progress_bar.close()
+    if total_size_in_bytes != 0 and \
+            progress_bar.n != total_size_in_bytes:
+        print("ERROR, something went wrong")
+    print('Content written to ' + dest_folder + filename + '\n')
+
+
+def download_all(url_file: str, dest_folder: str):
     """
     Downloads each of the elements in url_file and saves them to
     dest_folder
@@ -29,6 +51,11 @@ def download(url_file: str, dest_folder: str):
     should be stored
     :return:
     """
+
+    if not re.findall(r"/$", dest_folder):
+        print("Error: please enter a valid directory name (ending in '/')")
+        exit(1)
+
     if not os.path.exists(dest_folder):
         os.mkdir(dest_folder)
 
@@ -38,25 +65,8 @@ def download(url_file: str, dest_folder: str):
         for (filename, url) in url_list:
             response = requests.get(url, stream=True)
             response.raise_for_status()
+            download(url, filename, dest_folder, response)
 
-            # print downloading information
-            print('Downloading ' + filename + '\nFrom: ' + url)
-
-            # get https response
-            total_size_in_bytes = int(response.headers.get('content-length', 0))
-            # 1 Kibibyte
-            block_size = 1024
-            progress_bar = tqdm(total=total_size_in_bytes, unit='iB',
-                                unit_scale=True)
-            with open(dest_folder + filename, 'wb') as file:
-                for data in response.iter_content(block_size):
-                    progress_bar.update(len(data))
-                    file.write(data)
-            progress_bar.close()
-            if total_size_in_bytes != 0 and \
-                    progress_bar.n != total_size_in_bytes:
-                print("ERROR, something went wrong")
-            print('Content written to ' + dest_folder + filename + '\n')
     except requests.exceptions:
         print(
             'requests.get() returned an error code ' + str(
@@ -65,5 +75,5 @@ def download(url_file: str, dest_folder: str):
 
 if __name__ == '__main__':
     fire.Fire({
-        "download": download
+        "download": download_all
     })
