@@ -10,6 +10,11 @@ import fire
 
 # parses the provided url file into individual file names and download links
 def parse_url_file(file: str) -> [(str, str)]:
+    """
+    Parses a url file, turning it into a list of tuples of (filename, url)
+    :param file: the input file containing download urls, one per line
+    :return: list of tuples of (filename, url)
+    """
     # initialize lists
     url_list = []
     with open(file, 'r') as f:
@@ -28,6 +33,14 @@ def parse_url_file(file: str) -> [(str, str)]:
 # function to download a file using the provided response and store it
 # in the destination folder under filename
 def download(filename: str, dest_folder: str, response: requests.request):
+    """
+    Downloads the file from the url in response, puts it into dest_folder under
+    filename
+    :param filename: name of the downloaded file
+    :param dest_folder: folder to put the file in
+    :param response: the response from https requests based on url
+    :return:
+    """
     # get url from response
     url = response.url
     # print downloading information
@@ -54,6 +67,8 @@ def download(filename: str, dest_folder: str, response: requests.request):
     print('Content written to ' + dest_folder + filename + '\n')
 
 
+# function to download all the data specified by urls in urlfile, putting it
+# into dest_folder
 def download_all(url_file: str, dest_folder: str):
     """
     Downloads each of the elements in url_file and saves them to
