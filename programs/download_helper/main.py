@@ -66,6 +66,7 @@ def download_all(url_file: str, dest_folder: str):
             response = requests.get(url, stream=True)
             response.raise_for_status()
             download(url, filename, dest_folder, response)
+        print("Finished!")
 
     except requests.exceptions:
         print(
