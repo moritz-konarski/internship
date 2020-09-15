@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 """File Download Helper
 
 This script takes a file of download urls from
