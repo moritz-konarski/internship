@@ -56,4 +56,5 @@ extension, e.g.
 `https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/M2I3NPASM.5.12.4/2020/07/MERRA2_400.inst3_3d_asm_Np.20200703.nc4`
 will be turned into `20200703.nc4`. Take note that NetCDF files can be large 
 (> 1GB) so it might take a while for them to download.
+
 4. Deactivate the environment when you are done.
