@@ -9,10 +9,20 @@ import cartopy.crs as ccrs
 
 my_example_nc_file = '../.downloads/20200701.nc4'
 
+# TODO:
+def filter_variables(varlist):
+    pass
+    # filter by lines beginning with 'int' or 'float', then in next line
+    # 'long_name', then unit
+    # put in list, print out: 'T(time, lev, lat, lon), air_temperature, K'
+
+# TODO: use numpy variables for speed and accuracy -- read the type from input
+#  , save in dict
+
 if __name__ == '__main__':
     with Dataset(my_example_nc_file, mode='r') as data:
         print(data.variables)
-        # exit(0)
+        exit(0)
         lons: [float] = data.variables['lon'][:]
         lats: [float] = data.variables['lat'][:]
         T = data.variables['PS'][:, :, :]
@@ -32,10 +42,10 @@ if __name__ == '__main__':
 
         print("setting T")
         T_1: [float, float, float] = []
-        for x as lat in T:
-            for lat as
-                if 40 < x[1] < 50 and 40 < x[2] < 50:
-                    T_1.append(t, x[1], x[2])
+        # for x as lat in T:
+        #    for lat as
+        #        if 40 < x[1] < 50 and 40 < x[2] < 50:
+        #            T_1.append(t, x[1], x[2])
 
         # Set the figure size, projection, and extent
         fig = plt.figure(figsize=(10, 6))
