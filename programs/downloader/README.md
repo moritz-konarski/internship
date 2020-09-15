@@ -42,7 +42,7 @@ conda deactivate
 ## Practical Example
 
 1. Get a list of download urls from
-[here](https://disc.gsfc.nasa.gov/datasets/M2I3NPASM_5.12.4/summary?keywords=M2I3NPASM_5.12.4) 
+[here](https://disc.gsfc.nasa.gov/datasets/M2I3NPASM_5.12.4/summary?keywords=M2I3NPASM_5.12.4) or use the provided file (`urls.txt`) that only downloads a pdf as a test.
 by clicking "Subset / Get Data" in the "Data Access" section, selecting the 
 desired data range, and downloading the resulting text file. Save it in this
 programs folder for example.
