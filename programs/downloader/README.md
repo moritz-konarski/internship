@@ -11,13 +11,13 @@ is designed to work with urls and NetCDF files from
 2. Follow steps 1 and 2 outlined in
 <https://disc.gsfc.nasa.gov/data-access#python-requests> to get setup for this
 script.
-3. install [anaconda](https://www.anaconda.com/) for environment management (or
+3. Install [anaconda](https://www.anaconda.com/) for environment management (or
 use something equivalent).
-4. clone this git repository and navigate to this folder
+4. Clone this git repository and navigate to this folder
 ```bash 
 git clone https://github.com/moritz-konarski/internship.git
 ```
-5. create a conda environment from the included `downloader.yml` file by 
+5. Create a conda environment from the included `downloader.yml` file by 
 running
 ```bash
 conda env create --file downloader.yml
@@ -54,7 +54,6 @@ python3 main.py download urls.txt downloads/
 The files will be saved under the last word in their url plus their file
 extension, e.g.
 `https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/M2I3NPASM.5.12.4/2020/07/MERRA2_400.inst3_3d_asm_Np.20200703.nc4`
-will be turned into `20200703.nc4`
-__Take note that NetCDF files can be large (> 1GB) so it might take a while for
-them to download__
+will be turned into `20200703.nc4`. Take note that NetCDF files can be large 
+(> 1GB) so it might take a while for them to download.
 4. Deactivate the environment when you are done.
