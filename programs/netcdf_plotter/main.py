@@ -2,21 +2,32 @@
 # This is a sample Python script.
 # https://disc.gsfc.nasa.gov/information/howto?title=How%20to%20read%20and%20plot%20NetCDF%20MERRA-2%20data%20in%20Python
 
+# plotting stuff
+# https://scitools.org.uk/cartopy/docs/v0.15/matplotlib/advanced_plotting.html
+
+# cartopy
+# https://scitools.org.uk/cartopy/docs/latest/crs/projections.html
+
 from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+# TODO: set up cli app
 # import fire
 
 import warnings
 
+# TODO: try to fix these warnings
 # this is needed because netcdf4 emits warnings that I cannot fix when printing
 # data
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 # errors from mismatched libraries
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-my_example_nc_file = '../.downloads/20200701.nc4'
+# TODO: make all of this modular
+
+my_example_nc_file = '../.downloads_2/20200701.nc4'
 file_format = 'png'
 file_dpi = 500
 
@@ -32,6 +43,7 @@ def read_var_info() -> {str: (str, str)}:
 
 
 # this as one option for the cli app -- list to see this
+# TODO: add unit to this
 def print_var_info(data_dict: {str: (str, str)}):
     for key in data_dict.keys():
         print(key)
@@ -41,6 +53,10 @@ def print_var_info(data_dict: {str: (str, str)}):
 
 def list():
     print_var_info(read_var_info())
+
+
+# TODO: read lon, lat info from file and plot accordingly
+#
 
 
 def create_graph(var: str, name: str):
@@ -55,10 +71,13 @@ def create_graph(var: str, name: str):
 
         # Set the figure size, projection, and extent
         fig = plt.figure(figsize=(10, 6))
-        ax = plt.axes(projection=ccrs.Robinson())
+
+        ax = plt.axes(projection=ccrs.PlateCarree())
         ax.set_global()
-        ax.coastlines(resolution="110m", linewidth=1)
-        ax.gridlines(linestyle='--', color='black')
+        ax.set_extent([65, 83, 34, 48], crs=ccrs.PlateCarree())
+        ax.add_feature(cfeature.BORDERS, linewidth=1.4)
+        ax.gridlines(linestyle='--', color='black', draw_labels=True,
+                     linewidth=0.5)
 
         res = int((max - min) / 20)
 
@@ -69,7 +88,9 @@ def create_graph(var: str, name: str):
 
         cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.02, aspect=16,
                           shrink=0.8)
+
         cb.ax.tick_params(labelsize=10)
+        # TODO: make this more intelligent -- get time and date from file
         if name == 'ps':
             plt.title('Surface Pressure at 12am 01.07.2020', size=14)
             cb.set_label('Pa', size=12, rotation=0, labelpad=15)

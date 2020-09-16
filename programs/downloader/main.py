@@ -35,7 +35,7 @@ def parse_url_file(file: str) -> [(str, str)]:
             # find the last word and the file extension for the file name
             # e.g. extract '20200703.nc4' from the link
             # https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/M2I3NPASM.5.12.4/2020/07/MERRA2_400.inst3_3d_asm_Np.20200703.nc4
-            x = re.search(r"[^./_]+\....$", stripped_line)
+            x = re.search(r"[^./_]+\.nc4|[^./_]+\.pdf", stripped_line)
             # add a tuple of file name and url to the list
             url_list.append((x.group(), stripped_line))
     return url_list

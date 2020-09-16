@@ -5,3 +5,4 @@
 - [x] write doc on how to use 
 - [x] send diary to advisor
 - [ ] write plotter for 1 var of netcdf
+- [ ] try out spyder
