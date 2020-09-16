@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # This is a sample Python script.
 # https://disc.gsfc.nasa.gov/information/howto?title=How%20to%20read%20and%20plot%20NetCDF%20MERRA-2%20data%20in%20Python
 
@@ -121,8 +122,8 @@ def find_range(var_name):
 
 if __name__ == '__main__':
     with Dataset(my_example_nc_file, mode='r') as cdata:
-        list()
-        list_all_var_data()
+        # list()
+        # list_all_var_data()
         # print(find_range('PS'))
         create_graph('PS', 'ps')
         create_graph('PHIS', 'phis')
