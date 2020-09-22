@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import os
 # TODO: set up cli app
 # import fire
 
@@ -109,6 +110,27 @@ def list_all_var_data():
         print(data.variables)
 
 
+def get_var_name_list() -> [str]:
+    list = []
+    with Dataset(my_example_nc_file, mode='r') as data:
+        for var in data.variables.keys():
+            list.append(var)
+    return list
+
+
+def list_var_names():
+    for var in get_var_name_list():
+        print(var)
+
+
+def extract_vars_into_files(list: [str], filepath: str):
+    for var in list:
+        os.system("ncks -v " +
+                  var + " " +
+                  filepath + "20200701.nc4 " +
+                  filepath + "20200701_" + var + ".nc4")
+
+
 def find_range(var_name):
     with Dataset(my_example_nc_file, mode='r') as data:
         var = data.variables[var_name]
@@ -122,8 +144,13 @@ def find_range(var_name):
 
 if __name__ == '__main__':
     with Dataset(my_example_nc_file, mode='r') as cdata:
-        # list()
+        # list_var_names()
         # list_all_var_data()
+        extract_vars_into_files(get_var_name_list(),
+                                "/home/moritz/Documents/internship.git/programs/.downloads_2/")
         # print(find_range('PS'))
-        create_graph('PS', 'ps')
-        create_graph('PHIS', 'phis')
+        # create_graph('PS', 'ps')
+        # create_graph('PHIS', 'phis')
+
+        # og file:     5.8 MB
+        # split files: 6.3 MB
