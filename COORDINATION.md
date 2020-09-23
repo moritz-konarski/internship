@@ -28,7 +28,8 @@
     - GUI
         - selector menus
         - calenders for date selection
-- [ ] who does what
+- [ ] who does what and who downloads which part of the year (4 months
+sections, they have data until August 2020)
     - Akylbek
     - Aidai
     - Moritz
