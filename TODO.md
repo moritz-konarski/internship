@@ -7,6 +7,9 @@
 
 - [ ] remove link printing from downloader, add 'x or total' info
 - [ ] add basic completion checking using filenames
+- [ ] __use \*.npy format for data storage__
+    - [ ] write converter for data
+    - [ ] maybe automatic zipping and unzipping?
 
 - [ ] figure out which file format is best to store these data types
 - [ ] coordinate with others about precise abilities of our functions
