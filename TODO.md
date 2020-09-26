@@ -6,6 +6,7 @@
 - [ ] write proper wrapper for wget in python
 
 - [ ] remove link printing from downloader, add 'x or total' info
+- [ ] add basic completion checking using filenames
 
 - [ ] figure out which file format is best to store these data types
 - [ ] coordinate with others about precise abilities of our functions
