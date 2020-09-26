@@ -133,3 +133,4 @@ dmypy.json
 **.downloads_2
 *.nc
 *.nc4
+**.year

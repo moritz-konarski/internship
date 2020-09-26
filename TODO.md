@@ -2,7 +2,11 @@
 
 - [ ] update README
 - [ ] translate exercises to be sure what I am expected to do
+
 - [ ] write proper wrapper for wget in python
+
+- [ ] remove link printing from downloader, add 'x or total' info
+
 - [ ] figure out which file format is best to store these data types
 - [ ] coordinate with others about precise abilities of our functions
 - [ ] create templates for data retrieval for plotting
@@ -14,9 +18,6 @@
     - [ ] get time series (start\_time, end\_time, var, area=[], lev?)
     - [ ] get heat map (time, area, var, lev?)
     - get all data within certain constraints: greater than, smaller than ...
-- [ ] find a good data structure until Friday
-    - tether, hdf, pickle, etc
-    - Parquet, ORC, Arrow
 - [ ] to be more scientific, we should implement some better analysis features:
     - statistics
     - spectral analysis
