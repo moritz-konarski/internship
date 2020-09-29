@@ -44,9 +44,8 @@ reanalysis data
 
 ### Downloader 
 
-- [ ] write proper wrapper for wget in python
+- [x] write proper wrapper for wget in python
 - [ ] write GUI for downloader
-- [ ] remove link printing from downloader, add 'x or total' info
 - [ ] add basic completion checking using filenames
 
 ### File Management
