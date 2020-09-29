@@ -22,8 +22,8 @@ reanalysis data
 
 ### General 
 
-- [ ] update README
-- [ ] translate exercises to be sure what I am expected to do
+- [x] update README
+- [x] translate exercises to be sure what I am expected to do
 
 ### Downloader 
 
@@ -52,7 +52,7 @@ names
     - [ ] get time range (var)
     - [ ] get time series (start\_time, end\_time, var, area=[], lev?)
     - [ ] get heat map (time, area, var, lev?)
-    - get all data within certain constraints: greater than, smaller than ...
+    - [ ] get all data within certain constraints: greater than, smaller than ...
 
 ### Additional
 
