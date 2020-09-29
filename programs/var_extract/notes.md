@@ -8,3 +8,5 @@
     - time that is covered, units, names
     - resolution
     - where the data comes from
+- each deconstructed netCDF file gets a json file
+- then all the individual vars are named after `date_varname.npy`
