@@ -3,6 +3,23 @@
 Internship program at [AUCA](https://auca.kg) and 
 [RAS RS](http://www.gdirc.kg/en/) 2020.
 
+## Data
+
+[inst3_3d_asm_Np (M2I3NPASM)](https://disc.gsfc.nasa.gov/datasets/M2I3NPASM_5.12.4/summary): Assimilated Meteorological Fields
+
+| Detail        | Information                                       |
+|:--------------|:--------------------------------------------------|
+| Frequency     | 3-hourly from 00:00 UTC                           |
+| Spatial Grid  | 3D, pressure-level, full horizontal resolution    |
+| Dimensions    | longitude=576, latitude=361, level=42, time=8     |
+| Granule Size  | ~1.1GB                                            |
+
+### Our Subset
+
+- Geographic Region `[65, 34, 83, 48]` (W,S,E,S)
+    - 34N to 48N 
+    - 65E to 83E
+
 ## Tasks
 
 ### Educational Internship
