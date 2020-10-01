@@ -29,9 +29,11 @@ def extract_all(path: str, store_path: str):
     date = get_date_range(path)
     with Ds(path, 'r') as d:
         for var_name in var_list:
-            var = np.array(d.variables[var_name])
-            np.save(os.path.realpath(store_path) + '/' + date + "_"     \
-                    + var_name + '.npy', var, allow_pickle=True)
+            var = np.asarray(d.variables[var_name])
+            file_name = os.path.realpath(store_path) + '/' + date + "_"     \
+                    + var_name + ".npz"
+            with open(file_name, 'wb') as f:
+                np.savez_compressed(f, var, allow_pickle=True)
 
 
 def create_metadata_file(data: str, dest: str, var_list: str):
