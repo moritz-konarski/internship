@@ -6,24 +6,56 @@ import sys
 import fire
 import numpy as np
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 file_dpi = 500
 
 def graph_var(src_file: str, dest_file:str):
     with open(dest_file+".png", 'wb') as f:
         src = np.load(src_file, allow_pickle=True)
-        print(src['arr_0'].shape)
-        data = src['arr_0'][:,10,10]
-        print(data.shape)
+        #print(src['arr_0'].shape)
+        data = src['arr_0'][12,:,:]
 
+        v_max = data[:,:].max()
+        v_min = data[:,:].min()
+
+        lats = np.load("lat.npz", allow_pickle=True)['arr_0']
+        lons = np.load("lon.npz", allow_pickle=True)['arr_0']
+
+        # Set the figure size, projection, and extent
         fig = plt.figure(figsize=(10, 6))
-        plt.plot(data)
+
+        emin = 65
+        emax = 83
+        nmin = 34
+        nmax = 48
+
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        ax.set_global()
+        ax.set_extent([emin, emax, nmin, nmax], crs=ccrs.PlateCarree())   
+        ax.add_feature(cfeature.BORDERS, linewidth=1.4)
+        ax.gridlines(linestyle='--', color='black', draw_labels=True,
+                     linewidth=0.5)
+
+        res = int((v_max-v_min) / 20)
+
+        # Set contour levels, then draw the plot and a colorbar
+        clevs = np.arange(v_min, v_max, res)
+        plt.contourf(lons, lats, data, clevs, transform=ccrs.PlateCarree(),
+                     cmap=plt.cm.jet)
+
+        cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.02, aspect=16,
+                          shrink=0.8)
+
+        cb.ax.tick_params(labelsize=10)
+
+        plt.title("Surface Pressure", size=14)
+        cb.set_label('Pa', size=12, rotation=0, labelpad=35)
+
         fig.savefig(f, format='png', dpi=file_dpi)
 
         
-
-
-
 if __name__ == '__main__':
     fire.Fire({
         "graph": graph_var
@@ -38,7 +70,11 @@ def create_graph(var: str, name: str):
         min, max = find_range(var)
 
         d = data.variables[var][:, :, :]
+
         d: [float, float, float] = d[0, :, :]
+
+        v_max = d[:].max()
+        v_min = var[:].min()
 
         # Set the figure size, projection, and extent
         fig = plt.figure(figsize=(10, 6))

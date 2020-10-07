@@ -37,31 +37,10 @@ reanalysis data
 
 ## TODO List
 
-### General 
-
-- [x] update README
-- [x] translate exercises to be sure what I am expected to do
-
-### Downloader 
-
-- [x] write proper wrapper for wget in python
 - [ ] write GUI for downloader
-- [ ] add basic completion checking using filenames
-
-### File Management
-
-#### Convert netCDF to NPY
-
-- [ ] write proper converter that takes input of list of files or file with
-names
+- [ ] add basic download completion checking using filenames
 - [ ] use \*.csv or \*.json to store metadata for the data
-- [ ] __use \*.npy format for data storage__
-- [ ] finally zipping of the data
-
-#### Access Program
-
-- [ ] coordinate with others about precise abilities of our functions
-- [ ] create templates for data retrieval for plotting
+- [ ] write class that provides access to the needed files for plotting
     - [ ] get var list () -> [str]
     - [ ] get var type
     - [ ] get var unit
@@ -71,7 +50,7 @@ names
     - [ ] get heat map (time, area, var, lev?)
     - [ ] get all data within certain constraints: greater than, smaller than ...
 
-### Additional
+### Extra
 
 - [ ] to be more scientific, we should implement some better analysis features:
     - statistics
