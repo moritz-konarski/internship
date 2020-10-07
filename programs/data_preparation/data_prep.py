@@ -61,7 +61,8 @@ def extract_var(str_src_path: str, str_dest_path: str, var_name: str):
     dest_path = check_dest_path(str_dest_path)
     
     # TODO: come up with a good variable name check in this setting
-    if var_exists(var_name)
+    if var_exists(var_name):
+        pass
 
     if not re.findall(r"/$", store_path):
         store_path + "/"
@@ -110,16 +111,37 @@ def create_metadata_file(data: str, dest: str, var_list: str):
 
 
 def get_var_name_list(path: str) -> [str]:
+    """
+    List all variables in the specified file.
+    """
     list = []
-    with Ds(path, 'r') as d:
+    with Dataset(path, 'r') as d:
         for var in d.variables.keys():
             list.append(var)
     return list
+
+def get_var_name_list(path: str) -> [str]:
+    """
+    List all variables in the specified file.
+    """
+    list = []
+    with Dataset(path, 'r') as d:
+        for var in d.variables.keys():
+            list.append(var + "\t" + d.variables[var].units + ", " + 
+                    d.variables[var].long_name)
+    return list
+
+
+def print_all_vars(path: str):
+    for var in get_var_name_list(path):
+        print(var)
+
 
 
 def get_date_range(path: str) -> str:
     with Ds(path, 'r') as d:
         return str(d.RangeBeginningDate) + "_" + str(d.RangeEndingDate)
+
 
 
 #if __name__ == '__main__':
@@ -129,10 +151,12 @@ def get_date_range(path: str) -> str:
 #    })
 
 if __name__ == '__main__':
-    check_src_path('../var_extract')
-    check_dest_path('lol')
-    check_dest_path('hi')
-
+    #check_src_path('../var_extract')
+    #check_dest_path('lol')
+    #check_dest_path('hi')
+    fire.Fire({
+        "list": print_all_vars
+    })
 
     #concat('_PS', './test/', './test/PS.npz')
     #concat('_H', './test/', './test/H.npz')
