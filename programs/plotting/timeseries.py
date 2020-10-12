@@ -11,10 +11,9 @@ file_dpi = 500
 
 def graph_var(src_file: str, dest_file:str):
     with open(dest_file+".png", 'wb') as f:
+        # TODO: have if statement for 
         src = np.load(src_file, allow_pickle=True)
-        #print(src['arr_0'].shape)
-        data = src['arr_0'][:,10,10]
-        #print(data.shape)
+        data = src['data'][:,10,10]
 
         fig = plt.figure(figsize=(10, 6))
         

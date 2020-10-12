@@ -13,6 +13,7 @@ file_dpi = 500
 
 def graph_var(src_file: str, dest_file:str):
     with open(dest_file+".png", 'wb') as f:
+        # TODO: load lat and lon data from one file
         src = np.load(src_file, allow_pickle=True)
         #print(src['arr_0'].shape)
         data = src['arr_0'][12,:,:]

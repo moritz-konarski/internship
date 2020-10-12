@@ -19,16 +19,25 @@ def extract_var(src_path: str, dest_path: str, var_name: str):
         data = None
         for part in sorted(Path(src_path).glob("*.nc4")):
             filepath = os.path.join(part)
-            #print(filepath)
+            print(filepath)
             with Dataset(filepath, 'r') as d:
                 if data is None:
                     data = np.asarray(d.variables[var_name])
-                    #print(data.shape)
                 else:
                     data = np.append(data, np.asarray(d.variables[var_name]), 
                             axis=0)
-                    #print(data.shape)
-            np.savez_compressed(f, data, allow_pickle=True)
+        time = None
+        lats = None
+        lons = None
+        part = sorted(Path(src_path).glob("*.nc4"))[0]
+        filepath = os.path.join(part)
+        with Dataset(filepath, 'r') as d:
+            time = np.asarray(d.variables['time'])
+            lats = np.asarray(d.variables['lat'])
+            lons = np.asarray(d.variables['lon'])
+        np.savez_compressed(f, data=data, time=time, lat=lats, lon=lons, 
+            allow_pickle=True)
+
 
 def extract_time_lat_lon(src_path: str, dest_path: str):
     if not re.findall(r"/$", dest_path):
