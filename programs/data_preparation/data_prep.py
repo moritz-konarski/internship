@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import fire
+import json
 import numpy as np
 from pathlib import Path
 from netCDF4 import Dataset
@@ -11,15 +12,22 @@ from netCDF4 import Dataset
 
 def extract_var(src_path: str, dest_path: str, var_name: str):
     if not re.findall(r"/$", dest_path):
-        dest_path + "/"
-    if not os.path.exists(dest_path):
-        os.mkdir(dest_path)
+        dest_path += "/" + var_name + "/"
+    else:
+        dest_path += var_name + "/"
+    os.makedirs(dest_path, exist_ok=True)
 
+    sorted_file_list = sorted(Path(src_path).glob("*.nc4"))
+    first_file = sorted_file_list[0]
+    last_file = sorted_file_list[-1]
+
+    n_files = len(sorted_file_list)
+    # get data from files
     with open(dest_path + var_name + ".npz", 'wb') as f:
         data = None
-        for part in sorted(Path(src_path).glob("*.nc4")):
+        for (i, part) in enumerate(sorted_file_list):
             filepath = os.path.join(part)
-            print(filepath)
+            print(str(i) + "/" + str(n_files))
             with Dataset(filepath, 'r') as d:
                 if data is None:
                     data = np.asarray(d.variables[var_name])
@@ -29,15 +37,69 @@ def extract_var(src_path: str, dest_path: str, var_name: str):
         time = None
         lats = None
         lons = None
-        part = sorted(Path(src_path).glob("*.nc4"))[0]
+        part = sorted_file_list[0]
         filepath = os.path.join(part)
         with Dataset(filepath, 'r') as d:
             time = np.asarray(d.variables['time'])
             lats = np.asarray(d.variables['lat'])
             lons = np.asarray(d.variables['lon'])
+        print("Writing to file...")
         np.savez_compressed(f, data=data, time=time, lat=lats, lon=lons, 
             allow_pickle=True)
+    
+    with open(dest_path + "metadata.json", 'w') as f:
+        json.dump(extract_metadata(first_file, last_file, var_name), f)
 
+
+
+def get_var_info_list(path: str) -> [str, str, str]:
+    """
+    List all variables, their names, units in the specified file.
+    """
+    list = []
+    with Dataset(path, 'r') as d:
+        for var in d.variables.keys():
+            list.append((var, d.variables[var].long_name, 
+                    d.variables[var].units))#, d.variables[var].dimension))
+        print(d.variables)
+    return list
+
+
+def print_all_vars(path: str):
+    for (var, name, unit) in get_var_info_list(path):
+        print("{0:6s} {1:15s} {2:s}".format(var, unit, name))
+
+
+def extract_metadata(first_file: str, last_file: str, var: str) -> dict:
+    name = None
+    long_name = None
+    std_name = None
+    units = None
+    shape = None
+    time_shape = None
+    begin_date = None
+    end_date = None
+    with Dataset(first_file, 'r') as d:
+        name = d.variables[var].name
+        long_name = d.variables[var].long_name
+        std_name =  d.variables[var].standard_name
+        units = d.variables[var].units
+        shape = d.variables[var].shape
+        time_shape = d.variables['time'].shape
+        begin_date = d.RangeBeginningDate
+    with Dataset(last_file, 'r') as d:
+        end_date = d.RangeEndingDate
+    info_dict = {
+            "name" : name,
+            "long_name" : long_name,
+            "std_name" : std_name, 
+            "units" : units,
+            "shape" : shape,
+            "values_per_day" : time_shape,
+            "begin_date" : begin_date,
+            "end_date" : end_date
+        }
+    return info_dict
 
 def extract_time_lat_lon(src_path: str, dest_path: str):
     if not re.findall(r"/$", dest_path):
@@ -85,9 +147,17 @@ def extract_time_lat_lon(src_path: str, dest_path: str):
     #    np.save(os.path.realpath(store_path) + '/' + var_name + '.npy', var,
     #            allow_pickle=True)
 
+# TODO: write proper test code
 def test_file(src_path: str):
-    src = np.load(src_path, allow_pickle=True)
-    print(src['arr_0'].shape)
+    path = sorted(Path(src_path).glob("*.npz"))[0]
+    src = np.load(path, allow_pickle=True)
+    print(src['data'].shape)
+    print(src['lat'].shape)
+    print(src['lon'].shape)
+    print(src['time'].shape)
+    with open(src_path + "metadata.json", 'r') as f:
+        dictionary = json.load(f)
+        print(dictionary)
 
 
 # TODO: make sure that only the files that have dates are used here
@@ -149,7 +219,7 @@ if __name__ == '__main__':
     fire.Fire({
         "list": print_all_vars,
         "extract": extract_var,
-        "meta": extract_time_lat_lon,
+        #"meta": extract_time_lat_lon,
         "test": test_file
     })
 
