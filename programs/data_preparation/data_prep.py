@@ -28,7 +28,6 @@ def extract(src_path: str, dest_path: str, var_name: str):
     dest_file = dest_path + "metadata.json"
     extract_metadata(dest_file, first_file, last_file, data_file, var_name)
 
-# shape should be of the whole file
 
 def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
     n_files = len(file_list)
@@ -42,9 +41,6 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
             else:
                 data = np.append(data, np.asarray(d.variables[var_name]), 
                         axis=0)
-    #time = None
-    #lats = None
-    #lons = None
     first_file = file_list[0]
     filepath = os.path.join(first_file)
     with Dataset(filepath, 'r') as d:
@@ -58,8 +54,10 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
     
 def extract_metadata(dest_file: str, first_file: str, last_file: str,
         data_file: str, var: str):
+    print("Extracting metadata...")
     name = long_name = std_name = units = shape = time_steps = None
     begin_date = end_date = lat_min = lat_max = lon_min = lon_max = None
+    data_min = data_max = None
     with Dataset(first_file, 'r') as d:
         name = d.variables[var].name
         long_name = re.sub("_", " ", d.variables[var].long_name)
@@ -76,6 +74,12 @@ def extract_metadata(dest_file: str, first_file: str, last_file: str,
     lat_max = float(d['lat'][-1])
     lon_min = float(d['lon'][0])
     lon_max = float(d['lon'][-1])
+    if len(shape) == 4:
+        data_max = float(d['data'][:,:,:,:].max())
+        data_min = float(d['data'][:,:,:,:].min())
+    else:
+        data_max = float(d['data'][:,:,:].max())
+        data_min = float(d['data'][:,:,:].min())
 
     info_dict = {
             "name" : name,
@@ -83,6 +87,8 @@ def extract_metadata(dest_file: str, first_file: str, last_file: str,
             "std_name" : std_name, 
             "units" : units,
             "shape" : shape,
+            "data_max": data_max,
+            "data_min": data_min,
             "level_count" : 0 if len(shape) != 4 else int(shape[1]),
             "values_per_day" : time_steps,
             "day_count" : int(shape[0] / time_steps),
