@@ -106,7 +106,7 @@ def extract_metadata(first_file: str, last_file: str, var: str, count: int) -> d
             "std_name" : std_name, 
             "units" : units,
             "shape" : shape,
-            "level_count" : 0 if len(shape) != 4 else int(shape[2]),
+            "level_count" : 0 if len(shape) != 4 else int(shape[1]),
             "values_per_day" : int(time_shape[0]),
             "day_count" : count,
             "begin_date" : begin_date,
