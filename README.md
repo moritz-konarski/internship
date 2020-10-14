@@ -16,7 +16,7 @@ Internship program at [AUCA](https://auca.kg) and
 
 ### Our Subset
 
-- Geographic Region `[65, 34, 83, 48]` (W,S,E,S)
+- Geographic Region `[65, 34, 83, 48]` (W,S,E,N)
     - 34N to 48N 
     - 65E to 83E
 
