@@ -33,14 +33,12 @@ def extract(src_path: str, dest_path: str, var_name: str):
     dest_file = dest_path + "metadata.json"
     extract_metadata(dest_file, first_file, last_file, data_file, var_name)
 
+    replace_fill_value(dest_path)
+
 
 def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
     n_files = len(file_list)
-    data = None
-    time = None
-    lat = None
-    lon = None
-    lev = None
+    data = time = lat = lon = lev = None
     for (i, part) in enumerate(file_list):
         filepath = os.path.join(part)
         print(str(i+1) + "/" + str(n_files))
@@ -56,16 +54,45 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
         lat = np.asarray(d.variables['lat'])
         lon = np.asarray(d.variables['lon'])
         lev = np.asarray(d.variables['lev'])
-    print("converting to double")
+
+    print("Converting data types...")
     data = data.astype(np.float32, casting='safe')
     time = time.astype(np.int32, casting='safe')
     lat  = lat.astype(np.float64, casting='safe')
     lon  = lon.astype(np.float64, casting='safe')
     lev  = lev.astype(np.float64, casting='safe')
+
     print("Writing to file...")
     with open(dest_path, 'wb') as f:
         np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon, \
                 lev=lev, allow_pickle=True)
+
+def replace_fill_value(path: str):
+    meta_dict = None
+    with open(path + "metadata.json", 'r') as f:                          
+        meta_dict = json.load(f)                     
+
+    #print("max == fill: " + \
+    #        str(meta_dict['data_max'] == meta_dict['fill_value']))
+
+    #print("max : " + str(meta_dict['data_max']))
+    #print("fill: " + str(meta_dict['fill_value']))
+
+    if meta_dict['data_max'] == meta_dict['fill_value']:
+        print("Converting fill values to NaN...")
+        d = np.load(path + meta_dict['name'] + ".npz", allow_pickle=True)
+        if meta_dict['lev_count'] == 0:
+            new_d = np.where(d['data'][:,:,:] != meta_dict['fill_value'], \
+                    d['data'][:,:,:], np.NaN)
+        else:
+            new_d = np.where(d['data'][:,:,:,:] != meta_dict['fill_value'], \
+                    d['data'][:,:,:,:], np.NaN)
+
+        with open(path + meta_dict['name'] + ".npz", 'wb') as f:
+            np.savez_compressed(f, data=new_d, time=d['time'],       \
+                    lat=d['lat'], lon=d['lon'], lev=d['lev'],  \
+                    allow_pickle=True)
+
     
 def extract_metadata(dest_file: str, first_file: str, last_file: str,
         data_file: str, var: str):

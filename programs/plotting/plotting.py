@@ -51,11 +51,14 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     elif time_index > int(meta_dict['shape'][0])-1 and \
             meta_dict['last_day_inclusive']:
         print("Date too large, maximum is: " + str(meta_dict['end_date'])
-                + " 21")
+                + " " + str((meta_dict['values_per_day']-1) / \
+                        meta_dict['values_per_day']* 24))
         exit(-1)
     elif time_index > int(meta_dict['shape'][0])-1:
         print("Date too large, maximum is (last day is not included): " \
-                + str(meta_dict['end_date']) + " 21")
+                + str(meta_dict['end_date']) + " " + \
+                str((meta_dict['values_per_day']-1) / \
+                meta_dict['values_per_day']* 24))
         exit(-1)
 
     print("Plotting...")
@@ -69,12 +72,19 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
         print("Level must be less than: " + str(meta_dict['lev_count']))
         exit(-1)
 
-    data_min = float(data[:,:].min())
+
+    print(np.NaN)
+    data_min = float(np.nanmin(data[:,:]))
     print(data_min)
-    #print(data_min.shape)
-    data_max = float(data[:,:].max())
+    data_max = float(np.nanmax(data[:,:]))
     print(data_max)
-    #print(data_max.shape)
+
+    print(data)
+
+    if np.isnan(data_min) and np.isnan(data_max):
+        print("This array contains no valid numbers. Exiting.")
+        exit(-1)
+    
 
     lats = src['lat']
     lons = src['lon']
