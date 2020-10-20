@@ -57,11 +57,11 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
         lon = np.asarray(d.variables['lon'])
         lev = np.asarray(d.variables['lev'])
     print("converting to double")
-    data = data.astype(np.double, casting='safe')
-    time = time.astype(np.double, casting='safe')
-    lat  = lat.astype(np.double, casting='safe')
-    lon  = lon.astype(np.double, casting='safe')
-    lev  = lev.astype(np.double, casting='safe')
+    data = data.astype(np.float32, casting='safe')
+    time = time.astype(np.int32, casting='safe')
+    lat  = lat.astype(np.float64, casting='safe')
+    lon  = lon.astype(np.float64, casting='safe')
+    lev  = lev.astype(np.float64, casting='safe')
     print("Writing to file...")
     with open(dest_path, 'wb') as f:
         np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon, \
@@ -73,18 +73,19 @@ def extract_metadata(dest_file: str, first_file: str, last_file: str,
     name = long_name = std_name = units = shape = time_steps = None
     begin_date = end_date = lat_min = lat_max = lon_min = lon_max = None
     lev_units = lat_units = lon_units = data_min = data_max = None 
-    lev_min = lev_max = None
+    lev_min = lev_max = fill_value = None
     with Dataset(first_file, 'r') as d:
-        name = d.variables[var].name
+        name = str(d.variables[var].name)
         long_name = var_name_format(d.variables[var].long_name)
         std_name =  var_name_format(d.variables[var].standard_name)
-        units = d.variables[var].units
-        lat_units = d.variables['lat'].units
-        lon_units = d.variables['lon'].units
-        lev_units = d.variables['lev'].units
-        begin_date = d.RangeBeginningDate
+        units = str(d.variables[var].units)
+        fill_value = float(d.variables[var]._FillValue)
+        lat_units = str(d.variables['lat'].units)
+        lon_units = str(d.variables['lon'].units)
+        lev_units = str(d.variables['lev'].units)
+        begin_date = str(d.RangeBeginningDate)
     with Dataset(last_file, 'r') as d:
-        end_date = d.RangeEndingDate
+        end_date = str(d.RangeEndingDate)
 
     d = np.load(data_file, allow_pickle=True)
     shape = d['data'].shape
@@ -127,6 +128,7 @@ def extract_metadata(dest_file: str, first_file: str, last_file: str,
             "lev_max" : lev_max,
             "lev_count" : 0 if len(shape) != 4 else int(shape[1]),
             "lev_units" : lev_units,
+            "fill_value" : fill_value
         }
     with open(dest_file, 'w') as f:
         json.dump(info_dict, f)
