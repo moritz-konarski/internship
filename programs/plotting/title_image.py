@@ -91,7 +91,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     lats = src['lat']
     lons = src['lon']
 
-    fig = plt.figure(figsize=(9.5, 6))
+    fig = plt.figure(frameon=False)#figsize=(9.5, 6))
 
     emin = meta_dict['lon_min']
     emax = meta_dict['lon_max']
@@ -104,7 +104,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     ax.add_feature(cfeature.BORDERS, linewidth=1.4)
     ax.gridlines(linestyle='--',
                  color='black',
-                 draw_labels=True,
+    #             draw_labels=True,
                  linewidth=0.5)
 
     res = float((data_max - data_min) / 20)
@@ -117,19 +117,19 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
                  transform=ccrs.PlateCarree(),
                  cmap=plt.cm.jet)
 
-    cb = plt.colorbar(ax=ax,
-                      orientation="vertical",
-                      pad=0.08,
-                      aspect=16,
-                     shrink=0.8)
+    #cb = plt.colorbar(ax=ax,
+    #                  orientation="vertical",
+    #                  pad=0.08,
+    #                  aspect=16,
+    #                  shrink=0.8)
 
-    cb.ax.tick_params(labelsize=10, pad=0.5)
+    #cb.ax.tick_params(labelsize=10, pad=0.5)
 
     title = meta_dict['long_name'] + " on " \
             + graph_datetime.strftime("%d.%m.%Y %H:%M") + lev_str
 
-    plt.title(title, size=18, loc='left')
-    cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
+    #plt.title(title, size=18, loc='left')
+    #cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
 
     with open(title + ".pdf", 'wb') as f:
         fig.savefig(f, format='pdf', dpi=file_dpi, transparent=True, \
