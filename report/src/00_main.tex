@@ -1,0 +1,79 @@
+\documentclass[a4paper, 12pt, reqno]{article}
+
+\newcommand{\titl}{Internship Report}
+\newcommand{\auth}{Moritz M. Konarski}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[
+    margin=1in, 
+    showframe
+    ]{geometry}
+\usepackage[english]{babel}
+\usepackage[pdftitle={\titl}, pdfauthor={\auth}, final]{hyperref}
+\usepackage{graphicx}
+\usepackage[document]{ragged2e}
+\setlength{\RaggedRightParindent}{0.25in}
+\usepackage{fancyhdr}
+\usepackage{afterpage}
+\usepackage{lastpage}
+\usepackage{float}
+\usepackage{subfiles}
+\renewcommand{\baselinestretch}{1.1}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[R]{\auth{}}
+\fancyhead[L]{\titl}
+
+\begin{document}
+
+\thispagestyle{empty}
+\newgeometry{top=1.5in, bottom=1in}
+\begin{center}
+    \Large
+    \vspace{10pt}
+    \textsc{American University of Central Asia}\\[10pt]
+    \textsc{\titl{}}\\ [1.5cm]
+
+    \includegraphics[height=10cm]{../graphics/title_pic}
+
+    \vspace{1.5cm}
+
+    \normalsize
+    Place of Internship\\
+    \textit{Research Station \\
+    of the Russian Academy of Sciences, Bishkek}\\[10pt]
+
+    Program\\
+    \textit{Applied Mathematics and Informatics}\\[10pt]
+
+    Student\\
+    \textit{\auth{}}\\[10pt]
+
+    Group\\
+    \textit{2017}\\
+
+    \vfill
+
+    \large
+    \textsc{\today{} -- Bishkek}
+    \normalsize
+\end{center}
+
+\restoregeometry
+\newpage
+
+\afterpage{\cfoot{\thepage}}
+\tableofcontents
+
+\newpage
+
+\subfile{../src/01_introduction}
+
+\subfile{../src/02_part}
+
+\subfile{../src/10_conclusion}
+
+\end{document}
