@@ -48,8 +48,7 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
             if data is None:
                 data = np.asarray(d.variables[var_name])
             else:
-                data = np.append(data, np.asarray(d.variables[var_name]), 
-                        axis=0)
+                data=np.append(data, np.asarray(d.variables[var_name]),axis=0)
     first_file = file_list[0]
     filepath = os.path.join(first_file)
     with Dataset(filepath, 'r') as d:
@@ -57,10 +56,16 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
         lat = np.asarray(d.variables['lat'])
         lon = np.asarray(d.variables['lon'])
         lev = np.asarray(d.variables['lev'])
+    print("converting to double")
+    data = data.astype(np.double, casting='safe')
+    time = time.astype(np.double, casting='safe')
+    lat  = lat.astype(np.double, casting='safe')
+    lon  = lon.astype(np.double, casting='safe')
+    lev  = lev.astype(np.double, casting='safe')
     print("Writing to file...")
     with open(dest_path, 'wb') as f:
-        np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon, lev=lev, 
-            allow_pickle=True)
+        np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon, \
+                lev=lev, allow_pickle=True)
     
 def extract_metadata(dest_file: str, first_file: str, last_file: str,
         data_file: str, var: str):

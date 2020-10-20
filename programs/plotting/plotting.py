@@ -69,12 +69,12 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
         print("Level must be less than: " + str(meta_dict['lev_count']))
         exit(-1)
 
-    data_min = data[:,:].min()
+    data_min = float(data[:,:].min())
     print(data_min)
-    print(data_min.shape)
-    data_max = data[:,:].max()
+    #print(data_min.shape)
+    data_max = float(data[:,:].max())
     print(data_max)
-    print(data_max.shape)
+    #print(data_max.shape)
 
     lats = src['lat']
     lons = src['lon']
