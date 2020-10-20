@@ -41,7 +41,7 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
     data = time = lat = lon = lev = None
     for (i, part) in enumerate(file_list):
         filepath = os.path.join(part)
-        print(str(i + 1) + "/" + str(n_files))
+        #print(str(i + 1) + "/" + str(n_files))
         with Dataset(filepath, 'r') as d:
             if data is None:
                 data = np.asarray(d.variables[var_name])

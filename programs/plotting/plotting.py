@@ -91,7 +91,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     lats = src['lat']
     lons = src['lon']
 
-    fig = plt.figure(figsize=(9.5, 6))
+    fig = plt.figure()#figsize=(9.5, 6))
 
     emin = meta_dict['lon_min']
     emax = meta_dict['lon_max']
