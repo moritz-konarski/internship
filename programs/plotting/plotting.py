@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 
-
 file_dpi = 300
 
 
@@ -22,16 +21,16 @@ def get_data_info(src_folder: str):
     pprint.PrettyPrinter(indent=4, sort_dicts=False).pprint(info_dict)
 
 
-def get_time_index(src_folder: str, graph_datetime: str, meta_dict) -> (int,
-        datetime):
+def get_time_index(src_folder: str, graph_datetime: str,
+                   meta_dict) -> (int, datetime):
     start_datetime = \
         datetime.datetime.strptime(meta_dict['begin_date'], '%Y-%m-%d')
     end_datetime = \
         datetime.datetime.strptime(graph_datetime, '%Y-%m-%d %H')
     datetime_delta = end_datetime - start_datetime
-    return (int(datetime_delta.days * meta_dict['values_per_day'] 
-        + datetime_delta.seconds / 3600 / (24 / meta_dict['values_per_day'])),
-        end_datetime)
+    return (int(datetime_delta.days * meta_dict['values_per_day'] +
+                datetime_delta.seconds / 3600 /
+                (24 / meta_dict['values_per_day'])), end_datetime)
 
 
 def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
@@ -40,13 +39,13 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
         meta_dict = json.load(f)
     src_file = src_folder + meta_dict['name'] + ".npz"
     src = np.load(src_file, allow_pickle=True)
-    
+
     time_index, graph_datetime = get_time_index(src_folder, graph_datetime, \
             meta_dict)
 
     if time_index < 0:
-        print("Date too small, minimum is: " + str(meta_dict['begin_date'])
-                + " 0")
+        print("Date too small, minimum is: " + str(meta_dict['begin_date']) +
+              " 0")
         exit(-1)
     elif time_index > int(meta_dict['shape'][0])-1 and \
             meta_dict['last_day_inclusive']:
@@ -54,7 +53,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
                 + " " + str((meta_dict['values_per_day']-1) / \
                         meta_dict['values_per_day']* 24))
         exit(-1)
-    elif time_index > int(meta_dict['shape'][0])-1:
+    elif time_index > int(meta_dict['shape'][0]) - 1:
         print("Date too large, maximum is (last day is not included): " \
                 + str(meta_dict['end_date']) + " " + \
                 str((meta_dict['values_per_day']-1) / \
@@ -65,10 +64,10 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
 
     print("Plotting...")
     if meta_dict['lev_count'] == 0:
-        data = src['data'][time_index,:,:]
+        data = src['data'][time_index, :, :]
         print(data.shape)
     elif level < meta_dict['lev_count']:
-        data = src['data'][time_index, level,:,:]
+        data = src['data'][time_index, level, :, :]
         lev_str = " " + str(src['lev'][level]) + " " \
                 + meta_dict['lev_units']
         print(data.shape)
@@ -77,11 +76,10 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
         print("Level must be less than: " + str(meta_dict['lev_count']))
         exit(-1)
 
-
     print(np.NaN)
-    data_min = float(np.nanmin(data[:,:]))
+    data_min = float(np.nanmin(data[:, :]))
     print(data_min)
-    data_max = float(np.nanmax(data[:,:]))
+    data_max = float(np.nanmax(data[:, :]))
     print(data_max)
 
     #print(data)
@@ -89,7 +87,6 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     if np.isnan(data_min) and np.isnan(data_max):
         data_min = 0
         data_max = 1
-    
 
     lats = src['lat']
     lons = src['lon']
@@ -103,18 +100,27 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
 
     ax = plt.axes(projection=ccrs.PlateCarree())
     ax.set_global()
-    ax.set_extent([emin, emax, nmin, nmax], crs=ccrs.PlateCarree())   
+    ax.set_extent([emin, emax, nmin, nmax], crs=ccrs.PlateCarree())
     ax.add_feature(cfeature.BORDERS, linewidth=1.4)
-    ax.gridlines(linestyle='--', color='black', draw_labels=True,
+    ax.gridlines(linestyle='--',
+                 color='black',
+                 draw_labels=True,
                  linewidth=0.5)
 
     res = float((data_max - data_min) / 20)
 
-    clevs = np.arange(data_min, data_max+res, res, dtype=float)
-    plt.contourf(lons, lats, data, clevs, transform=ccrs.PlateCarree(),
+    clevs = np.arange(data_min, data_max + res, res, dtype=float)
+    plt.contourf(lons,
+                 lats,
+                 data,
+                 clevs,
+                 transform=ccrs.PlateCarree(),
                  cmap=plt.cm.jet)
 
-    cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.08, aspect=16,
+    cb = plt.colorbar(ax=ax,
+                      orientation="vertical",
+                      pad=0.08,
+                      aspect=16,
                       shrink=0.8)
 
     cb.ax.tick_params(labelsize=10, pad=0.5)
@@ -125,7 +131,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     plt.title(title, size=18, loc='left')
     cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
 
-    with open(title+".png", 'wb') as f:
+    with open(title + ".png", 'wb') as f:
         fig.savefig(f, format='png', dpi=file_dpi)
 
 
@@ -133,12 +139,13 @@ def timeseries(src_folder: str, lat: float, lon: float):
     pass
 
 
-def graph_var(src_file: str, dest_file:str):
+def graph_var(src_file: str, dest_file: str):
     pass
-        
+
+
 if __name__ == '__main__':
     fire.Fire({
-    #    "graph": graph_var,
+        #    "graph": graph_var,
         "info": get_data_info,
         "heatmap": heatmap
     })
@@ -165,17 +172,26 @@ def create_graph(var: str, name: str):
         ax.set_global()
         ax.set_extent([65, 83, 34, 48], crs=ccrs.PlateCarree())
         ax.add_feature(cfeature.BORDERS, linewidth=1.4)
-        ax.gridlines(linestyle='--', color='black', draw_labels=True,
+        ax.gridlines(linestyle='--',
+                     color='black',
+                     draw_labels=True,
                      linewidth=0.5)
 
         res = int((max - min) / 20)
 
         # Set contour levels, then draw the plot and a colorbar
         clevs = np.arange(min, max, res)
-        plt.contourf(lons, lats, d, clevs, transform=ccrs.PlateCarree(),
+        plt.contourf(lons,
+                     lats,
+                     d,
+                     clevs,
+                     transform=ccrs.PlateCarree(),
                      cmap=plt.cm.jet)
 
-        cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.02, aspect=16,
+        cb = plt.colorbar(ax=ax,
+                          orientation="vertical",
+                          pad=0.02,
+                          aspect=16,
                           shrink=0.8)
 
         cb.ax.tick_params(labelsize=10)
@@ -184,11 +200,13 @@ def create_graph(var: str, name: str):
             plt.title('Surface Pressure at 12am 01.07.2020', size=14)
             cb.set_label('Pa', size=12, rotation=0, labelpad=15)
         elif name == 'phis':
-            plt.title('Surface Geopotential Height at 12am 01.07.2020', size=14)
+            plt.title('Surface Geopotential Height at 12am 01.07.2020',
+                      size=14)
             cb.set_label('m^2/s^-2', size=12, rotation=0, labelpad=15)
 
         # Save the plot as a PNG image
-        fig.savefig('nc_plot_' + name + '.png', format=file_format,
+        fig.savefig('nc_plot_' + name + '.png',
+                    format=file_format,
                     dpi=file_dpi)
 
 
@@ -212,9 +230,7 @@ def list_var_names():
 
 def extract_vars_into_files(list: [str], filepath: str):
     for var in list:
-        os.system("ncks -v " +
-                  var + " " +
-                  filepath + "20200701.nc4 " +
+        os.system("ncks -v " + var + " " + filepath + "20200701.nc4 " +
                   filepath + "20200701_" + var + ".nc4")
 
 
@@ -225,16 +241,18 @@ def find_range(var_name):
         min = var[:].min()
     return min, max
 
+
 file_dpi = 500
 
-def graph_var(src_file: str, dest_file:str):
-    with open(dest_file+".png", 'wb') as f:
-        # TODO: have if statement for 
+
+def graph_var(src_file: str, dest_file: str):
+    with open(dest_file + ".png", 'wb') as f:
+        # TODO: have if statement for
         src = np.load(src_file, allow_pickle=True)
-        data = src['data'][:,10,10]
+        data = src['data'][:, 10, 10]
 
         fig = plt.figure(figsize=(10, 6))
-        
+
         plt.plot(data)
         plt.title("Surface Pressure Time Series", size=14)
 
@@ -258,17 +276,26 @@ def create_graph(var: str, name: str):
         ax.set_global()
         ax.set_extent([65, 83, 34, 48], crs=ccrs.PlateCarree())
         ax.add_feature(cfeature.BORDERS, linewidth=1.4)
-        ax.gridlines(linestyle='--', color='black', draw_labels=True,
+        ax.gridlines(linestyle='--',
+                     color='black',
+                     draw_labels=True,
                      linewidth=0.5)
 
         res = int((max - min) / 20)
 
         # Set contour levels, then draw the plot and a colorbar
         clevs = np.arange(min, max, res)
-        plt.contourf(lons, lats, d, clevs, transform=ccrs.PlateCarree(),
+        plt.contourf(lons,
+                     lats,
+                     d,
+                     clevs,
+                     transform=ccrs.PlateCarree(),
                      cmap=plt.cm.jet)
 
-        cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.02, aspect=16,
+        cb = plt.colorbar(ax=ax,
+                          orientation="vertical",
+                          pad=0.02,
+                          aspect=16,
                           shrink=0.8)
 
         cb.ax.tick_params(labelsize=10)
@@ -277,11 +304,13 @@ def create_graph(var: str, name: str):
             plt.title('Surface Pressure at 12am 01.07.2020', size=14)
             cb.set_label('Pa', size=12, rotation=0, labelpad=15)
         elif name == 'phis':
-            plt.title('Surface Geopotential Height at 12am 01.07.2020', size=14)
+            plt.title('Surface Geopotential Height at 12am 01.07.2020',
+                      size=14)
             cb.set_label('m^2/s^-2', size=12, rotation=0, labelpad=15)
 
         # Save the plot as a PNG image
-        fig.savefig('nc_plot_' + name + '.png', format=file_format,
+        fig.savefig('nc_plot_' + name + '.png',
+                    format=file_format,
                     dpi=file_dpi)
 
 
@@ -305,9 +334,7 @@ def list_var_names():
 
 def extract_vars_into_files(list: [str], filepath: str):
     for var in list:
-        os.system("ncks -v " +
-                  var + " " +
-                  filepath + "20200701.nc4 " +
+        os.system("ncks -v " + var + " " + filepath + "20200701.nc4 " +
                   filepath + "20200701_" + var + ".nc4")
 
 

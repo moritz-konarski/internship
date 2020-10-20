@@ -1,6 +1,5 @@
 #!/bin/env python
 
-
 import os
 import re
 import fire
@@ -64,6 +63,7 @@ def check_path(path: str) -> str:
     if not os.path.exists(path):
         os.mkdir(path)
     return path
+
 
 def download(src: str, path: str):
     if not os.path.exists(src):
