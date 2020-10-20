@@ -61,13 +61,18 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
                 meta_dict['values_per_day']* 24))
         exit(-1)
 
+    lev_str = ""
+
     print("Plotting...")
     if meta_dict['lev_count'] == 0:
         data = src['data'][time_index,:,:]
         print(data.shape)
     elif level < meta_dict['lev_count']:
         data = src['data'][time_index, level,:,:]
+        lev_str = " " + str(src['lev'][level]) + " " \
+                + meta_dict['lev_units']
         print(data.shape)
+        print(lev_str)
     else:
         print("Level must be less than: " + str(meta_dict['lev_count']))
         exit(-1)
@@ -79,7 +84,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     data_max = float(np.nanmax(data[:,:]))
     print(data_max)
 
-    print(data)
+    #print(data)
 
     if np.isnan(data_min) and np.isnan(data_max):
         print("This array contains no valid numbers. Exiting.")
@@ -89,8 +94,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     lats = src['lat']
     lons = src['lon']
 
-    # Set the figure size, projection, and extent
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(9.5, 6))
 
     emin = meta_dict['lon_min']
     emax = meta_dict['lon_max']
@@ -106,34 +110,35 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
 
     res = float((data_max - data_min) / 20)
 
-    # Set contour levels, then draw the plot and a colorbar
     clevs = np.arange(data_min, data_max+res, res, dtype=float)
     plt.contourf(lons, lats, data, clevs, transform=ccrs.PlateCarree(),
                  cmap=plt.cm.jet)
 
-    cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.02, aspect=16,
+    cb = plt.colorbar(ax=ax, orientation="vertical", pad=0.08, aspect=16,
                       shrink=0.8)
 
-    cb.ax.tick_params(labelsize=10)
+    cb.ax.tick_params(labelsize=10, pad=0.5)
 
-    title = "Heat Map of " + meta_dict['long_name'] + " on " \
-        + str(graph_datetime)
+    title = meta_dict['long_name'] + " on " \
+            + graph_datetime.strftime("%d.%m.%Y %H:%M") + lev_str
 
-    plt.title(title, size=14)
-    cb.set_label(meta_dict['units'], size=12, rotation=0, labelpad=35)
+    plt.title(title, size=18, loc='left')
+    cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
 
     with open(name+".png", 'wb') as f:
         fig.savefig(f, format='png', dpi=file_dpi)
 
+
 def timeseries(src_folder: str, lat: float, lon: float):
     pass
+
 
 def graph_var(src_file: str, dest_file:str):
     pass
         
 if __name__ == '__main__':
     fire.Fire({
-        "graph": graph_var,
+    #    "graph": graph_var,
         "info": get_data_info,
         "heatmap": heatmap
     })
