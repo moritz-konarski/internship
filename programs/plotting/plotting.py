@@ -87,8 +87,8 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     #print(data)
 
     if np.isnan(data_min) and np.isnan(data_max):
-        print("This array contains no valid numbers. Exiting.")
-        exit(-1)
+        data_min = 0
+        data_max = 1
     
 
     lats = src['lat']
@@ -125,7 +125,7 @@ def heatmap(src_folder: str, name: str, graph_datetime: str, level: int):
     plt.title(title, size=18, loc='left')
     cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
 
-    with open(name+".png", 'wb') as f:
+    with open(title+".png", 'wb') as f:
         fig.savefig(f, format='png', dpi=file_dpi)
 
 
