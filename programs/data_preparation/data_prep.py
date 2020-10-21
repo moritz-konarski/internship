@@ -2,12 +2,17 @@
 
 import os
 import re
-import sys
 import fire
 import json
 import numpy as np
 from pathlib import Path
 from netCDF4 import Dataset
+
+src_files = "*.nc4"
+tmp_file_ending = "_tmp.npz"
+file_ending = ".npz"
+dir_separator = "/"
+metadata_file_name = "metadata.json"
 
 
 def var_name_format(name: str) -> str:
@@ -16,38 +21,37 @@ def var_name_format(name: str) -> str:
 
 
 def extract(src_path: str, dest_path: str, var_name: str):
-    if not re.findall(r"/$", dest_path):
-        dest_path += "/" + var_name + "/"
+    reg = r"{0}$".format(dir_separator)
+    if not re.findall(reg, dest_path):
+        dest_path += dir_separator + var_name + dir_separator
     else:
-        dest_path += var_name + "/"
+        dest_path += var_name + dir_separator
     os.makedirs(dest_path, exist_ok=True)
 
-    sorted_file_list = sorted(Path(src_path).glob("*.nc4"))
-    n_files = len(sorted_file_list)
+    print("Extracting " + var_name + "...")
+
+    sorted_file_list = sorted(Path(src_path).glob(src_files))
     first_file = sorted_file_list[0]
     last_file = sorted_file_list[-1]
 
-    data_file = dest_path + var_name + ".npz"
+    data_file = dest_path + var_name + tmp_file_ending
     extract_and_save_data(sorted_file_list, data_file, var_name)
 
-    dest_file = dest_path + "metadata.json"
+    dest_file = dest_path + metadata_file_name
     extract_metadata(dest_file, first_file, last_file, data_file, var_name)
 
     replace_fill_value(dest_path)
 
 
 def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
-    n_files = len(file_list)
-    data = time = lat = lon = lev = None
+    data = None
     for (i, part) in enumerate(file_list):
         filepath = os.path.join(part)
-        #print(str(i + 1) + "/" + str(n_files))
         with Dataset(filepath, 'r') as d:
             if data is None:
                 data = np.asarray(d.variables[var_name])
             else:
-                data = np.append(data,
-                                 np.asarray(d.variables[var_name]),
+                data = np.append(data, np.asarray(d.variables[var_name]),
                                  axis=0)
     first_file = file_list[0]
     filepath = os.path.join(first_file)
@@ -57,53 +61,39 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
         lon = np.asarray(d.variables['lon'])
         lev = np.asarray(d.variables['lev'])
 
-    print("Converting data types...")
     data = data.astype(np.float32, casting='safe')
     time = time.astype(np.int32, casting='safe')
     lat = lat.astype(np.float64, casting='safe')
     lon = lon.astype(np.float64, casting='safe')
     lev = lev.astype(np.float64, casting='safe')
 
-    print("Writing to file...")
     with open(dest_path, 'wb') as f:
-        np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon, \
-                lev=lev, allow_pickle=True)
+        np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon,
+                            lev=lev, allow_pickle=True)
 
 
 def replace_fill_value(path: str):
-    meta_dict = None
-    with open(path + "metadata.json", 'r') as f:
+    with open(path + metadata_file_name, 'r') as f:
         meta_dict = json.load(f)
 
-    #print("max == fill: " + \
-    #        str(meta_dict['data_max'] == meta_dict['fill_value']))
-
-    #print("max : " + str(meta_dict['data_max']))
-    #print("fill: " + str(meta_dict['fill_value']))
-
     if meta_dict['data_max'] == meta_dict['fill_value']:
-        print("Converting fill values to NaN...")
-        d = np.load(path + meta_dict['name'] + ".npz", allow_pickle=True)
-        if meta_dict['lev_count'] == 0:
-            new_d = np.where(d['data'][:,:,:] != meta_dict['fill_value'], \
-                    d['data'][:,:,:], np.NaN)
-        else:
-            new_d = np.where(d['data'][:,:,:,:] != meta_dict['fill_value'], \
-                    d['data'][:,:,:,:], np.NaN)
-
-        with open(path + meta_dict['name'] + ".npz", 'wb') as f:
-            np.savez_compressed(f, data=new_d, time=d['time'],       \
-                    lat=d['lat'], lon=d['lon'], lev=d['lev'],  \
+        d = np.load(path + meta_dict['name'] + tmp_file_ending,
                     allow_pickle=True)
+        if meta_dict['lev_count'] == 0:
+            new_d = np.where(d['data'][:, :, :] != meta_dict['fill_value'],
+                             d['data'][:, :, :], np.NaN)
+        else:
+            new_d = np.where(d['data'][:, :, :, :] != meta_dict['fill_value'],
+                             d['data'][:, :, :, :], np.NaN)
+
+        with open(path + meta_dict['name'] + file_ending, 'wb') as f:
+            np.savez_compressed(f, data=new_d, time=d['time'], lat=d['lat'],
+                                lon=d['lon'], lev=d['lev'], allow_pickle=True)
+        os.remove(path + meta_dict['name'] + tmp_file_ending)
 
 
-def extract_metadata(dest_file: str, first_file: str, last_file: str,
+def extract_metadata(dest_file: str, first_file: Path, last_file: Path,
                      data_file: str, var: str):
-    print("Extracting metadata...")
-    name = long_name = std_name = units = shape = time_steps = None
-    begin_date = end_date = lat_min = lat_max = lon_min = lon_max = None
-    lev_units = lat_units = lon_units = data_min = data_max = None
-    lev_min = lev_max = fill_value = None
     with Dataset(first_file, 'r') as d:
         name = str(d.variables[var].name)
         long_name = var_name_format(d.variables[var].long_name)
@@ -165,13 +155,35 @@ def extract_metadata(dest_file: str, first_file: str, last_file: str,
 
 
 def print_all_vars(path: str):
-    l = []
+    var_info_list = []
     with Dataset(path, 'r') as d:
         for var in d.variables.keys():
-            l.append((var, d.variables[var].long_name, d.variables[var].units))
-    for (var, name, unit) in l:
+            var_info_list.append(
+                (var, d.variables[var].long_name, d.variables[var].units))
+    for (var, name, unit) in var_info_list:
         print("{0:6s} {1:15s} {2:s}".format(var, unit, name))
 
 
+def get_all_var_names(path: Path) -> [str]:
+    var_info_list = []
+    with Dataset(path, 'r') as d:
+        for var in d.variables.keys():
+            if var != 'time' and var != 'lat' and var != 'lon' and var != 'lev':
+                var_info_list.append(var)
+    return var_info_list
+
+
+def extract_all(src_path: str, dest_path: str):
+    var_name_src_file = sorted(Path(src_path).glob(src_files))[0]
+    var_name_list = get_all_var_names(var_name_src_file)
+    print(var_name_list)
+    for var_name in var_name_list:
+        extract(src_path, dest_path, var_name)
+
+
 if __name__ == '__main__':
-    fire.Fire({"list": print_all_vars, "extract": extract})
+    fire.Fire({
+        "list": print_all_vars,
+        "extract": extract,
+        "extract-all": extract_all
+    })
