@@ -12,6 +12,7 @@ src_files = "*.nc4"
 tmp_file_ending = "_tmp.npz"
 file_ending = ".npz"
 dir_separator = "/"
+tmp_metadata_file_name = "metadata_tmp.json"
 metadata_file_name = "metadata.json"
 
 
@@ -37,7 +38,7 @@ def extract(src_path: str, dest_path: str, var_name: str):
     data_file = dest_path + var_name + tmp_file_ending
     extract_and_save_data(sorted_file_list, data_file, var_name)
 
-    dest_file = dest_path + metadata_file_name
+    dest_file = dest_path + tmp_metadata_file_name
     extract_metadata(dest_file, first_file, last_file, data_file, var_name)
 
     replace_fill_value(dest_path)
@@ -73,7 +74,7 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
 
 
 def replace_fill_value(path: str):
-    with open(path + metadata_file_name, 'r') as f:
+    with open(path + tmp_metadata_file_name, 'r') as f:
         meta_dict = json.load(f)
 
     if meta_dict['data_max'] == meta_dict['fill_value']:
@@ -90,6 +91,24 @@ def replace_fill_value(path: str):
             np.savez_compressed(f, data=new_d, time=d['time'], lat=d['lat'],
                                 lon=d['lon'], lev=d['lev'], allow_pickle=True)
         os.remove(path + meta_dict['name'] + tmp_file_ending)
+
+        if len(new_d.shape) == 4:
+            data_max = float(np.nanmax(new_d[:, :, :, :]))
+            data_min = float(np.nanmin(new_d[:, :, :, :]))
+        else:
+            data_max = float(np.nanmax(new_d[:, :, :]))
+            data_min = float(np.nanmin(new_d[:, :, :]))
+        meta_dict['data_max'] = data_max
+        meta_dict['data_min'] = data_min
+
+        with open(path + metadata_file_name, 'w') as f:
+            json.dump(meta_dict, f)
+        os.remove(path + tmp_metadata_file_name)
+
+    else:
+        os.rename(path + meta_dict['name'] + tmp_file_ending, path +
+                  meta_dict['name'] + file_ending)
+        os.rename(path + tmp_metadata_file_name, path + metadata_file_name)
 
 
 def extract_metadata(dest_file: str, first_file: Path, last_file: Path,
