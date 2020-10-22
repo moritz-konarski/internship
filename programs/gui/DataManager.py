@@ -1,16 +1,17 @@
-from PlotObjet import PlotType
+from PlotObject import PlotType
+
 
 class DataManager:
 
     def __init__(self, path: str):
         # here we initialize the data manager
-        this.metadata = []
+        self.metadata = ['die', 'there']
         pass
 
-    @attribute
+    @property
     def metadata(self):
-        return this.metadata
+        return self.metadata
 
-    def get_plot_data(type: PlotType):
+    def get_plot_data(self, plot_type: PlotType):
         # return the appropriate type of slice
         pass
