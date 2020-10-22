@@ -1,0 +1,49 @@
+# coding: utf-8
+import numpy as np; import pandas as pd
+numd = np.load('./EPV/EPV.npz', allow_pickle=True)
+print(numd)
+print(numd.shape)
+print(numd['data'].shape)
+frame = pd.Dataframe(numd['data'][22,22,:,:],index=numd['data'][22,22,1,:])
+frame = pd.DataFrame(numd['data'][22,22,:,:],index=numd['data'][22,22,1,:])
+frame = pd.DataFrame(numd['data'][22,22,:,:],index=numd['data'][22,22,0,:])
+frame = pd.DataFrame(numd['data'][22,22,:,:])
+print(frame)
+frame = pd.DataFrame(numd['data'][:,22,12,12])
+print(frame)
+import matplotlib.pyplot as plt
+plt.plot(frame)
+p = plt.plot(frame)
+p.show()
+p.save()
+p = plt.plot(frame)
+p.savefig('./test.png')
+plt.plot(frame)
+plt.show()
+frame = pd.DataFrame(numd['data'][22,22,:,:])
+plt.plot(frame)
+plt.show()
+frame = pd.DataFrame(numd['data'][:,22,12,12])
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='H', periods=366))
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366))
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366))[:24]
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366))[:100]
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366*8))[:100]
+pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366*8))
+range = pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366*8))
+r = pd.Series(pd.date_range('2019-09-01 0:00:00', freq='3H', periods=366*8))
+frame = pd.DataFrame(numd['data'][:,22,12,12], index=r)
+print(frame)
+plt.plot(fram)
+plt.plot(frame)
+plt.show()
+frame = pd.DataFrame(numd['data'][:48,22,12,12], index=r)
+frame = pd.DataFrame(numd['data'][:48,22,12,12], index=r[:48])
+plt.plot(frame)
+plt.show()
+frame = pd.DataFrame(numd['data'][:12,22,12,12], index=r[:12])
+plt.plot(frame)
+plt.show()
+%save
+%save?
+%save -r pandas_dataframe_plotting 1-9999
