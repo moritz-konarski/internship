@@ -19,6 +19,7 @@
 \usepackage{float}
 \usepackage{subfiles}
 \renewcommand{\baselinestretch}{1.1}
+\usepackage[nottoc]{tocbibind}
 
 
 \pagestyle{fancy}
@@ -75,5 +76,9 @@
 \subfile{../src/02_part}
 
 \subfile{../src/10_conclusion}
+
+\nocite{*}
+\bibliographystyle{ieeetr}
+\bibliography{../src/bibliography}
 
 \end{document}
