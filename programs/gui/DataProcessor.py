@@ -49,6 +49,9 @@ class DataProcessor:
         self.__extraction_progress = 0
         self.__sorted_file_list = sorted(
             Path(self.__src_dir).glob(self.__extension))
+        if len(self.__sorted_file_list) == 0:
+            print("No valid files in directory")
+            exit(-1)
 
     def get_status(self) -> DataProcessorStatus:
         return self.__status
@@ -85,85 +88,106 @@ class DataProcessor:
         self.__data_file_path = destination_path + variable_name + \
                                 FileExtension.DATA_FILE.value
 
-        self.__extract_and_save_data(variable_name)
-
         self.__tmp_meta_file_path = destination_path + \
                                     FileExtension.TMP_META_FILE.value
 
         self.__meta_file_path = destination_path + \
                                 FileExtension.META_FILE.value
 
-        self.__extract_metadata(variable_name)
+        print(self.__tmp_meta_file_path)
+        print(self.__tmp_data_file_path)
+        print(self.__meta_file_path)
+        print(self.__data_file_path)
 
-        self.__replace_fill_value()
+        self.__extract_and_save_data(variable_name)
+
+        #self.__extract_metadata(variable_name)
+
+        # self.__replace_fill_value()
 
     def __extract_and_save_data(self, var_name: str):
-        data = None
-        length = len(self.__sorted_file_list)
-        for (i, part) in enumerate(self.__sorted_file_list):
-            self.__extraction_progress = (i + 1) / length
-            filepath = os.path.join(part)
-            with Dataset(filepath, 'r') as d:
-                if data is None:
-                    data = np.asarray(d.variables[var_name])
-                else:
-                    data = np.append(data, np.asarray(d.variables[var_name]),
-                                     axis=0)
+        print("extracting data")
+
         filepath = os.path.join(self.__sorted_file_list[0])
         with Dataset(filepath, 'r') as d:
             time = np.asarray(d.variables['time'])
             lat = np.asarray(d.variables['lat'])
             lon = np.asarray(d.variables['lon'])
             lev = np.asarray(d.variables['lev'])
+            var_dims = len(d.variables[var_name].shape)
+            fill_value = d.variables[var_name]._FillValue
 
+        file_count = len(self.__sorted_file_list)
+        time_count = time.shape[0]
+        lat_count = lat.shape[0]
+        lon_count = lon.shape[0]
+        lev_count = lev.shape[0]
+        print(var_dims)
+
+        print("malloc")
+
+        if var_dims == 3:
+            data = np.ones(
+                (file_count * time_count, lat_count, lon_count),
+                dtype=np.float32)
+            print("extraction 3D")
+
+            for (i, part) in enumerate(self.__sorted_file_list):
+                self.__extraction_progress = (i + 1) / file_count
+                print(str(i + 1) + " of " + str(file_count))
+                filepath = os.path.join(part)
+                with Dataset(filepath, 'r') as d:
+                    _d = np.asarray(d.variables[var_name])
+                    data[i * time_count:i * time_count + time_count, :, :] = _d
+        else:
+            data = np.ones(
+                (file_count * time_count, lev_count, lat_count, lon_count),
+                dtype=np.float32)
+            print("extraction 4D")
+
+            for (i, part) in enumerate(self.__sorted_file_list):
+                self.__extraction_progress = (i + 1) / file_count
+                print(str(i + 1) + " of " + str(file_count))
+                filepath = os.path.join(part)
+                with Dataset(filepath, 'r') as d:
+                    _d = np.asarray(d.variables[var_name])
+                    data[i * time_count:i * time_count + time_count, :, :, :] = _d
+
+        print("convert data types")
         data = data.astype(np.float32, casting='safe')
         time = time.astype(np.int32, casting='safe')
         lat = lat.astype(np.float64, casting='safe')
         lon = lon.astype(np.float64, casting='safe')
         lev = lev.astype(np.float64, casting='safe')
 
-        with open(self.__tmp_data_file_path, 'wb') as f:
-            np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon,
+        new_data = self.__replace_fill_value(data, fill_value)
+
+        data = None
+
+        data_min = float(np.nanmin(new_data))
+        data_max = float(np.nanmax(new_data))
+
+        print("saving to file")
+        with open(self.__data_file_path, 'wb') as f:
+            np.savez_compressed(f, data=new_data, time=time, lat=lat, lon=lon,
                                 lev=lev, allow_pickle=True)
 
-    def __replace_fill_value(self, ):
-        with open(self.__tmp_meta_file_path, 'r') as f:
-            meta_dict = json.load(f)
+        new_data = None
 
-        if meta_dict['data_max'] == meta_dict['fill_value']:
-            d = np.load(self.__tmp_data_file_path, allow_pickle=True)
-            if meta_dict['lev_count'] == 0:
-                new_d = np.where(d['data'][:, :, :] != meta_dict['fill_value'],
-                                 d['data'][:, :, :], np.NaN)
-            else:
-                new_d = np.where(
-                    d['data'][:, :, :, :] != meta_dict['fill_value'],
-                    d['data'][:, :, :, :], np.NaN)
+        self.__extract_metadata(var_name, data_min, data_max)
 
-            with open(self.__data_file_path, 'wb') as f:
-                np.savez_compressed(f, data=new_d, time=d['time'], lat=d['lat'],
-                                    lon=d['lon'], lev=d['lev'],
-                                    allow_pickle=True)
-            os.remove(self.__tmp_data_file_path)
 
-            if len(new_d.shape) == 4:
-                data_max = float(np.nanmax(new_d[:, :, :, :]))
-                data_min = float(np.nanmin(new_d[:, :, :, :]))
-            else:
-                data_max = float(np.nanmax(new_d[:, :, :]))
-                data_min = float(np.nanmin(new_d[:, :, :]))
-            meta_dict['data_max'] = data_max
-            meta_dict['data_min'] = data_min
-
-            with open(self.__meta_file_path, 'w') as f:
-                json.dump(meta_dict, f)
-            os.remove(self.__tmp_meta_file_path)
-
+    def __replace_fill_value(self, data: np.ndarray, fill_value) -> np.ndarray:
+        print("replace fill values")
+        if len(data.shape) == 3:
+            new_d = np.where(data[:, :, :] != fill_value, data[:, :, :], np.NaN)
         else:
-            os.rename(self.__data_data_file_path, self.__data_file_path)
-            os.rename(self.__tmp_meta_file_path, self.__meta_file_path)
+            new_d = np.where(
+                data[:, :, :, :] != fill_value, data[:, :, :, :], np.NaN)
+        return new_d
 
-    def __extract_metadata(self, variable_name: str):
+    def __extract_metadata(self, variable_name: str, data_min, data_max):
+        print("extract metadata")
         with Dataset(self.__sorted_file_list[0], 'r') as d:
             name = str(d.variables[variable_name].name)
             long_name = format_variable_name(
@@ -179,7 +203,7 @@ class DataProcessor:
         with Dataset(self.__sorted_file_list[-1], 'r') as d:
             end_date = str(d.RangeEndingDate)
 
-        d = np.load(self.__tmp_data_file_path, allow_pickle=True)
+        d = np.load(self.__data_file_path, allow_pickle=True)
         shape = d['data'].shape
         time_steps = int(d['time'].shape[0])
         lat_min = float(d['lat'].min())
@@ -188,12 +212,6 @@ class DataProcessor:
         lon_max = float(d['lon'].max())
         lev_min = float(d['lev'].min())
         lev_max = float(d['lev'].max())
-        if len(shape) == 4:
-            data_max = float(d['data'][:, :, :, :].max())
-            data_min = float(d['data'][:, :, :, :].min())
-        else:
-            data_max = float(d['data'][:, :, :].max())
-            data_min = float(d['data'][:, :, :].min())
 
         info_dict = {
             "name": name,
@@ -222,7 +240,8 @@ class DataProcessor:
             "lev_units": lev_units,
             "fill_value": fill_value
         }
-        with open(self.__tmp_meta_file_path, 'w') as f:
+
+        with open(self.__meta_file_path, 'w') as f:
             json.dump(info_dict, f)
 
     def get_variable_information(self) -> [(str, str, str)]:
