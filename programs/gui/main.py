@@ -16,9 +16,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
 
-    #dp = DataProcessor(source_dir="../.month/", destination_dir="./test/")
-    #print(dp.get_available_variables())
-    #print(dp.get_variable_information())
-    #dp.extract_variable(variable_name='EPV')
+    dp = DataProcessor(source_dir="../.year/", destination_dir="./test/")
+    print(dp.get_available_variables())
+    print(dp.get_variable_information())
+    dp.extract_variable(variable_name='PS')
