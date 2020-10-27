@@ -1,11 +1,9 @@
 #!/usr/bin/python
 
-from Plotter import Plotter
-import DataManager
-from PlotObject import TimeSeries
-from GUI import GUI
-from DataProcessor import DataProcessor
 import sys
+import warnings
+warnings.filterwarnings("ignore")
+from GUI import GUI
 from PyQt5.QtWidgets import QApplication
 
 
@@ -16,9 +14,4 @@ def main():
 
 
 if __name__ == '__main__':
-    #main()
-
-    dp = DataProcessor(source_dir="../.year/", destination_dir="./test/")
-    print(dp.get_available_variables())
-    print(dp.get_variable_information())
-    dp.extract_variable(variable_name='PS')
+    main()

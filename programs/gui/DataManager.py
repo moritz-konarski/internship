@@ -2,7 +2,6 @@ from PlotObject import PlotType
 
 
 class DataManager:
-
     def __init__(self, path: str):
         # here we initialize the data manager
         self.metadata = ['die', 'there']
