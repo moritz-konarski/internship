@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import (QDesktopWidget, QMainWindow, QPushButton,
                              QFileDialog, QComboBox, QProgressBar)
 from PyQt5.QtCore import pyqtSlot
 
-# TODO: make an info field for variable after it was selected
-
 
 class GUI(QMainWindow):
     def __init__(self):
@@ -15,6 +13,7 @@ class GUI(QMainWindow):
         self.__dest_dir_path = ""
         self.__var_name_list = []
         self.__data_processor = None
+        self.__long_variable_name = ""
 
     def __init_ui(self):
         scale_factor = 1.3
@@ -85,6 +84,17 @@ class GUI(QMainWindow):
         self.__variable_box.setFixedWidth(
             self.__variable_box.fontMetrics().boundingRect(15 * "X").width())
         self.__variable_box.move(20, 10 + 9.25 * scale_factor * text_height)
+        self.__variable_box.currentIndexChanged.connect(
+            self.__update_variable_info)
+        self.__variable_box_info = QtWidgets.QLabel(self)
+        self.__variable_box_info.setFont(font)
+        self.__variable_box_info.setText("Full Variable Name")
+        self.__variable_box_info.setFixedWidth(
+            20 +
+            self.__variable_box_info.fontMetrics().boundingRect(200 *
+                                                                "X").width())
+        self.__variable_box_info.move(180,
+                                      10 + 9.25 * scale_factor * text_height)
 
         # extract button
         self.__extract_btn = QPushButton("Extract", self)
@@ -99,7 +109,8 @@ class GUI(QMainWindow):
 
         # create the progress bar
         self.progressBar = QProgressBar(self)
-        self.progressBar.setGeometry(20, 10 + 13 * scale_factor * text_height, window_width - 40, button_height)
+        self.progressBar.setGeometry(20, 10 + 13 * scale_factor * text_height,
+                                     window_width - 40, button_height)
 
         # TODO: reactive this
         # exitAct = QAction('&Exit', self)
@@ -115,8 +126,14 @@ class GUI(QMainWindow):
         self.show()
 
     @pyqtSlot(float)
-    def update_extraction_bar(self, progress: float):
+    def __update_extraction_bar(self, progress: float):
         self.progressBar.setValue(progress)
+
+    def __update_variable_info(self):
+        if not self.__variable_box.currentText() is None:
+            self.__long_variable_name = DataProcessor.get_long_variable_name(
+                self.__src_dir_path, self.__variable_box.currentText())
+            self.__variable_box_info.setText(self.__long_variable_name)
 
     def __extract(self):
         self.__extract_btn.setEnabled(False)
@@ -127,15 +144,15 @@ class GUI(QMainWindow):
         self.thread = DataProcessor(self.__src_dir_path, self.__dest_dir_path,
                                     self.__variable_box.currentText())
         self.thread.extraction_progress_update.connect(
-            self.update_extraction_bar)
-        self.thread.finished.connect(self.re_enable_extract_btn)
-        self.thread.extraction_status_message.connect(self.update_status_bar)
+            self.__update_extraction_bar)
+        self.thread.finished.connect(self.__re_enable_extract_btn)
+        self.thread.extraction_status_message.connect(self.__update_status_bar)
         self.thread.start()
 
-    def re_enable_extract_btn(self):
+    def __re_enable_extract_btn(self):
         self.__extract_btn.setEnabled(True)
 
-    def update_status_bar(self, status: str):
+    def __update_status_bar(self, status: str):
         self.statusBar().showMessage(status)
 
     def __show_dest_dir_dialog(self):

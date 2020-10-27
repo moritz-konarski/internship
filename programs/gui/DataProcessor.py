@@ -105,6 +105,7 @@ class DataProcessor(QThread):
 
     def __extract_and_save_data(self):
 
+        self.extraction_progress_update.emit(0)
         self.__status = DataProcessorStatus.ALLOCATING_MEMORY
         self.extraction_status_message.emit(self.__status.value)
 
@@ -260,11 +261,13 @@ class DataProcessor(QThread):
         with open(self.__meta_file_path, 'w') as f:
             json.dump(info_dict, f)
 
-    def __get_variable_information(self) -> (str, str, str):
-        with Dataset(self.__sorted_file_list[0], 'r') as d:
-            return (self.variable_name,
-                    d.variables[self.variable_name].long_name,
-                    d.variables[self.variable_name].units)
+    @staticmethod
+    def get_long_variable_name(src_path: str, variable_name: str) -> str:
+        sorted_file_list = sorted(
+            Path(src_path).glob(FileExtension.NETCDF4.value))
+        with Dataset(sorted_file_list[0], 'r') as d:
+            return DataProcessor.__format_variable_name(
+                d.variables[variable_name].long_name)
 
     @staticmethod
     def get_available_variables(src_path: str) -> [str]:
