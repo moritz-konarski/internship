@@ -20,7 +20,10 @@
 \usepackage{subfiles}
 \renewcommand{\baselinestretch}{1.1}
 \usepackage[nottoc]{tocbibind}
-
+\usepackage{appendix}
+\usepackage{libertine}
+\usepackage{libertinust1math}
+\usepackage[T1]{fontenc}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -73,12 +76,26 @@
 
 \subfile{../src/01_introduction}
 
-\subfile{../src/02_part}
+\subfile{../src/02_nasa_data}
 
-\subfile{../src/10_conclusion}
+\subfile{../src/03_netcdf}
 
+\subfile{../src/04_processing_lib}
+
+\subfile{../src/05_plotting_lib}
+
+\subfile{../src/06_gui}
+
+\subfile{../src/07_conclusion}
+
+\newpage
 \nocite{*}
 \bibliographystyle{ieeetr}
 \bibliography{../src/bibliography}
+
+\newpage
+\appendix
+\appendixpage
+\subfile{../src/08_appendix}
 
 \end{document}
