@@ -24,9 +24,9 @@ def get_time_index(graph_datetime: str, meta_dict) -> (int, datetime):
                                                 '%Y-%m-%d')
     end_datetime = datetime.datetime.strptime(graph_datetime, '%Y-%m-%d %H')
     datetime_delta = end_datetime - start_datetime
-    return (int(datetime_delta.days * meta_dict[
-        'values_per_day'] + datetime_delta.seconds / 3600 / (
-                        24 / meta_dict['values_per_day'])), end_datetime)
+    return (int(datetime_delta.days * meta_dict['values_per_day'] +
+                datetime_delta.seconds / 3600 /
+                (24 / meta_dict['values_per_day'])), end_datetime)
 
 
 def heatmap(src_folder: str, graph_datetime: str, level: int):
@@ -38,20 +38,20 @@ def heatmap(src_folder: str, graph_datetime: str, level: int):
     time_index, graph_datetime = get_time_index(graph_datetime, meta_dict)
 
     if time_index < 0:
-        print("Date too small, minimum is: " + str(
-            meta_dict['begin_date']) + " 0")
+        print("Date too small, minimum is: " + str(meta_dict['begin_date']) +
+              " 0")
         exit(-1)
     elif time_index > int(meta_dict['shape'][0]) - 1 and \
             meta_dict['last_day_inclusive']:
-        print("Date too large, maximum is: " + str(meta_dict['end_date'])
-              + " " + str((meta_dict['values_per_day'] - 1) /
-                          meta_dict['values_per_day'] * 24))
+        print("Date too large, maximum is: " + str(meta_dict['end_date']) +
+              " " + str((meta_dict['values_per_day'] - 1) /
+                        meta_dict['values_per_day'] * 24))
         exit(-1)
     elif time_index > int(meta_dict['shape'][0]) - 1:
-        print("Date too large, maximum is (last day is not included): " + str(
-            meta_dict['end_date']) + " " + str(
-            (meta_dict['values_per_day'] - 1) /
-            meta_dict['values_per_day'] * 24))
+        print("Date too large, maximum is (last day is not included): " +
+              str(meta_dict['end_date']) + " " +
+              str((meta_dict['values_per_day'] - 1) /
+                  meta_dict['values_per_day'] * 24))
         exit(-1)
 
     print("Plotting...")
@@ -103,9 +103,12 @@ def heatmap(src_folder: str, graph_datetime: str, level: int):
             + graph_datetime.strftime("%d.%m.%Y %H:%M") + lev_str
 
     with open(title + '.' + file_format, 'wb') as f:
-        fig.savefig(f, format=file_format, dpi=file_dpi,
+        fig.savefig(f,
+                    format=file_format,
+                    dpi=file_dpi,
                     transparent=is_background_transparent,
-                    bbox_inches='tight', pad_inches=inch_padding)
+                    bbox_inches='tight',
+                    pad_inches=inch_padding)
 
 
 if __name__ == '__main__':

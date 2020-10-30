@@ -19,6 +19,15 @@ inch_padding = 0.1
 metadata_file_name = "metadata.json"
 src_file_extension = ".npz"
 
+plot_cities = True
+
+# city   longitude, latitude, name
+bishkek = (74.5698, 42.8746, "Bishkek")
+almaty = (76.8512, 43.2220, "Almaty")
+kabul = (69.2075, 34.5553, "Kabul")
+tashkent = (69.2401, 41.2995, "Tashkent")
+dushanbe = (68.7870, 38.5598, "Dushanbe")
+
 
 def get_data_info(src_folder: str):
     with open(src_folder + metadata_file_name, 'r') as f:
@@ -31,9 +40,9 @@ def get_time_index(graph_datetime: str, meta_dict) -> (int, datetime):
                                                 '%Y-%m-%d')
     end_datetime = datetime.datetime.strptime(graph_datetime, '%Y-%m-%d %H')
     datetime_delta = end_datetime - start_datetime
-    return (int(datetime_delta.days * meta_dict[
-        'values_per_day'] + datetime_delta.seconds / 3600 / (
-                        24 / meta_dict['values_per_day'])), end_datetime)
+    return (int(datetime_delta.days * meta_dict['values_per_day'] +
+                datetime_delta.seconds / 3600 /
+                (24 / meta_dict['values_per_day'])), end_datetime)
 
 
 def heatmap(src_folder: str, graph_datetime: str, level: int):
@@ -45,20 +54,20 @@ def heatmap(src_folder: str, graph_datetime: str, level: int):
     time_index, graph_datetime = get_time_index(graph_datetime, meta_dict)
 
     if time_index < 0:
-        print("Date too small, minimum is: " + str(
-            meta_dict['begin_date']) + " 0")
+        print("Date too small, minimum is: " + str(meta_dict['begin_date']) +
+              " 0")
         exit(-1)
     elif time_index > int(meta_dict['shape'][0]) - 1 and \
             meta_dict['last_day_inclusive']:
-        print("Date too large, maximum is: " + str(meta_dict['end_date'])
-              + " " + str((meta_dict['values_per_day'] - 1) /
-                          meta_dict['values_per_day'] * 24))
+        print("Date too large, maximum is: " + str(meta_dict['end_date']) +
+              " " + str((meta_dict['values_per_day'] - 1) /
+                        meta_dict['values_per_day'] * 24))
         exit(-1)
     elif time_index > int(meta_dict['shape'][0]) - 1:
-        print("Date too large, maximum is (last day is not included): " + str(
-            meta_dict['end_date']) + " " + str(
-            (meta_dict['values_per_day'] - 1) /
-            meta_dict['values_per_day'] * 24))
+        print("Date too large, maximum is (last day is not included): " +
+              str(meta_dict['end_date']) + " " +
+              str((meta_dict['values_per_day'] - 1) /
+                  meta_dict['values_per_day'] * 24))
         exit(-1)
 
     print("Plotting...")
@@ -100,7 +109,7 @@ def heatmap(src_folder: str, graph_datetime: str, level: int):
                  draw_labels=True,
                  linewidth=0.5)
 
-    res = float((data_max - data_min) / 20)
+    res = float((data_max - data_min) / 50)
 
     clevs = np.arange(data_min, data_max + res, res, dtype=float)
     plt.contourf(lons,
@@ -121,13 +130,82 @@ def heatmap(src_folder: str, graph_datetime: str, level: int):
     title = meta_dict['long_name'] + " on " \
             + graph_datetime.strftime("%d.%m.%Y %H:%M") + lev_str
 
+    if plot_cities:
+        plt.plot(bishkek[0],
+                 bishkek[1],
+                 color='black',
+                 markersize=3,
+                 marker='o',
+                 transform=ccrs.PlateCarree())
+
+        ax.text(bishkek[0],
+                bishkek[1] - 0.5,
+                bishkek[2],
+                horizontalalignment='center',
+                transform=ccrs.PlateCarree())
+
+        plt.plot(almaty[0],
+                 almaty[1],
+                 color='black',
+                 markersize=3,
+                 marker='o',
+                 transform=ccrs.PlateCarree())
+
+        ax.text(almaty[0],
+                almaty[1] + 0.25,
+                almaty[2],
+                horizontalalignment='center',
+                transform=ccrs.PlateCarree())
+
+        plt.plot(kabul[0],
+                 kabul[1],
+                 color='black',
+                 markersize=3,
+                 marker='o',
+                 transform=ccrs.PlateCarree())
+
+        ax.text(kabul[0],
+                kabul[1] + 0.25,
+                kabul[2],
+                horizontalalignment='center',
+                transform=ccrs.PlateCarree())
+
+        plt.plot(tashkent[0],
+                 tashkent[1],
+                 color='black',
+                 markersize=3,
+                 marker='o',
+                 transform=ccrs.PlateCarree())
+
+        ax.text(tashkent[0] - 0.9,
+                tashkent[1] + 0.25,
+                tashkent[2],
+                horizontalalignment='center',
+                transform=ccrs.PlateCarree())
+
+        plt.plot(dushanbe[0],
+                 dushanbe[1],
+                 color='black',
+                 markersize=3,
+                 marker='o',
+                 transform=ccrs.PlateCarree())
+
+        ax.text(dushanbe[0] + 0.65,
+                dushanbe[1] + 0.25,
+                dushanbe[2],
+                horizontalalignment='center',
+                transform=ccrs.PlateCarree())
+
     plt.title(title, size=18, loc='left', pad=10)
     cb.set_label(meta_dict['units'], size=12, rotation=90, labelpad=10)
 
     with open(title + '.' + file_format, 'wb') as f:
-        fig.savefig(f, format=file_format, dpi=file_dpi,
+        fig.savefig(f,
+                    format=file_format,
+                    dpi=file_dpi,
                     transparent=is_background_transparent,
-                    bbox_inches='tight', pad_inches=inch_padding)
+                    bbox_inches='tight',
+                    pad_inches=inch_padding)
 
 
 def find_closest_point_index(given: str, options) -> int:
@@ -148,8 +226,8 @@ def find_closest_point_index(given: str, options) -> int:
     return best_index
 
 
-def get_datetime_list(start: datetime, end: datetime, interval: int) -> [
-    datetime]:
+def get_datetime_list(start: datetime, end: datetime,
+                      interval: int) -> [datetime]:
     delta = end - start
 
     date_list = []
@@ -160,8 +238,8 @@ def get_datetime_list(start: datetime, end: datetime, interval: int) -> [
             # print(start + datetime.timedelta(days=day, hours=hour))
 
     for hour in range(0, int(delta.seconds / 3600) + 1, interval):
-        date_list.append(
-            start + datetime.timedelta(days=delta.days, hours=hour))
+        date_list.append(start +
+                         datetime.timedelta(days=delta.days, hours=hour))
         # print(start + datetime.timedelta(days=delta.days,hours=hour))
 
     return date_list
@@ -176,29 +254,28 @@ def timeseries(src_folder: str, graph_datetime_start: str,
 
     start_time_index, start_graph_datetime = get_time_index(
         graph_datetime_start, meta_dict)
-    end_time_index, end_graph_datetime = get_time_index(graph_datetime_end,
-                                                        meta_dict)
+    end_time_index, end_graph_datetime = get_time_index(
+        graph_datetime_end, meta_dict)
 
     if start_time_index > end_time_index:
         print("End time must be after start time")
         exit(-1)
 
     if start_time_index < 0:
-        print("Start date too small, minimum is: " + str(
-            meta_dict['begin_date']) + " 0")
+        print("Start date too small, minimum is: " +
+              str(meta_dict['begin_date']) + " 0")
         exit(-1)
     elif end_time_index > int(meta_dict['shape'][0]) - 1 and \
             meta_dict['last_day_inclusive']:
-        print("End date too large, maximum is: " + str(meta_dict['end_date'])
-              + " " + str((meta_dict['values_per_day'] - 1) /
-                          meta_dict['values_per_day'] * 24))
+        print("End date too large, maximum is: " + str(meta_dict['end_date']) +
+              " " + str((meta_dict['values_per_day'] - 1) /
+                        meta_dict['values_per_day'] * 24))
         exit(-1)
     elif end_time_index > int(meta_dict['shape'][0]) - 1:
-        print(
-            "End date too large, maximum is (last day is not included): " + str(
-                meta_dict['end_date']) + " " + str(
-                (meta_dict['values_per_day'] - 1) /
-                meta_dict['values_per_day'] * 24))
+        print("End date too large, maximum is (last day is not included): " +
+              str(meta_dict['end_date']) + " " +
+              str((meta_dict['values_per_day'] - 1) /
+                  meta_dict['values_per_day'] * 24))
         exit(-1)
 
     print("Plotting...")
@@ -211,8 +288,10 @@ def timeseries(src_folder: str, graph_datetime_start: str,
     if meta_dict['lev_count'] == 0:
         data = src['data'][start_time_index:end_time_index + 1, lat, lon]
     elif level < meta_dict['lev_count']:
-        data = src['data'][start_time_index:end_time_index + 1, level, lat, lon]
-        lev_str = " at " + str(src['lev'][level]) + " " + meta_dict['lev_units']
+        data = src['data'][start_time_index:end_time_index + 1, level, lat,
+                           lon]
+        lev_str = " at " + str(
+            src['lev'][level]) + " " + meta_dict['lev_units']
     else:
         print("Level must be less than: " + str(meta_dict['lev_count']))
         exit(-1)
@@ -249,11 +328,13 @@ def timeseries(src_folder: str, graph_datetime_start: str,
                               int(24 / meta_dict['values_per_day']))
 
     if len(dates) / 8 < 3:
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d.%m.%Y %H'))
+        plt.gca().xaxis.set_major_formatter(
+            mdates.DateFormatter('%d.%m.%Y %H'))
         plt.gca().xaxis.set_major_locator(
             mdates.HourLocator(byhour=[0, 3, 6, 9, 12, 15, 18, 21]))
     elif len(dates) / 8 < 6:
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d.%m.%Y %H'))
+        plt.gca().xaxis.set_major_formatter(
+            mdates.DateFormatter('%d.%m.%Y %H'))
         plt.gca().xaxis.set_major_locator(
             mdates.HourLocator(byhour=[0, 6, 12, 18]))
     elif len(dates) / 8 <= 15:
@@ -276,7 +357,9 @@ def timeseries(src_folder: str, graph_datetime_start: str,
 
     # TODO: change back to title
     with open('plot' + '.' + file_format, 'wb') as f:
-        fig.savefig(f, format=file_format, dpi=file_dpi,
+        fig.savefig(f,
+                    format=file_format,
+                    dpi=file_dpi,
                     transparent=is_background_transparent,
                     bbox_inches='tight',
                     pad_inches=inch_padding)
