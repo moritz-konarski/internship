@@ -267,7 +267,7 @@ class DataProcessor(QThread):
             Path(src_path).glob(FileExtension.NETCDF4.value))
         with Dataset(sorted_file_list[0], 'r') as d:
             return DataProcessor.__format_variable_name(
-                d.variables[variable_name].long_name)
+                d.variables[variable_name].long_nameith)
 
     @staticmethod
     def get_available_variables(src_path: str) -> [str]:
