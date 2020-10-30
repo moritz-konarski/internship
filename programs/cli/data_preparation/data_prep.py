@@ -52,7 +52,8 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
             if data is None:
                 data = np.asarray(d.variables[var_name])
             else:
-                data = np.append(data, np.asarray(d.variables[var_name]),
+                data = np.append(data,
+                                 np.asarray(d.variables[var_name]),
                                  axis=0)
     first_file = file_list[0]
     filepath = os.path.join(first_file)
@@ -69,8 +70,13 @@ def extract_and_save_data(file_list: [str], dest_path: str, var_name: str):
     lev = lev.astype(np.float64, casting='safe')
 
     with open(dest_path, 'wb') as f:
-        np.savez_compressed(f, data=data, time=time, lat=lat, lon=lon,
-                            lev=lev, allow_pickle=True)
+        np.savez_compressed(f,
+                            data=data,
+                            time=time,
+                            lat=lat,
+                            lon=lon,
+                            lev=lev,
+                            allow_pickle=True)
 
 
 def replace_fill_value(path: str):
@@ -88,8 +94,13 @@ def replace_fill_value(path: str):
                              d['data'][:, :, :, :], np.NaN)
 
         with open(path + meta_dict['name'] + file_ending, 'wb') as f:
-            np.savez_compressed(f, data=new_d, time=d['time'], lat=d['lat'],
-                                lon=d['lon'], lev=d['lev'], allow_pickle=True)
+            np.savez_compressed(f,
+                                data=new_d,
+                                time=d['time'],
+                                lat=d['lat'],
+                                lon=d['lon'],
+                                lev=d['lev'],
+                                allow_pickle=True)
         os.remove(path + meta_dict['name'] + tmp_file_ending)
 
         if len(new_d.shape) == 4:
@@ -106,8 +117,8 @@ def replace_fill_value(path: str):
         os.remove(path + tmp_metadata_file_name)
 
     else:
-        os.rename(path + meta_dict['name'] + tmp_file_ending, path +
-                  meta_dict['name'] + file_ending)
+        os.rename(path + meta_dict['name'] + tmp_file_ending,
+                  path + meta_dict['name'] + file_ending)
         os.rename(path + tmp_metadata_file_name, path + metadata_file_name)
 
 
