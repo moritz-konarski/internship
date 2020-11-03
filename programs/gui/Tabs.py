@@ -17,10 +17,16 @@ class Tabs(QWidget):
         self.tabs.addTab(self.tab1, self.tab1.title)
 
         self.tab2 = QWidget()
-        self.tabs.addTab(self.tab2, "For")
+        self.tabs.addTab(self.tab2, "Data Manager")
+
+        self.sub_tabs = QTabWidget()
+        self.sub_tab1 = QWidget()
+        self.sub_tab2 = QWidget()
+        self.sub_tabs.addTab(self.sub_tab1, "Heat Map")
+        self.sub_tabs.addTab(self.sub_tab2, "Time Series")
 
         self.tab3 = QWidget()
-        self.tabs.addTab(self.tab3, "Geeks")
+        self.tabs.addTab(self.sub_tabs, "Plotting")
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.tabs)

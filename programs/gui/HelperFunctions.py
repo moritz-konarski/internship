@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import numpy as np
 from enum import Enum
 from pathlib import Path
@@ -13,6 +14,8 @@ class FileExtension(Enum):
     TMP_DATA_FILE = "_tmp.npz"
     META_FILE = "metadata.json"
     TMP_META_FILE = "metadata_tmp.json"
+    PLOT_PNG = ".png"
+    PLOT_PDF = ".pdf"
 
 
 class DirectorySeparator(Enum):
@@ -77,3 +80,8 @@ class HelperFunction:
     def format_variable_name(name: str) -> str:
         n = re.sub("_", " ", name)
         return " ".join(w.capitalize() for w in n.split())
+
+    @staticmethod
+    def get_data_info(src_folder: str):
+        with open(src_folder + FileExtension.META_FILE.value, 'r') as f:
+            return json.load(f)
