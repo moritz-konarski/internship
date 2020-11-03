@@ -7,20 +7,7 @@ from pathlib import Path
 from netCDF4 import Dataset
 from enum import Enum
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
-
-
-class FileExtension(Enum):
-    NETCDF = "*.nc"
-    NETCDF4 = "*.nc4"
-    DATA_FILE = ".npz"
-    TMP_DATA_FILE = "_tmp.npz"
-    META_FILE = "metadata.json"
-    TMP_META_FILE = "metadata_tmp.json"
-
-
-class DirectorySeparator(Enum):
-    UNIX = "/"
-    WINDOWS = "\\"
+from HelperFunctions import DirectorySeparator, FileExtension, HelperFunction
 
 
 class DataProcessorStatus(Enum):
@@ -31,16 +18,19 @@ class DataProcessorStatus(Enum):
     SAVING_DATA = "Saving Data..."
     EXTRACTING_METADATA = "Extracting Metadata..."
     FINISHED = "Finished!"
+    THREAD_KILLED = "Thread was killed!"
 
 
 class DataProcessor(QThread):
     extraction_progress_update = pyqtSignal(float)
     extraction_status_message = pyqtSignal(str)
+    error = pyqtSignal(str)
     finished = pyqtSignal()
 
     def __init__(self, source_dir: str, destination_dir: str, var_name: str):
         super().__init__()
 
+        self.thread_running = False
         # determine system platform
         system = platform.system()
         if system == 'Darwin' or system == 'Linux':
@@ -57,15 +47,15 @@ class DataProcessor(QThread):
         self.sorted_file_list = sorted(
             Path(self.src_dir).glob(self.file_extension))
         self.variable_name = var_name
-        # TODO: error out
-        if len(self.sorted_file_list) == 0:
-            print("No valid files in directory")
-            exit(-1)
 
-    @staticmethod
-    def format_variable_name(name: str) -> str:
-        n = re.sub("_", " ", name)
-        return " ".join(w.capitalize() for w in n.split())
+        self.tmp_data_file_path = ""
+        self.data_file_path = ""
+        self.tmp_meta_file_path = ""
+        self.meta_file_path = ""
+
+        if len(self.sorted_file_list) == 0:
+            self.error.emit("Data Processor: Invalid Directory")
+            return
 
     def format_directory_path(self, path: str) -> str:
         reg = r"{0}$".format(self.dir_separator)
@@ -75,11 +65,21 @@ class DataProcessor(QThread):
 
     @pyqtSlot()
     def run(self):
+        self.thread_running = True
         self.extract_variable()
         self.finished.emit()
 
+    @pyqtSlot()
+    def stop(self):
+        self.thread_running = False
+        self.wait()
+
     # extracting the specified variable
     def extract_variable(self):
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
         destination_path = self.dest_dir + self.variable_name \
                            + self.dir_separator
 
@@ -97,10 +97,22 @@ class DataProcessor(QThread):
         self.meta_file_path = destination_path + \
                               FileExtension.META_FILE.value
 
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
         self.extract_and_save_data()
 
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
         self.extraction_progress_update.emit(100)
 
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
         self.status = DataProcessorStatus.FINISHED
         self.extraction_status_message.emit(self.status.value)
 
@@ -110,6 +122,10 @@ class DataProcessor(QThread):
         self.status = DataProcessorStatus.ALLOCATING_MEMORY
         self.extraction_status_message.emit(self.status.value)
 
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
         filepath = os.path.join(self.sorted_file_list[0])
         with Dataset(filepath, 'r') as d:
             time = np.asarray(d.variables['time'])
@@ -127,16 +143,22 @@ class DataProcessor(QThread):
 
         self.status = DataProcessorStatus.EXTRACTING_DATA
         self.extraction_status_message.emit(self.status.value)
-
-        data = None
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
         if var_dims == 3:
             data = np.ones((file_count * time_count, lat_count, lon_count),
                            dtype=np.float32)
             for (i, part) in enumerate(self.sorted_file_list):
+                if not self.thread_running:
+                    self.status = DataProcessorStatus.THREAD_KILLED
+                    self.extraction_status_message.emit(self.status.value)
+                    return
                 self.extraction_progress = (i + 1) / file_count
-                self.extraction_progress_update.emit(
-                    self.extraction_progress * 100 - 1)
+                self.extraction_progress_update.emit(self.extraction_progress *
+                                                     100 - 1)
 
                 filepath = os.path.join(part)
                 with Dataset(filepath, 'r') as d:
@@ -148,19 +170,22 @@ class DataProcessor(QThread):
                 dtype=np.float32)
 
             for (i, part) in enumerate(self.sorted_file_list):
+                if not self.thread_running:
+                    self.status = DataProcessorStatus.THREAD_KILLED
+                    self.extraction_status_message.emit(self.status.value)
+                    return
                 self.extraction_progress = (i + 1) / file_count
-                self.extraction_progress_update.emit(
-                    self.extraction_progress * 100 - 1)
+                self.extraction_progress_update.emit(self.extraction_progress *
+                                                     100 - 1)
 
                 filepath = os.path.join(part)
                 with Dataset(filepath, 'r') as d:
                     _d = np.asarray(d.variables[self.variable_name])
                     data[i * time_count:i * time_count +
                          time_count, :, :, :] = _d
-        # TODO: error out
         else:
-            print("unsupported data dimensions")
-            exit(-1)
+            self.error.emit("Data Processor: Data Dimension not supported!")
+            return
 
         self.status = DataProcessorStatus.CONVERTING_DATA_TYPES
         self.extraction_status_message.emit(self.status.value)
@@ -173,14 +198,22 @@ class DataProcessor(QThread):
 
         self.status = DataProcessorStatus.REPLACING_FILL_VALUES
         self.extraction_status_message.emit(self.status.value)
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
-        new_data = self.replace_fill_value(data, fill_value)
+        new_data = HelperFunction.replace_array_fill_value(data, fill_value)
 
         data_min = float(np.nanmin(new_data))
         data_max = float(np.nanmax(new_data))
 
         self.status = DataProcessorStatus.SAVING_DATA
         self.extraction_status_message.emit(self.status.value)
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
         with open(self.data_file_path, 'wb') as f:
             np.savez_compressed(f,
@@ -193,25 +226,19 @@ class DataProcessor(QThread):
 
         self.status = DataProcessorStatus.EXTRACTING_METADATA
         self.extraction_status_message.emit(self.status.value)
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
         self.extract_metadata(data_min, data_max)
-
-    @staticmethod
-    def replace_fill_value(data: np.ndarray, fill_value) -> np.ndarray:
-        if len(data.shape) == 3:
-            new_d = np.where(data[:, :, :] != fill_value, data[:, :, :],
-                             np.NaN)
-        else:
-            new_d = np.where(data[:, :, :, :] != fill_value, data[:, :, :, :],
-                             np.NaN)
-        return new_d
 
     def extract_metadata(self, data_min, data_max):
         with Dataset(self.sorted_file_list[0], 'r') as d:
             name = str(d.variables[self.variable_name].name)
-            long_name = DataProcessor.format_variable_name(
+            long_name = HelperFunction.format_variable_name(
                 d.variables[self.variable_name].long_name)
-            std_name = DataProcessor.format_variable_name(
+            std_name = HelperFunction.format_variable_name(
                 d.variables[self.variable_name].standard_name)
             units = str(d.variables[self.variable_name].units)
             fill_value = float(d.variables[self.variable_name]._FillValue)
@@ -221,6 +248,10 @@ class DataProcessor(QThread):
             begin_date = str(d.RangeBeginningDate)
         with Dataset(self.sorted_file_list[-1], 'r') as d:
             end_date = str(d.RangeEndingDate)
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
         d = np.load(self.data_file_path, allow_pickle=True)
         shape = d['data'].shape
@@ -259,31 +290,10 @@ class DataProcessor(QThread):
             "lev_units": lev_units,
             "fill_value": fill_value
         }
+        if not self.thread_running:
+            self.status = DataProcessorStatus.THREAD_KILLED
+            self.extraction_status_message.emit(self.status.value)
+            return
 
         with open(self.meta_file_path, 'w') as f:
             json.dump(info_dict, f)
-
-    @staticmethod
-    def get_long_variable_name(src_path: str, variable_name: str) -> str:
-        sorted_file_list = sorted(
-            Path(src_path).glob(FileExtension.NETCDF4.value))
-        # TODO: error out
-        if len(sorted_file_list) == 0:
-            exit(-1)
-        with Dataset(sorted_file_list[0], 'r') as d:
-            return DataProcessor.format_variable_name(
-                d.variables[variable_name].long_name)
-
-    @staticmethod
-    def get_available_variables(src_path: str) -> [str]:
-        sorted_file_list = sorted(
-            Path(src_path).glob(FileExtension.NETCDF4.value))
-        if len(sorted_file_list) == 0:
-            # TODO: error out
-            exit(-1)
-        var_info_list = []
-        with Dataset(sorted_file_list[0], 'r') as d:
-            for var in d.variables.keys():
-                if var != 'time' and var != 'lat' and var != 'lon' and var != 'lev':
-                    var_info_list.append(var)
-        return var_info_list
