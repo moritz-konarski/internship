@@ -1,7 +1,7 @@
 from DataProcessor import DataProcessor
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (QDesktopWidget, QMainWindow, QPushButton,
-                             QFileDialog, QComboBox, QProgressBar)
+from PyQt5.QtWidgets import (QDesktopWidget, QMainWindow, QPushButton, QWidget,
+                             QFileDialog, QComboBox, QProgressBar, QTabWidget)
 from PyQt5.QtCore import pyqtSlot
 
 
@@ -21,19 +21,24 @@ class GUI(QMainWindow):
         font.setPointSize(11)
         window_width = 600
 
-        # source directory label and message box
-        self.__src_dir_title = QtWidgets.QLabel(self)
-        self.__src_dir_title.setFont(font)
+        self.tabs = QTabWidget()
+        self.data_processing_tab = QWidget()
+        self.tabs.addTab(self.data_processing_tab, "dpt")
+        self.tabs.resize(300, 300)
 
-        text_height = self.__src_dir_title.fontMetrics().boundingRect(
+        # source directory label and message box
+        self.data_processing_tab.__src_dir_title = QtWidgets.QLabel(self)
+        self.data_processing_tab.__src_dir_title.setFont(font)
+
+        text_height = self.data_processing_tab.__src_dir_title.fontMetrics().boundingRect(
             "0").height()
         button_height = 1.8 * text_height
         window_height = 16 * scale_factor * text_height
 
-        self.__src_dir_title.setText("Source Directory Path")
-        self.__src_dir_title.setFixedWidth(
-            self.__src_dir_title.fontMetrics().boundingRect(255 * "0").width())
-        self.__src_dir_title.move(20, 10)
+        self.data_processing_tab.__src_dir_title.setText("Source Directory Path")
+        self.data_processing_tab.__src_dir_title.setFixedWidth(
+            self.data_processing_tab.__src_dir_title.fontMetrics().boundingRect(255 * "0").width())
+        self.data_processing_tab.__src_dir_title.move(20, 10)
         self.__src_dir_label = QtWidgets.QLabel(self)
         self.__src_dir_label.setFont(font)
         self.__src_dir_label.setText("--")
@@ -54,7 +59,7 @@ class GUI(QMainWindow):
         self.__dest_dir_title.setFont(font)
         self.__dest_dir_title.setText("Destination Directory Path")
         self.__dest_dir_title.setFixedWidth(
-            self.__src_dir_title.fontMetrics().boundingRect(255 * "0").width())
+            self.data_processing_tab.__src_dir_title.fontMetrics().boundingRect(255 * "0").width())
         self.__dest_dir_title.move(20, 10 + 4 * scale_factor * text_height)
         self.__dest_dir_label = QtWidgets.QLabel(self)
         self.__dest_dir_label.setFont(font)
