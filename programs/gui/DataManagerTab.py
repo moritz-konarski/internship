@@ -5,7 +5,9 @@ from DataProcessor import DataProcessor
 from HelperFunctions import HelperFunction
 from DataManager import DataManager
 from HeatMapParameterWindow import HeatMapParameterWindow
+
 # TODO:
+#  - create input fields for min and max lat/lon
 #  - do error checking
 #  - get data from popups
 #  - show user what was selected
@@ -38,6 +40,10 @@ class DataManagerTab(QWidget):
         self.end_date = None
         self.level = None
         self.export_format = None
+        self.lat_min = None
+        self.lat_max = None
+        self.lon_min = None
+        self.lon_max = None
 
         # source directory label and message box
         text = "Source Directory Path"
@@ -65,59 +71,57 @@ class DataManagerTab(QWidget):
             self.element_height)
 
         text = "Variable: Name"
-        self.var_name_label = QLabel(self)
-        self.var_name_label.setText(text)
-        self.var_name_label.setGeometry(self.margin,
-                                        10 + 4 * self.element_height,
-                                        self.empty_label_width,
-                                        self.element_height)
+        self.name_label = QLabel(self)
+        self.name_label.setText(text)
+        self.name_label.setGeometry(self.margin, 10 + 4 * self.element_height,
+                                    self.empty_label_width,
+                                    self.element_height)
         text = "Name: Long Name"
-        self.var_name_long_name_label = QLabel(self)
-        self.var_name_long_name_label.setText(text)
-        self.var_name_long_name_label.setGeometry(self.margin,
-                                                  10 + 5 * self.element_height,
-                                                  self.empty_label_width,
-                                                  self.element_height)
+        self.long_name_label = QLabel(self)
+        self.long_name_label.setText(text)
+        self.long_name_label.setGeometry(self.margin,
+                                         10 + 5 * self.element_height,
+                                         self.empty_label_width,
+                                         self.element_height)
 
         text = "Units: Units"
-        self.var_unit_label = QLabel(self)
-        self.var_unit_label.setText(text)
-        self.var_unit_label.setGeometry(self.margin,
-                                        10 + 6 * self.element_height,
-                                        self.empty_label_width,
-                                        self.element_height)
+        self.unit_label = QLabel(self)
+        self.unit_label.setText(text)
+        self.unit_label.setGeometry(self.margin, 10 + 6 * self.element_height,
+                                    self.empty_label_width,
+                                    self.element_height)
 
         text = "Time Range: beginning to end"
-        self.var_time_range_label = QLabel(self)
-        self.var_time_range_label.setText(text)
-        self.var_time_range_label.setGeometry(self.margin,
-                                              10 + 7 * self.element_height,
-                                              self.empty_label_width,
-                                              self.element_height)
+        self.time_range_label = QLabel(self)
+        self.time_range_label.setText(text)
+        self.time_range_label.setGeometry(self.margin,
+                                          10 + 7 * self.element_height,
+                                          self.empty_label_width,
+                                          self.element_height)
 
         text = "Latitude Range: lat range"
-        self.var_lat_range_label = QLabel(self)
-        self.var_lat_range_label.setText(text)
-        self.var_lat_range_label.setGeometry(self.margin,
-                                             10 + 8 * self.element_height,
-                                             self.empty_label_width,
-                                             self.element_height)
+        self.lat_range_label = QLabel(self)
+        self.lat_range_label.setText(text)
+        self.lat_range_label.setGeometry(self.margin,
+                                         10 + 8 * self.element_height,
+                                         self.empty_label_width,
+                                         self.element_height)
 
         text = "Longitude Range: lon range"
-        self.var_lon_range_label = QLabel(self)
-        self.var_lon_range_label.setText(text)
-        self.var_lon_range_label.setGeometry(self.margin,
-                                             10 + 9 * self.element_height,
-                                             self.empty_label_width,
-                                             self.element_height)
+        self.lon_range_label = QLabel(self)
+        self.lon_range_label.setText(text)
+        self.lon_range_label.setGeometry(self.margin,
+                                         10 + 9 * self.element_height,
+                                         self.empty_label_width,
+                                         self.element_height)
 
         text = "Levels: level count"
-        self.var_level_range_label = QLabel(self)
-        self.var_level_range_label.setText(text)
-        self.var_level_range_label.setGeometry(self.margin,
-                                               10 + 10 * self.element_height,
-                                               self.empty_label_width,
-                                               self.element_height)
+        self.level_range_label = QLabel(self)
+        self.level_range_label.setText(text)
+        self.level_range_label.setGeometry(self.margin,
+                                           10 + 10 * self.element_height,
+                                           self.empty_label_width,
+                                           self.element_height)
 
         text = "Export Time Series Data"
         self.export_time_series_button = QPushButton(text, self)
@@ -129,11 +133,39 @@ class DataManagerTab(QWidget):
 
         text = "Export Heat Map Data"
         self.export_heat_map_button = QPushButton(text, self)
-        self.export_heat_map_button.clicked.connect(
-            self.export_heat_map_data)
-        self.export_heat_map_button.setGeometry(
-            self.margin, 10 + 13 * self.element_height, self.button_width,
-            self.element_height)
+        self.export_heat_map_button.clicked.connect(self.export_heat_map_data)
+        self.export_heat_map_button.setGeometry(self.margin,
+                                                10 + 13 * self.element_height,
+                                                self.button_width,
+                                                self.element_height)
+
+        text = "Selected Time Range: beginning to end"
+        self.selected_time_range_label = QLabel(self)
+        self.selected_time_range_label.setText(text)
+        self.selected_time_range_label.setGeometry(
+            self.margin, 10 + 14.5 * self.element_height,
+            self.empty_label_width, self.element_height)
+
+        text = "Selected Latitude Range: lat range"
+        self.selected_lat_range_label = QLabel(self)
+        self.selected_lat_range_label.setText(text)
+        self.selected_lat_range_label.setGeometry(
+            self.margin, 10 + 15.5 * self.element_height,
+            self.empty_label_width, self.element_height)
+
+        text = "Selected Longitude Range: lon range"
+        self.selected_lon_range_label = QLabel(self)
+        self.selected_lon_range_label.setText(text)
+        self.selected_lon_range_label.setGeometry(
+            self.margin, 10 + 16.5 * self.element_height,
+            self.empty_label_width, self.element_height)
+
+        text = "Selected Level: level count"
+        self.selected_level_range_label = QLabel(self)
+        self.selected_level_range_label.setText(text)
+        self.selected_level_range_label.setGeometry(
+            self.margin, 10 + 17.5 * self.element_height,
+            self.empty_label_width, self.element_height)
 
         self.show()
 
@@ -142,34 +174,41 @@ class DataManagerTab(QWidget):
 
     def export_heat_map_data(self):
         if isinstance(self.data_manager, DataManager):
-            self.popup_window = HeatMapParameterWindow(self,
-                                                       self.data_manager.metadata[
-                                                      'name'],
-                                                       self.data_manager.begin_datetime,
-                                                       self.data_manager.end_datetime,
-                                                       self.data_manager.level_count)
+            self.popup_window = HeatMapParameterWindow(
+                self, self.data_manager.metadata['name'],
+                self.data_manager.begin_datetime,
+                self.data_manager.end_datetime, self.data_manager.level_count,
+                self.data_manager.lat_min, self.data_manager.lat_min,
+                self.data_manager.lon_min, self.data_manager.lon_max)
+            self.popup_window.info_submitted.connect(self.get_heat_map_info)
 
     def update_info_labels(self):
         text = "Variable: " + self.data_manager.metadata['name']
-        self.var_name_label.setText(text)
+        self.name_label.setText(text)
         text = "Name: " + self.data_manager.metadata['long_name']
-        self.var_name_long_name_label.setText(text)
+        self.long_name_label.setText(text)
         text = "Units: " + self.data_manager.metadata['units']
-        self.var_unit_label.setText(text)
+        self.unit_label.setText(text)
         text = "Time Range: " + self.data_manager.metadata[
-            'begin_date'] + " to " + self.data_manager.metadata[
-                   'end_date']
-        self.var_time_range_label.setText(text)
-        text = "Latitude Range: " + str(self.data_manager.metadata[
-                                            'lat_min']) + " to " + str(
-            self.data_manager.metadata['lat_max'])
-        self.var_lat_range_label.setText(text)
-        text = "Longitute Range: " + str(self.data_manager.metadata[
-                                             'lon_min']) + " to " + str(
-            self.data_manager.metadata['lon_max'])
-        self.var_lon_range_label.setText(text)
+            'begin_date'] + " to " + self.data_manager.metadata['end_date']
+        self.time_range_label.setText(text)
+        text = "Latitude Range: " + str(
+            self.data_manager.metadata['lat_min']) + " to " + str(
+                self.data_manager.metadata['lat_max'])
+        self.lat_range_label.setText(text)
+        text = "Longitute Range: " + str(
+            self.data_manager.metadata['lon_min']) + " to " + str(
+                self.data_manager.metadata['lon_max'])
+        self.lon_range_label.setText(text)
         text = "Levels: " + str(self.data_manager.metadata['lev_count'])
-        self.var_level_range_label.setText(text)
+        self.level_range_label.setText(text)
+
+    def get_heat_map_info(self):
+        self.being_date = self.popup_window.begin_date
+        self.end_date = self.popup_window.end_date
+        self.export_format = self.popup_window.export_data_type
+        self.level = self.popup_window.level
+        #self.lat_min
 
     def lol(self):
         # destination directory label and message box
@@ -341,7 +380,7 @@ class DataManagerTab(QWidget):
         if file_name:
             if HelperFunction.is_valid_npz_source_directory(
                     file_name) and HelperFunction.can_read_directory(
-                file_name):
+                        file_name):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)
 

@@ -10,7 +10,7 @@ from netCDF4 import Dataset
 
 class ExportDataType(Enum):
     CSV = ".csv"
-    ZIP = ".zip"    # via pickle
+    ZIP = ".zip"  # via pickle
     EXCEL = ".xlsx"
     HTML = ".html"
 

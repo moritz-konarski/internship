@@ -52,7 +52,8 @@ class DataManager(QThread):
         else:
             pass
 
-    def check_time_constraints(self, start_time: datetime, end_time: datetime) -> bool:
+    def check_time_constraints(self, start_time: datetime,
+                               end_time: datetime) -> bool:
         if start_time < self.begin_datetime:
             # TODO: error out
             pass
@@ -78,7 +79,6 @@ class DataManager(QThread):
         self.check_time_constraints(start_time, end_time)
         self.check_location_constraints(lat, lon)
         self.check_level_constraints(level)
-
 
         pass
 
