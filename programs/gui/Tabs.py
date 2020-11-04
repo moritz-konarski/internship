@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from DataProcessorTab import DataProcessorTab
+from DataManagerTab import DataManagerTab
 
 
 class Tabs(QWidget):
@@ -16,8 +17,8 @@ class Tabs(QWidget):
         self.tab1 = DataProcessorTab(self)
         self.tabs.addTab(self.tab1, self.tab1.title)
 
-        self.tab2 = QWidget()
-        self.tabs.addTab(self.tab2, "Data Manager")
+        self.tab2 = DataManagerTab(self)
+        self.tabs.addTab(self.tab2, self.tab2.title)
 
         self.sub_tabs = QTabWidget()
         self.sub_tab1 = QWidget()

@@ -3,24 +3,41 @@ from PyQt5.QtWidgets import (QStatusBar, QWidget, QLabel, QPushButton,
 from PyQt5.QtCore import pyqtSlot
 from DataProcessor import DataProcessor
 from HelperFunctions import HelperFunction
+from DataManager import DataManager
+from HeatMapParameterWindow import HeatMapParameterWindow
+# TODO:
+#  - do error checking
+#  - get data from popups
+#  - show user what was selected
+#  - convert npz to pandas DataFrame, then save data
 
 
-class DataProcessorTab(QWidget):
+class DataManagerTab(QWidget):
     def __init__(self, tab):
         super().__init__()
 
-        self.title = 'Data Processor'
-        self.destination_directory = ""
+        self.title = 'Data Manager'
         self.source_directory = ""
 
         self.long_variable_name = ""
         self.thread = None
+        self.popup_window = None
+
+        self.data_manager = None
+
+        self.get_time_series_info_window = None
+        self.get_heat_map_info_window = None
 
         self.button_width = tab.button_width
         self.element_height = tab.element_height
         self.margin = tab.margin
         self.empty_label_width = tab.parent.width - 3 * self.margin
         self.height = tab.parent.height
+
+        self.being_date = None
+        self.end_date = None
+        self.level = None
+        self.export_format = None
 
         # source directory label and message box
         text = "Source Directory Path"
@@ -47,6 +64,114 @@ class DataProcessorTab(QWidget):
             self.margin, 10 + 2.25 * self.element_height, self.button_width,
             self.element_height)
 
+        text = "Variable: Name"
+        self.var_name_label = QLabel(self)
+        self.var_name_label.setText(text)
+        self.var_name_label.setGeometry(self.margin,
+                                        10 + 4 * self.element_height,
+                                        self.empty_label_width,
+                                        self.element_height)
+        text = "Name: Long Name"
+        self.var_name_long_name_label = QLabel(self)
+        self.var_name_long_name_label.setText(text)
+        self.var_name_long_name_label.setGeometry(self.margin,
+                                                  10 + 5 * self.element_height,
+                                                  self.empty_label_width,
+                                                  self.element_height)
+
+        text = "Units: Units"
+        self.var_unit_label = QLabel(self)
+        self.var_unit_label.setText(text)
+        self.var_unit_label.setGeometry(self.margin,
+                                        10 + 6 * self.element_height,
+                                        self.empty_label_width,
+                                        self.element_height)
+
+        text = "Time Range: beginning to end"
+        self.var_time_range_label = QLabel(self)
+        self.var_time_range_label.setText(text)
+        self.var_time_range_label.setGeometry(self.margin,
+                                              10 + 7 * self.element_height,
+                                              self.empty_label_width,
+                                              self.element_height)
+
+        text = "Latitude Range: lat range"
+        self.var_lat_range_label = QLabel(self)
+        self.var_lat_range_label.setText(text)
+        self.var_lat_range_label.setGeometry(self.margin,
+                                             10 + 8 * self.element_height,
+                                             self.empty_label_width,
+                                             self.element_height)
+
+        text = "Longitude Range: lon range"
+        self.var_lon_range_label = QLabel(self)
+        self.var_lon_range_label.setText(text)
+        self.var_lon_range_label.setGeometry(self.margin,
+                                             10 + 9 * self.element_height,
+                                             self.empty_label_width,
+                                             self.element_height)
+
+        text = "Levels: level count"
+        self.var_level_range_label = QLabel(self)
+        self.var_level_range_label.setText(text)
+        self.var_level_range_label.setGeometry(self.margin,
+                                               10 + 10 * self.element_height,
+                                               self.empty_label_width,
+                                               self.element_height)
+
+        text = "Export Time Series Data"
+        self.export_time_series_button = QPushButton(text, self)
+        self.export_time_series_button.clicked.connect(
+            self.export_time_series_data)
+        self.export_time_series_button.setGeometry(
+            self.margin, 10 + 11.5 * self.element_height, self.button_width,
+            self.element_height)
+
+        text = "Export Heat Map Data"
+        self.export_heat_map_button = QPushButton(text, self)
+        self.export_heat_map_button.clicked.connect(
+            self.export_heat_map_data)
+        self.export_heat_map_button.setGeometry(
+            self.margin, 10 + 13 * self.element_height, self.button_width,
+            self.element_height)
+
+        self.show()
+
+    def export_time_series_data(self):
+        pass
+
+    def export_heat_map_data(self):
+        if isinstance(self.data_manager, DataManager):
+            self.popup_window = HeatMapParameterWindow(self,
+                                                       self.data_manager.metadata[
+                                                      'name'],
+                                                       self.data_manager.begin_datetime,
+                                                       self.data_manager.end_datetime,
+                                                       self.data_manager.level_count)
+
+    def update_info_labels(self):
+        text = "Variable: " + self.data_manager.metadata['name']
+        self.var_name_label.setText(text)
+        text = "Name: " + self.data_manager.metadata['long_name']
+        self.var_name_long_name_label.setText(text)
+        text = "Units: " + self.data_manager.metadata['units']
+        self.var_unit_label.setText(text)
+        text = "Time Range: " + self.data_manager.metadata[
+            'begin_date'] + " to " + self.data_manager.metadata[
+                   'end_date']
+        self.var_time_range_label.setText(text)
+        text = "Latitude Range: " + str(self.data_manager.metadata[
+                                            'lat_min']) + " to " + str(
+            self.data_manager.metadata['lat_max'])
+        self.var_lat_range_label.setText(text)
+        text = "Longitute Range: " + str(self.data_manager.metadata[
+                                             'lon_min']) + " to " + str(
+            self.data_manager.metadata['lon_max'])
+        self.var_lon_range_label.setText(text)
+        text = "Levels: " + str(self.data_manager.metadata['lev_count'])
+        self.var_level_range_label.setText(text)
+
+    def lol(self):
         # destination directory label and message box
         text = "Destination Directory Path"
         self.destination_directory_info_label = QLabel(self)
@@ -54,8 +179,9 @@ class DataProcessorTab(QWidget):
         self.destination_directory_info_label \
             .setGeometry(self.margin,
                          10 + 4 * self.element_height,
-                         HelperFunction.get_qt_text_width(self.destination_directory_info_label,
-                                        text),
+                         HelperFunction.get_qt_text_width(
+                             self.destination_directory_info_label,
+                             text),
                          self.element_height)
 
         self.destination_directory_label = QLabel(self)
@@ -209,21 +335,26 @@ class DataProcessorTab(QWidget):
 
     def show_source_directory_dialog(self):
         msg = "Select Source Directory"
-        self.statusBar.showMessage(msg)
+        # self.statusBar.showMessage(msg)
         file_name = QFileDialog.getExistingDirectory(self, msg)
 
         if file_name:
-            if HelperFunction.is_valid_nc_source_directory(
+            if HelperFunction.is_valid_npz_source_directory(
                     file_name) and HelperFunction.can_read_directory(
-                        file_name):
+                file_name):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)
-                self.variable_combobox.clear()
-                self.variable_combobox.addItems(
-                    HelperFunction.get_available_variables(
-                        self.source_directory))
-                self.extract_button.setEnabled(True)
-                self.statusBar.showMessage("Source Directory Selected")
+
+                self.data_manager = DataManager(self.source_directory)
+
+                self.update_info_labels()
+
+                # self.variable_combobox.clear()
+                # self.variable_combobox.addItems(
+                #    HelperFunction.get_available_variables(
+                #        self.source_directory))
+                # self.extract_button.setEnabled(True)
+                # self.statusBar.showMessage("Source Directory Selected")
             else:
                 error = QMessageBox(self)
                 error.setWindowTitle("Error!")
@@ -236,3 +367,20 @@ class DataProcessorTab(QWidget):
             error.setText("Directory Selection Failed!")
             error.exec_()
             return
+
+    def find_lat_or_lon_index(self, given: str) -> int:
+        val = float(given)
+        min = np.nanmin(options)
+        max = np.nanmax(options)
+
+        if val > max or val < min:
+            print("Latitute or Longitute out of range")
+            exit(-1)
+
+        best_index = -1
+        min_diff = max
+        for (i, opt) in enumerate(options):
+            if abs(opt - val) < min_diff:
+                best_index = i
+
+        return best_index

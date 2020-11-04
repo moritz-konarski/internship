@@ -33,10 +33,7 @@ class DataProcessor(QThread):
         self.thread_running = False
         # determine system platform
         system = platform.system()
-        if system == 'Darwin' or system == 'Linux':
-            self.dir_separator = DirectorySeparator.UNIX.value
-        elif system == 'Windows':
-            self.dir_separator = DirectorySeparator.WINDOWS.value
+        self.dir_separator = HelperFunction.get_dir_separator()
 
         self.src_dir = self.format_directory_path(source_dir)
         self.dest_dir = self.format_directory_path(destination_dir)
