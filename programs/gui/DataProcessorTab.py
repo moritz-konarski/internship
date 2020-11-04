@@ -53,7 +53,7 @@ class DataProcessorTab(QWidget):
         self.destination_directory_info_label.setText(text)
         self.destination_directory_info_label \
             .setGeometry(self.margin,
-                         10 + 4 * self.element_height,
+                         10 + 3.5 * self.element_height,
                          HelperFunction.get_qt_text_width(self.destination_directory_info_label,
                                         text),
                          self.element_height)
@@ -61,15 +61,15 @@ class DataProcessorTab(QWidget):
         self.destination_directory_label = QLabel(self)
         self.destination_directory_label.setText("No Directory Selected")
         self.destination_directory_label.setGeometry(
-            self.margin, 10 + 5 * self.element_height, self.empty_label_width,
-            self.element_height)
+            self.margin, 10 + 4.5 * self.element_height,
+            self.empty_label_width, self.element_height)
 
         text = "Select Destination Directory"
         self.destination_directory_button = QPushButton(text, self)
         self.destination_directory_button.clicked.connect(
             self.show_destination_directory_dialog)
         self.destination_directory_button.setGeometry(
-            self.margin, 10 + 6.25 * self.element_height, self.button_width,
+            self.margin, 10 + 5.75 * self.element_height, self.button_width,
             self.element_height)
 
         # combo box for variables
@@ -78,7 +78,7 @@ class DataProcessorTab(QWidget):
         self.variable_combobox_info_label.setText(text)
         self.variable_combobox_info_label \
             .setGeometry(self.margin,
-                         10 + 8 * self.element_height,
+                         10 + 7 * self.element_height,
                          HelperFunction.get_qt_text_width(
                              self.variable_combobox_info_label,
                              text),
@@ -88,7 +88,7 @@ class DataProcessorTab(QWidget):
         self.variable_combobox.currentIndexChanged.connect(
             self.update_variable_info)
         self.variable_combobox.setGeometry(self.margin,
-                                           10 + 9.25 * self.element_height,
+                                           10 + 8 * self.element_height,
                                            self.button_width,
                                            self.element_height)
 
@@ -96,7 +96,7 @@ class DataProcessorTab(QWidget):
         self.variable_combobox_info_label.setText("Full Variable Name")
         self.variable_combobox_info_label.setGeometry(
             2 * self.margin + self.button_width,
-            10 + 9.3 * self.element_height, self.empty_label_width,
+            10 + 8.05 * self.element_height, self.empty_label_width,
             self.element_height)
 
         # extract button
@@ -104,7 +104,7 @@ class DataProcessorTab(QWidget):
         self.extract_button.setFixedHeight(self.element_height)
         self.extract_button.clicked.connect(self.extract)
         self.extract_button.setGeometry(self.margin,
-                                        10 + 11.25 * self.element_height,
+                                        10 + 9.5 * self.element_height,
                                         self.button_width, self.element_height)
         self.disable_extract_button()
 
@@ -114,13 +114,13 @@ class DataProcessorTab(QWidget):
         self.cancel_extraction_button.clicked.connect(self.stop_thread)
         self.cancel_extraction_button.setGeometry(
             2 * self.margin + self.button_width,
-            10 + 11.25 * self.element_height, self.button_width,
+            10 + 9.5 * self.element_height, self.button_width,
             self.element_height)
 
         # create the progress bar
         self.progressBar = QProgressBar(self)
         self.progressBar.setGeometry(self.margin,
-                                     10 + 13 * self.element_height,
+                                     10 + 11 * self.element_height,
                                      self.empty_label_width,
                                      self.element_height)
 

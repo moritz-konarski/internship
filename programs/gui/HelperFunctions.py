@@ -126,3 +126,7 @@ class HelperFunction:
     def get_data_info(src_folder: str):
         with open(src_folder + FileExtension.META_FILE.value, 'r') as f:
             return json.load(f)
+
+    @staticmethod
+    def round_number(number, places):
+        return round(10**places * number) / 10**places

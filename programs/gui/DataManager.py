@@ -7,19 +7,18 @@ import pandas as pd
 from PlotObject import PlotType
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 from HelperFunctions import DirectorySeparator, FileExtension, HelperFunction
+from PlotDataObject import PlotDataObject
 
 
 class DataManager(QThread):
-    def __init__(self, path: str):
+    def __init__(self, path: str, plot_data_object: PlotDataObject):
         super().__init__()
         self.thread_running = False
+        self.plot_data_object = plot_data_object
 
         self.dir_separator = HelperFunction.get_dir_separator()
-
         self.path = self.format_directory_path(path)
-
         self.metadata_path = self.path + FileExtension.META_FILE.value
-
         self.metadata_dictionary = None
         try:
             with open(self.metadata_path, 'r') as f:

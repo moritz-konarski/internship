@@ -23,6 +23,7 @@ class HeatMapParameterWindow(QWidget):
 
         self.margin = parent.margin
         self.element_height = parent.element_height
+
         self.button_width = parent.button_width
         self.begin_date = begin_date
         self.level = level_count

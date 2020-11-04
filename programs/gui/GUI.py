@@ -11,8 +11,8 @@ class GUI(QMainWindow):
 
         self.tab_widget = None
         self.title = window_title_long
-        self.width = 1000
-        self.height = 800
+        self.width = 750
+        self.height = 490
 
         self.init_ui()
 
