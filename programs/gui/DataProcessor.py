@@ -11,6 +11,8 @@ from netCDF4 import Dataset
 
 from HelperFunctions import FileExtension, HelperFunction
 
+# TODO: dont save lev for 3D data
+
 
 class DataProcessorStatus(Enum):
     ALLOCATING_MEMORY = "Allocating Memory..."

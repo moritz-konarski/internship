@@ -1,47 +1,58 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 
-from DataManagerTab import DataManagerTab
+from DataManagerTab import DataManagerTab, DataAction
 from DataProcessorTab import DataProcessorTab
 
 
-class Tabs(QWidget):
-    def __init__(self, parent):
+class TabWidget(QWidget):
+    horizontal_margin = 20
+    element_height = 25
+    button_width = 200
+
+    def __init__(self, main_gui):
         super().__init__()
 
-        # TODO: add some help in a separate tab
-        self.parent = parent
-        self.margin = 20
-        self.element_height = 25
-        self.button_width = 200
+        self.main_gui = main_gui
 
+        # main tab widget
         self.tabs = QTabWidget()
 
+        # data processing tab, first tab
         self.tab1 = DataProcessorTab(self)
         self.tabs.addTab(self.tab1, self.tab1.title)
 
+        # data manager tab, second tab
         self.tab2 = DataManagerTab(self)
-        self.tab2.is_data_selected.connect(self.set_subtabs_enabled)
         self.tabs.addTab(self.tab2, self.tab2.title)
+        # enable / disable plotting and export tabs if the appropriate data has been submitted
+        self.tab2.data_selection_signal.connect(self.enable_tabs)
 
-        self.sub_tabs = QTabWidget()
-        self.sub_tab1 = QWidget()
-        self.sub_tab2 = QWidget()
-        self.sub_tabs.addTab(self.sub_tab1, "Heat Map")
-        self.sub_tabs.addTab(self.sub_tab2, "Time Series")
-
-        self.sub_tabs.setDisabled(True)
-
-        # TODO: add an overlay that explains why it's deactivated
+        # TODO: add an overlay that explains why it's deactivated, make modular dependent on plot type
+        # plotting tab, third tab
         self.tab3 = QWidget()
-        self.tabs.addTab(self.sub_tabs, "Plot Data")
+        self.tabs.addTab(QWidget(), "Plot Data")
+        # disable this tab by default because user input is needed to validate it
+        self.tab3.setEnabled(False)
 
         # TODO: add an overlay that explains why it's deactivated
+        # data export tab, fourth tab
         self.tab4 = QWidget()
+        # disable this tab by default because user input is needed to validate it
         self.tabs.addTab(self.tab4, "Export Data")
+        self.tab4.setEnabled(False)
 
+        # TODO: flesh out the help section
+        #   - give this widget tabs that correspond to the individual main tabs
+        self.tab5 = QWidget()
+        self.tabs.addTab(self.tab5, "Help")
+
+        # add the tabs to the window
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-    def set_subtabs_enabled(self, enabled: bool):
-        self.sub_tabs.setEnabled(enabled)
+    def enable_tabs(self, enabled: bool, action: DataAction):
+        if action == DataAction.PLOT:
+            self.tab3.setEnabled(enabled)
+        elif action == DataAction.EXPORT:
+            self.tab4.setEnabled(enabled)

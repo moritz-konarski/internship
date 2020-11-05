@@ -7,20 +7,27 @@ from PyQt5.QtWidgets import (QFileDialog, QLabel, QMessageBox,
 
 from DataManager import DataManager
 from DataProcessor import DataProcessor
-from HelperFunctions import HelperFunction
+from HelperFunctions import HelperFunction as hf
 from PlotDataObject import PlotDataObject
+from enum import Enum, auto
 
 
 # TODO:
+#  - disable the level selection for 3D data
 #  - don't ask for destination directory
 #  - do error checking
 #  - show user what was selected
 #  - convert npz to pandas DataFrame, then save data, if multiple time steps are
 #    selected in heat map, save multiple files
 
+class DataAction(Enum):
+    EXPORT = auto()
+    PLOT = auto()
+
+
 
 class DataManagerTab(QWidget):
-    is_data_selected = pyqtSignal(bool)
+    data_selection_signal = pyqtSignal(bool, DataAction)
 
     def __init__(self, tab):
         super().__init__()
@@ -35,36 +42,39 @@ class DataManagerTab(QWidget):
 
         self.button_width = tab.button_width
         self.element_height = tab.element_height
-        self.margin = tab.margin
-        self.empty_label_width = tab.parent.width - 3 * self.margin
-        self.height = tab.parent.height
+        self.margin = tab.horizontal_margin
+        self.empty_label_width = tab.main_gui.width - 3 * self.margin
+        self.height = tab.main_gui.height
 
         self.plot_data_object = None
 
         # source directory label and message box
         text = "Source Directory Path"
-        self.source_directory_info_label = QLabel(self)
-        self.source_directory_info_label.setText(text)
-        self.source_directory_info_label.setGeometry(
-            self.margin, 10,
-            HelperFunction.get_qt_text_width(self.source_directory_info_label,
-                                             text), self.element_height)
+        #self.source_directory_info_label = QLabel(self)
+        #self.source_directory_info_label.setText(text)
+        #self.source_directory_info_label.setGeometry(
+        #    self.margin, 10,
+        #    HelperFunction.get_qt_text_width(self.source_directory_info_label,
+        #                                     text), self.element_height)
+        hf.create_label(self, text, self.margin, 10, self.element_height)
 
         text = "No Source Directory Selected"
-        self.source_directory_label = QLabel(self)
-        self.source_directory_label.setText(text)
-        self.source_directory_label.setGeometry(self.margin,
-                                                10 + self.element_height,
-                                                self.empty_label_width,
-                                                self.element_height)
+        #self.source_directory_label = QLabel(self)
+        #self.source_directory_label.setText(text)
+        #self.source_directory_label.setGeometry(self.margin,
+        #                                        10 + self.element_height,
+        #                                        self.empty_label_width,
+        #                                        self.element_height)
+        hf.create_label(self, text, self.margin, 10 + self.element_height, self.element_height)
 
         text = "Select Source Directory"
-        self.source_directory_button = QPushButton(text, self)
+        #self.source_directory_button = QPushButton(text, self)
+        #self.source_directory_button.setGeometry(
+        #    self.margin, 10 + 2.25 * self.element_height, self.button_width,
+        #    self.element_height)
+        self.source_directory_button = hf.create_button(self, text, self.margin, 10 + 2.25 * self.element_height, self.button_width, self.element_height)
         self.source_directory_button.clicked.connect(
             self.show_source_directory_dialog)
-        self.source_directory_button.setGeometry(
-            self.margin, 10 + 2.25 * self.element_height, self.button_width,
-            self.element_height)
 
         # source directory label and message box
         text = "Destination Directory Path"
@@ -72,7 +82,7 @@ class DataManagerTab(QWidget):
         self.destination_directory_info_label.setText(text)
         self.destination_directory_info_label.setGeometry(
             self.margin, 10 + 3.5 * self.element_height,
-            HelperFunction.get_qt_text_width(
+            hf.get_qt_text_width(
                 self.destination_directory_info_label,
                 text), self.element_height)
 
@@ -226,11 +236,11 @@ class DataManagerTab(QWidget):
             self.table.item(3, 5).setText("")
 
     def export_data(self):
-        self.is_data_selected.emit(True)
+        self.data_selection_signal.emit(True, DataAction.EXPORT)
         pass
 
     def plot_data(self):
-        self.is_data_selected.emit(True)
+        self.data_selection_signal.emit(True, DataAction.PLOT)
         pass
 
     def update_info(self):
@@ -293,7 +303,7 @@ class DataManagerTab(QWidget):
         file_name = QFileDialog.getExistingDirectory(self, msg)
 
         if file_name:
-            if HelperFunction.can_write_directory(file_name):
+            if hf.can_write_directory(file_name):
                 self.destination_directory = file_name
                 self.destination_directory_label.setText(
                     self.destination_directory)
@@ -315,8 +325,8 @@ class DataManagerTab(QWidget):
         file_name = QFileDialog.getExistingDirectory(self, msg)
 
         if file_name:
-            if HelperFunction.is_valid_npz_source_directory(
-                    file_name) and HelperFunction.can_read_directory(
+            if hf.is_valid_npz_source_directory(
+                    file_name) and hf.can_read_directory(
                 file_name):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)

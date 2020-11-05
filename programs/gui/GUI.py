@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow
 
-from Tabs import Tabs
+from Tabs import TabWidget
 
 window_title_long = 'Satellite Data Modification and Plotting Program'
 window_title = 'SDMAPP'
@@ -22,7 +22,7 @@ class GUI(QMainWindow):
         self.setFixedSize(self.width, self.height)
         self.center_window()
 
-        self.tab_widget = Tabs(self)
+        self.tab_widget = TabWidget(self)
         self.setCentralWidget(self.tab_widget)
 
         self.show()

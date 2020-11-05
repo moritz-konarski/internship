@@ -9,7 +9,7 @@ from HelperFunctions import HelperFunction
 # TODO: only ask for destination folder when the user clicks "extract"
 
 class DataProcessorTab(QWidget):
-    def __init__(self, tab):
+    def __init__(self, tab_window):
         super().__init__()
 
         self.title = 'Data Processor'
@@ -19,11 +19,11 @@ class DataProcessorTab(QWidget):
         self.long_variable_name = ""
         self.thread = None
 
-        self.button_width = tab.button_width
-        self.element_height = tab.element_height
-        self.margin = tab.margin
-        self.empty_label_width = tab.parent.width - 3 * self.margin
-        self.height = tab.parent.height
+        self.button_width = tab_window.button_width
+        self.element_height = tab_window.element_height
+        self.margin = tab_window.horizontal_margin
+        self.empty_label_width = tab_window.main_gui.width - 3 * self.margin
+        self.height = tab_window.main_gui.height
 
         # source directory label and message box
         text = "Source Directory Path"
