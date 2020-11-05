@@ -7,6 +7,7 @@ class Tabs(QWidget):
     def __init__(self, parent):
         super().__init__()
 
+        # TODO: add some help in a separate tab
         self.parent = parent
         self.margin = 20
         self.element_height = 25
@@ -29,8 +30,13 @@ class Tabs(QWidget):
 
         self.sub_tabs.setDisabled(True)
 
+        # TODO: add an overlay that explains why it's deactivated
         self.tab3 = QWidget()
         self.tabs.addTab(self.sub_tabs, "Plot Data")
+
+        # TODO: add an overlay that explains why it's deactivated
+        self.tab4 = QWidget()
+        self.tabs.addTab(self.tab4, "Export Data")
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.tabs)
