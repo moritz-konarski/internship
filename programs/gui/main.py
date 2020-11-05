@@ -2,8 +2,10 @@
 
 import sys
 import warnings
-from GUI import GUI
+
 from PyQt5.QtWidgets import QApplication
+
+from GUI import GUI
 
 warnings.filterwarnings("ignore")
 

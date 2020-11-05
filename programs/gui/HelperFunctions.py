@@ -98,8 +98,14 @@ class HelperFunction:
             with open(metadata_path, 'r') as f:
                 metadata_dictionary = json.load(f)
         except:
+            print("try exit")
             # TODO: exit out here
+            exit(-1)
             pass
+
+        if metadata_dictionary is None:
+            # TODO: error out here
+            exit(-1)
 
         var_name = metadata_dictionary['name']
         data_path = src_path + var_name + FileExtension.DATA_FILE.value
