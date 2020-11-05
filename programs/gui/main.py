@@ -10,6 +10,8 @@ from GUI import GUI
 warnings.filterwarnings("ignore")
 
 
+# TODO: fix all the naming
+
 def main():
     app = QApplication(sys.argv)
     gui = GUI()

@@ -20,7 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="de76383c-8d67-4e72-8eeb-97cae4b89750" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataManagerTab.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataManagerTab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataProcessor.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataProcessor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataProcessorTab.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataProcessorTab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HeatMapParameterWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/HeatMapParameterWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HelperFunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/HelperFunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlotDataObject.py" beforeDir="false" afterPath="$PROJECT_DIR$/PlotDataObject.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tabs.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tabs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -161,6 +171,7 @@
       <workItem from="1604424413903" duration="9145000" />
       <workItem from="1604478449253" duration="8470000" />
       <workItem from="1604558906418" duration="528000" />
+      <workItem from="1604562013238" duration="1238000" />
     </task>
     <servers />
   </component>
@@ -251,6 +262,10 @@
       <screen x="0" y="27" width="1920" height="1053" />
     </state>
     <state x="100" y="127" width="1720" height="853" key="dock-window-1/0.27.1920.1053@0.27.1920.1053" timestamp="1604430748323" />
+    <state x="543" y="211" width="824" height="691" key="editAsTableFormatDialogDimension" timestamp="1604564248294">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="543" y="211" width="824" height="691" key="editAsTableFormatDialogDimension/0.27.1920.1053@0.27.1920.1053" timestamp="1604564248294" />
     <state x="654" y="151" width="611" height="804" key="find.popup" timestamp="1604427819010">
       <screen x="0" y="27" width="1920" height="1053" />
     </state>

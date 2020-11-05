@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from DataProcessorTab import DataProcessorTab
+
 from DataManagerTab import DataManagerTab
+from DataProcessorTab import DataProcessorTab
 
 
 class Tabs(QWidget):

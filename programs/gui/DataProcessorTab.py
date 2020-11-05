@@ -1,9 +1,12 @@
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (QStatusBar, QWidget, QLabel, QPushButton,
                              QProgressBar, QComboBox, QFileDialog, QMessageBox)
-from PyQt5.QtCore import pyqtSlot
+
 from DataProcessor import DataProcessor
 from HelperFunctions import HelperFunction
 
+
+# TODO: only ask for destination folder when the user clicks "extract"
 
 class DataProcessorTab(QWidget):
     def __init__(self, tab):
@@ -54,8 +57,9 @@ class DataProcessorTab(QWidget):
         self.destination_directory_info_label \
             .setGeometry(self.margin,
                          10 + 3.5 * self.element_height,
-                         HelperFunction.get_qt_text_width(self.destination_directory_info_label,
-                                        text),
+                         HelperFunction.get_qt_text_width(
+                             self.destination_directory_info_label,
+                             text),
                          self.element_height)
 
         self.destination_directory_label = QLabel(self)
@@ -215,7 +219,7 @@ class DataProcessorTab(QWidget):
         if file_name:
             if HelperFunction.is_valid_nc_source_directory(
                     file_name) and HelperFunction.can_read_directory(
-                        file_name):
+                file_name):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)
                 self.variable_combobox.clear()

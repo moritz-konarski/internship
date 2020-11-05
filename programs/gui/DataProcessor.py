@@ -1,13 +1,15 @@
-import os
-import re
 import json
-import numpy as np
+import os
 import platform
-from pathlib import Path
-from netCDF4 import Dataset
+import re
 from enum import Enum
+from pathlib import Path
+
+import numpy as np
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
-from HelperFunctions import DirectorySeparator, FileExtension, HelperFunction
+from netCDF4 import Dataset
+
+from HelperFunctions import FileExtension, HelperFunction
 
 
 class DataProcessorStatus(Enum):
@@ -179,7 +181,7 @@ class DataProcessor(QThread):
                 with Dataset(filepath, 'r') as d:
                     _d = np.asarray(d.variables[self.variable_name])
                     data[i * time_count:i * time_count +
-                         time_count, :, :, :] = _d
+                                        time_count, :, :, :] = _d
         else:
             self.error.emit("Data Processor: Data Dimension not supported!")
             return

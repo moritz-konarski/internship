@@ -1,17 +1,18 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import (QComboBox, QFileDialog, QLabel, QMessageBox,
-                             QProgressBar, QPushButton, QRadioButton,
+from PyQt5.QtWidgets import (QFileDialog, QLabel, QMessageBox,
+                             QPushButton, QRadioButton,
                              QStatusBar, QTableWidget, QTableWidgetItem,
                              QWidget)
 
 from DataManager import DataManager
 from DataProcessor import DataProcessor
-from HeatMapParameterWindow import HeatMapParameterWindow
 from HelperFunctions import HelperFunction
 from PlotDataObject import PlotDataObject
 
+
 # TODO:
+#  - don't ask for destination directory
 #  - do error checking
 #  - show user what was selected
 #  - convert npz to pandas DataFrame, then save data, if multiple time steps are
@@ -71,16 +72,17 @@ class DataManagerTab(QWidget):
         self.destination_directory_info_label.setText(text)
         self.destination_directory_info_label.setGeometry(
             self.margin, 10 + 3.5 * self.element_height,
-            HelperFunction.get_qt_text_width(self.destination_directory_info_label,
-                                             text), self.element_height)
+            HelperFunction.get_qt_text_width(
+                self.destination_directory_info_label,
+                text), self.element_height)
 
         text = "No Destination Directory Selected"
         self.destination_directory_label = QLabel(self)
         self.destination_directory_label.setText(text)
         self.destination_directory_label.setGeometry(self.margin,
-                                                10 + 4.5 * self.element_height,
-                                                self.empty_label_width,
-                                                self.element_height)
+                                                     10 + 4.5 * self.element_height,
+                                                     self.empty_label_width,
+                                                     self.element_height)
 
         text = "Select Destination Directory"
         self.destination_directory_button = QPushButton(text, self)
@@ -169,9 +171,9 @@ class DataManagerTab(QWidget):
         self.plot_data_button = QPushButton(text, self)
         self.plot_data_button.clicked.connect(self.plot_data)
         self.plot_data_button.setGeometry(self.margin,
-                                            10 + 18.25 * self.element_height,
-                                            self.button_width,
-                                            self.element_height)
+                                          10 + 18.25 * self.element_height,
+                                          self.button_width,
+                                          self.element_height)
 
         text = "Export Data"
         self.export_data_button = QPushButton(text, self)
@@ -196,16 +198,16 @@ class DataManagerTab(QWidget):
     def resize_table(self):
         self.table.resizeColumnsToContents()
         self.table.setFixedWidth(1.02 * self.table.columnWidth(0) +
-                                       self.table.columnWidth(1) +
-                                       self.table.columnWidth(2) +
-                                       self.table.columnWidth(3) +
-                                       self.table.columnWidth(4) +
-                                       self.table.columnWidth(5))
+                                 self.table.columnWidth(1) +
+                                 self.table.columnWidth(2) +
+                                 self.table.columnWidth(3) +
+                                 self.table.columnWidth(4) +
+                                 self.table.columnWidth(5))
         self.table.setFixedHeight(1.07 * self.table.rowHeight(0) +
-                                        self.table.rowHeight(1) +
-                                        self.table.rowHeight(2) +
-                                        self.table.rowHeight(3) +
-                                        self.table.rowHeight(4))
+                                  self.table.rowHeight(1) +
+                                  self.table.rowHeight(2) +
+                                  self.table.rowHeight(3) +
+                                  self.table.rowHeight(4))
 
     def update_table_on_button_toggle(self):
         if self.time_series_radio_button.isChecked():
@@ -315,7 +317,7 @@ class DataManagerTab(QWidget):
         if file_name:
             if HelperFunction.is_valid_npz_source_directory(
                     file_name) and HelperFunction.can_read_directory(
-                        file_name):
+                file_name):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)
 

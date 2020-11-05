@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow
+
 from Tabs import Tabs
 
 window_title_long = 'Satellite Data Modification and Plotting Program'

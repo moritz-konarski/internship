@@ -1,13 +1,11 @@
-from PyQt5.QtWidgets import (QStatusBar, QWidget, QLabel, QPushButton,
-                             QProgressBar, QComboBox, QFileDialog, QMessageBox,
-                             QDateTimeEdit, QDateEdit, QDesktopWidget,
-                             QLineEdit)
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from DataProcessor import DataProcessor
-from HelperFunctions import HelperFunction, ExportDataType
-from DataManager import DataManager
-from PyQt5 import QtCore
 import datetime
+
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton,
+                             QComboBox, QDateTimeEdit, QDesktopWidget,
+                             QLineEdit)
+
+from HelperFunctions import HelperFunction, ExportDataType
 
 
 class HeatMapParameterWindow(QWidget):

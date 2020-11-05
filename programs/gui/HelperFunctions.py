@@ -1,10 +1,11 @@
-import os
-import re
 import json
+import os
 import platform
-import numpy as np
+import re
 from enum import Enum
 from pathlib import Path
+
+import numpy as np
 from netCDF4 import Dataset
 
 
@@ -135,4 +136,4 @@ class HelperFunction:
 
     @staticmethod
     def round_number(number, places):
-        return round(10**places * number) / 10**places
+        return round(10 ** places * number) / 10 ** places

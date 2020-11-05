@@ -1,13 +1,10 @@
 import datetime
 import json
-import platform
 import re
 
-import numpy as np
-import pandas as pd
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, pyqtSlot
 
-from HelperFunctions import DirectorySeparator, FileExtension, HelperFunction
+from HelperFunctions import FileExtension, HelperFunction
 from PlotDataObject import PlotDataObject
 from PlotObject import PlotType
 
