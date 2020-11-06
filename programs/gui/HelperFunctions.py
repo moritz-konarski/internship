@@ -5,13 +5,13 @@ import re
 from enum import Enum
 from pathlib import Path
 
-from PyQt5.QtWidgets import QLabel, QPushButton
+from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar
 
 import numpy as np
 from netCDF4 import Dataset
 
-
 #TODO: make the qt_text_width function only dependent on the element, not the text
+
 
 class ExportDataType(Enum):
     CSV = ".csv"
@@ -38,11 +38,6 @@ class DirectorySeparator(Enum):
 
 class HelperFunction:
     label_width = 260
-    horizontal_margin = 0
-
-    @staticmethod
-    def set_horizontal_margin(margin:int):
-        HelperFunction.horizontal_margin = margin
 
     @staticmethod
     def can_read_directory(src_path: str) -> bool:
@@ -147,24 +142,45 @@ class HelperFunction:
 
     @staticmethod
     def round_number(number, places):
-        return round(10 ** places * number) / 10 ** places
+        return round(10**places * number) / 10**places
 
     @staticmethod
-    def create_label(parent, text: str, x_position: int, y_position: int, height: int) -> QLabel:
-        label = HelperFunction.create_label_with_height(parent, text, x_position, y_position,HelperFunction.label_width, height)
+    def create_label(parent, text: str, x_position: int, y_position: int,
+                     height: int) -> QLabel:
+        label = HelperFunction.create_label_with_width(
+            parent, text, x_position, y_position, HelperFunction.label_width,
+            height)
         label.setFixedWidth(HelperFunction.get_qt_text_width(label, text))
         return label
 
     @staticmethod
-    def create_label_with_height(parent, text: str, x: int, y: int, width: int, height: int) -> QLabel:
+    def create_label_with_width(parent, text: str, x: int, y: int, width: int,
+                                height: int) -> QLabel:
         label = QLabel(parent)
         label.setText(text)
         label.setGeometry(x, y, width, height)
         return label
 
     @staticmethod
-    def create_button(parent, text: str, x:int, y:int, width:int, height:int) -> QPushButton:
+    def create_button(parent, text: str, x: int, y: int, width: int,
+                      height: int) -> QPushButton:
         button = QPushButton(parent)
         button.setText(text)
         button.setGeometry(x, y, width, height)
         return button
+
+    @staticmethod
+    def create_radio_button(parent, text: str, x: int, y: int, width: int,
+                            height: int) -> QRadioButton:
+        radio_button = QRadioButton(parent)
+        radio_button.setText(text)
+        radio_button.setGeometry(x, y, width, height)
+        return radio_button
+
+    @staticmethod
+    def create_status_bar(parent, text: str, x: int, y: int, width: int,
+                          height: int) -> QStatusBar:
+        status_bar = QStatusBar(parent)
+        status_bar.showMessage(text)
+        status_bar.setGeometry(x, y, width, height)
+        return status_bar

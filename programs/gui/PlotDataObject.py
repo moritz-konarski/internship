@@ -51,13 +51,13 @@ class PlotDataObject:
         return str(hf.round_number(self.data_info['lat_min'], 5)), str(
             hf.round_number(self.data_info['lat_max'],
                             5)), hf.format_variable_name(
-            self.data_info['lat_units'])
+                                self.data_info['lat_units'])
 
     def get_data_lon_range_str(self) -> (str, str, str):
         return str(hf.round_number(self.data_info['lon_min'], 5)), str(
             hf.round_number(self.data_info['lon_max'],
                             5)), hf.format_variable_name(
-            self.data_info['lon_units'])
+                                self.data_info['lon_units'])
 
     def get_data_lev_range_str(self) -> (str, str, str):
         return str(hf.round_number(self.data_info['lev_min'], 5)), str(

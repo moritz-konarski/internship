@@ -1,9 +1,8 @@
 import datetime
 
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton,
-                             QComboBox, QDateTimeEdit, QDesktopWidget,
-                             QLineEdit)
+from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QComboBox,
+                             QDateTimeEdit, QDesktopWidget, QLineEdit)
 
 from HelperFunctions import HelperFunction, ExportDataType
 

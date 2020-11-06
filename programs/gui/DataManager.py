@@ -8,6 +8,7 @@ from HelperFunctions import FileExtension, HelperFunction
 from PlotDataObject import PlotDataObject
 from PlotObject import PlotType
 
+
 class DataManager(QThread):
     def __init__(self, path: str, plot_data_object: PlotDataObject):
         super().__init__()

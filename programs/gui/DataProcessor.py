@@ -183,7 +183,7 @@ class DataProcessor(QThread):
                 with Dataset(filepath, 'r') as d:
                     _d = np.asarray(d.variables[self.variable_name])
                     data[i * time_count:i * time_count +
-                                        time_count, :, :, :] = _d
+                         time_count, :, :, :] = _d
         else:
             self.error.emit("Data Processor: Data Dimension not supported!")
             return

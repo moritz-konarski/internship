@@ -9,11 +9,11 @@ from GUI import GUI
 
 warnings.filterwarnings("ignore")
 
-
 # TODO: fix all the naming
 # TODO: add tool tips to the most important elements
 # TODO: see if creating template classes for main tabs and help tabs would be useful
 # TODO: see if a static method that returns the desired elements would cut down the code
+
 
 def main():
     app = QApplication(sys.argv)
