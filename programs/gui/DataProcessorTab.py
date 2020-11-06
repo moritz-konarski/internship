@@ -21,6 +21,9 @@ class DataProcessorTab(QWidget):
         self.empty_label_width = tab_window.main_gui.width - 3 * self.margin
         self.height = tab_window.main_gui.height
 
+        self.init_ui()
+
+    def init_ui(self):
         # source directory label and message box
         text = "Source Directory Path"
         hf.create_label(self, text, self.margin, 10, self.element_height)
@@ -105,6 +108,7 @@ class DataProcessorTab(QWidget):
     def stop_thread(self):
         if isinstance(self.thread, DataProcessor):
             self.thread.stop()
+            self.thread = None
 
     def update_variable_info(self):
         if not self.variable_combobox.currentText(

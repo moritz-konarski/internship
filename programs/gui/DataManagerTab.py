@@ -7,16 +7,12 @@ from PyQt5.QtWidgets import (QFileDialog, QLabel, QMessageBox, QPushButton,
 from DataManager import DataManager
 from DataProcessor import DataProcessor
 from HelperFunctions import HelperFunction as hf
-from PlotDataObject import PlotDataObject
 from enum import Enum, auto
 
 # TODO:
-#  - disable the level selection for 3D data
-#  - don't ask for destination directory
+#  - finish data input
 #  - do error checking
-#  - show user what was selected
-#  - convert npz to pandas DataFrame, then save data, if multiple time steps are
-#    selected in heat map, save multiple files
+#  - convert npz to pandas DataFrames and then pass them to the export or plotting functions
 
 
 class DataAction(Enum):
@@ -32,10 +28,8 @@ class DataManagerTab(QWidget):
 
         self.title = 'Data Manager'
         self.source_directory = ""
-        self.destination_directory = ""
 
         self.thread = None
-        self.popup_window = None
         self.data_manager = None
 
         self.button_width = tab.button_width
@@ -44,122 +38,56 @@ class DataManagerTab(QWidget):
         self.empty_label_width = tab.main_gui.width - 3 * self.margin
         self.height = tab.main_gui.height
 
-        self.plot_data_object = None
+        self.data_has_level = True
 
-        # source directory label and message box
+        self.init_ui()
+
+    def init_ui(self):
         text = "Source Directory Path"
-        #self.source_directory_info_label = QLabel(self)
-        #self.source_directory_info_label.setText(text)
-        #self.source_directory_info_label.setGeometry(
-        #    self.margin, 10,
-        #    HelperFunction.get_qt_text_width(self.source_directory_info_label,
-        #                                     text), self.element_height)
         hf.create_label(self, text, self.margin, 10, self.element_height)
 
         text = "No Source Directory Selected"
-        #self.source_directory_label = QLabel(self)
-        #self.source_directory_label.setText(text)
-        #self.source_directory_label.setGeometry(self.margin,
-        #                                        10 + self.element_height,
-        #                                        self.empty_label_width,
-        #                                        self.element_height)
         self.source_directory_label = hf.create_label_with_width(
             self, text, self.margin, 10 + self.element_height,
             self.empty_label_width, self.element_height)
 
         text = "Select Source Directory"
-        #self.source_directory_button = QPushButton(text, self)
-        #self.source_directory_button.setGeometry(
-        #    self.margin, 10 + 2.25 * self.element_height, self.button_width,
-        #    self.element_height)
         self.source_directory_button = hf.create_button(
             self, text, self.margin, 10 + 2.25 * self.element_height,
             self.button_width, self.element_height)
         self.source_directory_button.clicked.connect(
             self.show_source_directory_dialog)
 
-        # source directory label and message box
-        text = "Destination Directory Path"
-        hf.create_label(self, text, self.margin,
-                        10 + 3.5 * self.element_height, self.element_height)
-        #self.destination_directory_info_label = QLabel(self)
-        #self.destination_directory_info_label.setText(text)
-        #self.destination_directory_info_label.setGeometry(
-        #    self.margin, 10 + 3.5 * self.element_height,
-        #    hf.get_qt_text_width(
-        #        self.destination_directory_info_label,
-        #        text), self.element_height)
-
-        text = "No Destination Directory Selected"
-        self.destination_directory_label = hf.create_label_with_width(
-            self, text, self.margin, 10 + 4.5 * self.element_height,
-            self.empty_label_width, self.element_height)
-        #self.destination_directory_label.setText(text)
-        #self.destination_directory_label.setGeometry(self.margin,
-        #                                             10 + 4.5 * self.element_height,
-        #                                             self.empty_label_width,
-        #                                             self.element_height)
-
-        text = "Select Destination Directory"
-        self.destination_directory_button = hf.create_button(
-            self, text, self.margin, 10 + 5.75 * self.element_height,
-            self.button_width, self.element_height)
-        #QPushButton(text, self)
-        self.destination_directory_button.clicked.connect(
-            self.show_destination_directory_dialog)
-        #self.destination_directory_button.setGeometry(
-        #    self.margin, 10 + 5.75 * self.element_height, self.button_width,
-        #    self.element_height)
-
         text = "Variable: Name"
         self.name_label = hf.create_label_with_width(
-            self, text, self.margin, 10 + 7 * self.element_height,
+            self, text, self.margin, 10 + 3.5 * self.element_height,
             self.empty_label_width, self.element_height)
-        #self.name_label.setText(text)
-        #self.name_label.setGeometry(self.margin,
-        #                            10 + 7 * self.element_height,
-        #                            self.empty_label_width,
-        #                            self.element_height)
 
         text = "Name: Long Name"
         self.long_name_label = hf.create_label_with_width(
-            self, self.margin, 10 + 8 * self.element_height,
+            self, text, self.margin, 10 + 4.5 * self.element_height,
             self.empty_label_width, self.element_height)
-        #self.long_name_label.setText(text)
-        #self.long_name_label.setGeometry(self.margin,
-        #                                 10 + 8 * self.element_height,
-        #                                 self.empty_label_width,
-        #                                 self.element_height)
 
         text = "Units: Units"
         self.unit_label = hf.create_label_with_width(
-            self, self.margin, 10 + 9 * self.element_height,
+            self, text, self.margin, 10 + 5.5 * self.element_height,
             self.empty_label_width, self.element_height)
-        #self.unit_label.setText(text)
-        #self.unit_label.setGeometry(self.margin,
-        #                            10 + 9 * self.element_height,
-        #                            self.empty_label_width,
-        #                            self.element_height)
 
         text = "Time Series Data"
         self.time_series_radio_button = hf.create_radio_button(
-            self, text, self.margin, 10 + 10.25 * self.element_height,
+            self, text, self.margin, 10 + 6.75 * self.element_height,
             self.button_width, self.element_height)
-        #self.time_series_radio_button.setGeometry(
-        #    self.margin, 10 + 10.25 * self.element_height, self.button_width,
-        #    self.element_height)
 
         text = "Heat Map Data"
         self.heat_map_radio_button = hf.create_radio_button(
-            self, text, self.button_width, 10 + 10.25 * self.element_height,
+            self, text, self.button_width, 10 + 6.75 * self.element_height,
             self.button_width, self.element_height)
 
-        #self.heat_map_radio_button.setGeometry(
-        #    self.button_width,
-        #    10 + 10.25 * self.element_height, self.button_width,
-        #    self.element_height)
         self.heat_map_radio_button.toggled.connect(
             self.update_table_on_button_toggle)
+
+        text = "Select data parameters here:"
+        hf.create_label(self, text, self.margin, 10 + 7.75 * self.element_height, self.element_height)
 
         self.table = QTableWidget(self)
         self.table.setSizeAdjustPolicy(
@@ -192,40 +120,29 @@ class DataManagerTab(QWidget):
         self.table.item(4, 0).setText("Level Range")
         self.table.item(1, 1).setText("Date Hours")
 
-        self.table.move(self.margin, 10 + 11.75 * self.element_height)
+        self.table.move(self.margin, 10 + 9 * self.element_height)
         self.resize_table()
+        self.table.cellChanged.connect(self.check_data_bounds)
 
         text = "Plot Data"
         self.plot_data_button = hf.create_button(
-            self, text, self.margin, 10 + 18.25 * self.element_height,
+            self, text, self.margin, 10 + 15.75 * self.element_height,
             self.button_width, self.element_height)
         self.plot_data_button.clicked.connect(self.plot_data)
-        #self.plot_data_button.setGeometry(self.margin,
-        #                                  10 + 18.25 * self.element_height,
-        #                                  self.button_width,
-        #                                  self.element_height)
 
         text = "Export Data"
         self.export_data_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-            10 + 18.25 * self.element_height, self.button_width,
+            10 + 15.75 * self.element_height, self.button_width,
             self.element_height)
 
         self.export_data_button.clicked.connect(self.export_data)
-        #self.export_data_button.setGeometry(2 * self.margin + self.button_width,
-        #                                    10 + 18.25 * self.element_height,
-        #                                    self.button_width,
-        #                                    self.element_height)
 
         text = "Ready"
         self.statusBar = hf.create_status_bar(self, text, 0.5 * self.margin,
                                               self.height - 4 * self.margin,
                                               self.empty_label_width,
                                               self.element_height)
-        #self.statusBar.setGeometry(0.5 * self.margin,
-        #                           self.height - 4 * self.margin,
-        #                           self.empty_label_width, self.element_height)
-        #self.statusBar.showMessage('Ready')
 
         self.time_series_radio_button.toggled.connect(
             self.update_table_on_button_toggle)
@@ -263,6 +180,25 @@ class DataManagerTab(QWidget):
                                         | Qt.ItemIsEnabled)
             self.table.item(3, 5).setText("")
 
+    def check_data_bounds(self):
+        if isinstance(self.data_manager, DataManager):
+            row = self.table.currentRow()
+            col = self.table.currentColumn()
+            if not self.is_cell_empty(row, col):
+                if row == 1 and col == 4:
+                    self.data_manager.set_begin_time(self.table.item(row, col).text())
+                if row == 1 and col == 5:
+                    self.data_manager.set_end_time(self.table.item(row, col).text())
+
+    def show_error(self, message: str):
+        hf.show_error_message(self, message)
+
+    def clear_table(self):
+        for row in range(1, 5):
+            for col in range(4,6):
+                self.table.item(row, col).setText("")
+        self.update_table_on_button_toggle()
+
     def export_data(self):
         self.data_selection_signal.emit(True, DataAction.EXPORT)
         pass
@@ -272,41 +208,64 @@ class DataManagerTab(QWidget):
         pass
 
     def update_info(self):
-        text = "Variable: " + self.plot_data_object.data_info['name']
+        self.clear_table()
+        text = "Variable: " + self.data_manager.metadata['name']
         self.name_label.setText(text)
 
-        text = "Name: " + self.plot_data_object.data_info['long_name']
+        text = "Name: " + self.data_manager.metadata['long_name']
         self.long_name_label.setText(text)
 
-        text = "Units: " + self.plot_data_object.data_info['units']
+        text = "Units: " + self.data_manager.metadata['units']
         self.unit_label.setText(text)
 
-        data = self.plot_data_object.get_data_time_range_str()
+        data = self.data_manager.get_data_time_range_str()
         self.table.item(1, 2).setText(data[0])
         self.table.item(1, 3).setText(data[1])
 
-        data = self.plot_data_object.get_data_lat_range_str()
+        data = self.data_manager.get_data_lat_range_str()
         self.table.item(2, 2).setText(data[0])
         self.table.item(2, 1).setText(data[2])
         self.table.item(2, 3).setText(data[1])
 
-        data = self.plot_data_object.get_data_lon_range_str()
+        data = self.data_manager.get_data_lon_range_str()
         self.table.item(3, 2).setText(data[0])
         self.table.item(3, 1).setText(data[2])
         self.table.item(3, 3).setText(data[1])
 
-        data = self.plot_data_object.get_data_lev_range_str()
-        self.table.item(4, 2).setText(data[0])
-        self.table.item(4, 1).setText(data[2])
-        self.table.item(4, 3).setText(data[1])
+        if self.data_has_level:
+            self.table.item(4, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 1).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 2).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 3).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 4).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 4).setText("")
+            self.table.item(4, 5).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+                                        | Qt.ItemIsEnabled)
+            self.table.item(4, 5).setText("")
+
+            data = self.data_manager.get_data_lev_range_str()
+            self.table.item(4, 2).setText(data[0])
+            self.table.item(4, 1).setText(data[2])
+            self.table.item(4, 3).setText(data[1])
+        else:
+            self.table.item(4, 0).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 1).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 1).setText("------")
+            self.table.item(4, 2).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 2).setText("------")
+            self.table.item(4, 3).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 3).setText("------")
+            self.table.item(4, 4).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 4).setText("------")
+            self.table.item(4, 5).setFlags(Qt.ItemIsSelectable)
+            self.table.item(4, 5).setText("------")
 
         self.resize_table()
-
-    def get_info(self):
-        self.being_date = self.popup_window.begin_date
-        self.end_date = self.popup_window.end_date
-        self.export_format = self.popup_window.export_data_type
-        self.level = self.popup_window.level
 
     @pyqtSlot(float)
     def update_progress_bar(self, progress: float):
@@ -316,36 +275,13 @@ class DataManagerTab(QWidget):
         if isinstance(self.thread, DataProcessor):
             self.thread.stop()
 
-    def show_error(self, msg: str):
-        error = QMessageBox(self)
-        error.setWindowTitle("Error!")
-        error.setText(msg)
-        error.exec_()
-
     def set_status_bar(self, status: str):
         self.statusBar.showMessage(status)
 
-    def show_destination_directory_dialog(self):
-        msg = "Select Destination Directory"
-        self.statusBar.showMessage(msg)
-        file_name = QFileDialog.getExistingDirectory(self, msg)
-
-        if file_name:
-            if hf.can_write_directory(file_name):
-                self.destination_directory = file_name
-                self.destination_directory_label.setText(
-                    self.destination_directory)
-                self.statusBar.showMessage("Destination Directory Selected")
-            else:
-                error = QMessageBox(self)
-                error.setWindowTitle("Error!")
-                error.setText("Directory Cannot Be Written To!")
-                error.exec_()
-        else:
-            error = QMessageBox(self)
-            error.setWindowTitle("Error!")
-            error.setText("Directory Selection Failed!")
-            error.exec_()
+    def is_cell_empty(self, row:int, col:int) -> bool:
+        if not self.table.item(row, col) is None:
+            return self.table.item(row, col).text() == ""
+        return False
 
     def show_source_directory_dialog(self):
         msg = "Select Source Directory"
@@ -358,9 +294,14 @@ class DataManagerTab(QWidget):
                 self.source_directory = file_name
                 self.source_directory_label.setText(self.source_directory)
 
-                self.plot_data_object = PlotDataObject(self.source_directory)
-                self.data_manager = DataManager(self.source_directory,
-                                                self.plot_data_object)
+                self.data_manager = DataManager(self.source_directory)
+
+                self.data_manager.error.connect(self.show_error)
+
+                if len(self.data_manager.shape) == 4:
+                    self.data_has_level = True
+                else:
+                    self.data_has_level = False 
 
                 self.update_info()
             else:

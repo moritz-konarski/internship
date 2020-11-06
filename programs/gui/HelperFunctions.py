@@ -2,10 +2,11 @@ import json
 import os
 import platform
 import re
+import datetime
 from enum import Enum
 from pathlib import Path
 
-from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar
+from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar, QMessageBox
 
 import numpy as np
 from netCDF4 import Dataset
@@ -37,7 +38,13 @@ class DirectorySeparator(Enum):
 
 
 class HelperFunction:
-    label_width = 260
+    @staticmethod
+    def format_directory_path(path: str) -> str:
+        separator = HelperFunction.get_dir_separator()
+        reg = r"{0}$".format(separator)
+        if not re.findall(reg, path):
+            path += separator
+        return path
 
     @staticmethod
     def can_read_directory(src_path: str) -> bool:
@@ -147,9 +154,9 @@ class HelperFunction:
     @staticmethod
     def create_label(parent, text: str, x_position: int, y_position: int,
                      height: int) -> QLabel:
-        label = HelperFunction.create_label_with_width(
-            parent, text, x_position, y_position, HelperFunction.label_width,
-            height)
+        label = HelperFunction.create_label_with_width(parent, text,
+                                                       x_position, y_position,
+                                                       1, height)
         label.setFixedWidth(HelperFunction.get_qt_text_width(label, text))
         return label
 
@@ -184,3 +191,15 @@ class HelperFunction:
         status_bar.showMessage(text)
         status_bar.setGeometry(x, y, width, height)
         return status_bar
+
+    @staticmethod
+    def show_error_message(parent, text: str):
+        error = QMessageBox(parent)
+        error.setWindowTitle("An Error Occurred!")
+        error.setText(text)
+        error.exec_()
+
+    @staticmethod
+    def get_datetime_from_str(string: str):
+        return datetime.datetime.strptime(string , "%Y-%m-%d %H:%M")
+
