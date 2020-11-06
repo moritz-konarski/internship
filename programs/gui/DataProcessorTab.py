@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import (QComboBox, QFileDialog, QLabel, QMessageBox,
-                             QProgressBar, QPushButton, QStatusBar, QWidget)
+from PyQt5.QtWidgets import (QComboBox, QFileDialog, QProgressBar, QWidget)
 
 from DataProcessor import DataProcessor
 from HelperFunctions import HelperFunction as hf
