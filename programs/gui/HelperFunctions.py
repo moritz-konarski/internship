@@ -203,3 +203,7 @@ class HelperFunction:
     def get_datetime_from_str(string: str):
         return datetime.datetime.strptime(string , "%Y-%m-%d %H:%M")
 
+    @staticmethod
+    def get_str_from_datetime(dt: datetime.datetime):
+        return datetime.datetime.strftime(dt, "%Y-%m-%d %H:%M")
+

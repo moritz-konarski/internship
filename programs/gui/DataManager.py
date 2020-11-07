@@ -2,11 +2,14 @@ import datetime
 import json
 import re
 
+import numpy as np
+
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 
 from HelperFunctions import FileExtension, HelperFunction as hf
 from PlotObject import PlotType
 
+# TODO: check lev input
 
 class DataManager(QThread):
     error = pyqtSignal(str)
@@ -30,30 +33,180 @@ class DataManager(QThread):
 
         self.begin_date = None
         self.end_date = None
+        self.begin_date_index = None
+        self.end_date_index = None
+
+        self.lat_min = None
+        self.lat_max = None
+        self.lat_min_index = None
+        self.lat_max_index = None
+
+        self.lon_min = None
+        self.lon_max = None
+        self.lon_min_index = None
+        self.lon_max_index = None
 
     def set_begin_time(self, begin_time: str):
         try:
             self.begin_date = hf.get_datetime_from_str(begin_time)
-            if self.begin_date < hf.get_datetime_from_str(self.metadata_dictionary['begin_date'] + " 0:00"):
+            self.get_begin_time_index()
+            if self.begin_date < hf.get_datetime_from_str(self.metadata_dictionary['begin_date'] + " 0:00") or self.begin_date > hf.get_datetime_from_str(self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
             if isinstance(self.end_date, datetime.datetime):
                 if self.begin_date > self.end_date:
                     raise Exception()
+            return True
         except:
             self.error.emit("Incorrect Start Time!")
-            pass
+            self.begin_date = None
+            self.begin_date_index = None
+            return False
+
+    def get_begin_time_index(self):
+        self.begin_date = self.begin_date.replace(second=0, minute=0, microsecond=0, hour=int(self.begin_date.hour - self.begin_date.hour % (24 / self.metadata_dictionary['values_per_day'])))
+        datetime_delta = hf.get_datetime_from_str(self.metadata_dictionary['begin_date'] + " 0:00") - self.begin_date
+        self.begin_date_index = int(datetime_delta.days * self.metadata_dictionary['values_per_day'] +
+                    datetime_delta.seconds / 3600 /
+                    (24 / self.metadata_dictionary['values_per_day']))
 
     def set_end_time(self, end_time: str):
         try:
             self.end_date = hf.get_datetime_from_str(end_time)
-            if self.end_date > hf.get_datetime_from_str(self.metadata_dictionary['end_date'] + " 21:00"):
+            self.get_end_time_index()
+            if self.end_date < hf.get_datetime_from_str(self.metadata_dictionary['begin_date'] + " 0:00") or self.end_date > hf.get_datetime_from_str(self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
             if isinstance(self.begin_date, datetime.datetime):
-                if self.begin_date < self.end_date:
+                if self.begin_date > self.end_date:
                     raise Exception()
+            return True
         except:
             self.error.emit("Incorrect End Time!")
-            pass
+            self.end_date = None
+            self.end_date_index = None
+            return False
+
+    def get_end_time_index(self):
+        self.end_date = self.end_date.replace(second=0, minute=0, microsecond=0, hour=int(self.end_date.hour - self.end_date.hour % (24 / self.metadata_dictionary['values_per_day'])))
+        datetime_delta = hf.get_datetime_from_str(self.metadata_dictionary['end_date'] + " 0:00")- self.end_date
+        self.end_date_index = int(datetime_delta.days * self.metadata_dictionary['values_per_day'] +
+                    datetime_delta.seconds / 3600 /
+                    (24 / self.metadata_dictionary['values_per_day']))
+
+    def set_lat_min(self, text: str) -> bool:
+        try:
+            self.lat_min = float(text)
+            if self.lat_min < self.metadata_dictionary['lat_min'] or self.lat_min > self.metadata_dictionary['lat_max']:
+                raise Exception()
+            self.find_closest_lat_min()
+            if not self.lat_max is None:
+                if self.lat_max < self.lat_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Minimum Latetude!")
+            self.lat_min = None
+            self.lat_min_index = 0
+            return False
+
+    def set_lat_max(self, text: str) -> bool:
+        try:
+            self.lat_max = float(text)
+            if self.lat_max < self.metadata_dictionary['lat_min'] or self.lat_max > self.metadata_dictionary['lat_max']:
+                raise Exception()
+            self.find_closest_lat_max()
+            if not self.lat_min is None:
+                if self.lat_max < self.lat_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Maximum Latetude!")
+            self.lat_max = None
+            self.lat_max_index = None
+            return False
+
+    def find_closest_lat_min(self):
+        lats = np.load(self.data_path, allow_pickle=True)['lat'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(lats)
+        for (i, opt) in enumerate(lats):
+            if abs(opt - self.lat_min) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lat_min)
+
+        self.lat_min = lats[best_index]
+        self.lat_min_index = best_index
+
+    def find_closest_lat_max(self):
+        lats = np.load(self.data_path, allow_pickle=True)['lat'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(lats)
+        for (i, opt) in enumerate(lats):
+            if abs(opt - self.lat_max) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lat_max)
+
+        self.lat_max = lats[best_index]
+        self.lat_max_index = best_index
+
+    def set_lon_min(self, text: str) -> bool:
+        try:
+            self.lon_min = float(text)
+            if self.lon_min < self.metadata_dictionary['lon_min'] or self.lon_min > self.metadata_dictionary['lon_max']:
+                raise Exception()
+            self.find_closest_lon_min()
+            if not self.lon_max is None:
+                if self.lon_max < self.lon_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Minimum Longitude!")
+            self.lon_min = None
+            self.lon_min_index = 0
+            return False
+
+    def set_lon_max(self, text: str) -> bool:
+        try:
+            self.lon_max = float(text)
+            if self.lon_max < self.metadata_dictionary['lon_min'] or self.lon_max > self.metadata_dictionary['lon_max']:
+                raise Exception()
+            self.find_closest_lon_max()
+            if not self.lon_min is None:
+                if self.lon_max < self.lon_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Maximum Longitude!")
+            self.lon_max = None
+            self.lon_max_index = None
+            return False
+
+    def find_closest_lon_min(self):
+        lons = np.load(self.data_path, allow_pickle=True)['lon'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(lons)
+        for (i, opt) in enumerate(lons):
+            if abs(opt - self.lon_min) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lon_min)
+
+        self.lon_min = lons[best_index]
+        self.lon_min_index = best_index
+
+    def find_closest_lon_max(self):
+        lons = np.load(self.data_path, allow_pickle=True)['lon'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(lons)
+        for (i, opt) in enumerate(lons):
+            if abs(opt - self.lon_max) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lon_max)
+
+        self.lon_max = lons[best_index]
+        self.lon_max_index = best_index
 
     def check_time_constraints(self, start_time: datetime,
                                end_time: datetime) -> bool:
@@ -117,7 +270,7 @@ class DataManager(QThread):
         # return the appropriate type of slice
         pass
 
-    def get_data_time_range_str(self) -> (str, str, str, str):
+    def get_data_time_range_str(self) -> (str, str):
         return self.metadata_dictionary['begin_date'] + " 0:00", self.metadata_dictionary[
             'end_date'] + " 21:00"
 

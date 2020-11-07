@@ -40,6 +40,8 @@ class DataManagerTab(QWidget):
 
         self.data_has_level = True
 
+        self.is_updating = False
+
         self.init_ui()
 
     def init_ui(self):
@@ -165,6 +167,7 @@ class DataManagerTab(QWidget):
                                   self.table.rowHeight(4))
 
     def update_table_on_button_toggle(self):
+        self.is_updating = True
         if self.time_series_radio_button.isChecked():
             self.table.item(2, 5).setFlags(Qt.ItemIsSelectable)
             self.table.item(2, 5).setText("------")
@@ -180,15 +183,31 @@ class DataManagerTab(QWidget):
                                         | Qt.ItemIsEnabled)
             self.table.item(3, 5).setText("")
 
+        self.is_updating = False
+
     def check_data_bounds(self):
-        if isinstance(self.data_manager, DataManager):
+        if not self.is_updating and isinstance(self.data_manager, DataManager):
             row = self.table.currentRow()
             col = self.table.currentColumn()
             if not self.is_cell_empty(row, col):
                 if row == 1 and col == 4:
-                    self.data_manager.set_begin_time(self.table.item(row, col).text())
+                    if self.data_manager.set_begin_time(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(hf.get_str_from_datetime(self.data_manager.begin_date))
                 if row == 1 and col == 5:
-                    self.data_manager.set_end_time(self.table.item(row, col).text())
+                    if self.data_manager.set_end_time(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(hf.get_str_from_datetime(self.data_manager.end_date))
+                if row == 2 and col == 4:
+                    if self.data_manager.set_lat_min(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(self.data_manager.lat_min))
+                if row == 2 and col == 5:
+                    if self.data_manager.set_lat_max(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(self.data_manager.lat_max))
+                if row == 3 and col == 4:
+                    if self.data_manager.set_lon_min(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(self.data_manager.lon_min))
+                if row == 3 and col == 5:
+                    if self.data_manager.set_lon_max(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(self.data_manager.lon_max))
 
     def show_error(self, message: str):
         hf.show_error_message(self, message)
@@ -280,7 +299,7 @@ class DataManagerTab(QWidget):
 
     def is_cell_empty(self, row:int, col:int) -> bool:
         if not self.table.item(row, col) is None:
-            return self.table.item(row, col).text() == ""
+            return self.table.item(row, col).text() == "" or self.table.item(row, col).text() == "------"
         return False
 
     def show_source_directory_dialog(self):
