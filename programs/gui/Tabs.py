@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 from DataManagerTab import DataManagerTab, DataAction
 from DataProcessorTab import DataProcessorTab
 from ExportDataTab import ExportDataTab
+from DataPlotTab import DataPlotTab
 
 
 class TabWidget(QWidget):
@@ -37,8 +38,8 @@ class TabWidget(QWidget):
 
         # TODO: add an overlay that explains why it's deactivated, make modular dependent on plot type
         # plotting tab, 4th tab
-        self.tab4 = QWidget()
-        self.tabs.addTab(self.tab4, "Plot Data")
+        self.tab4 = DataPlotTab(self)
+        self.tabs.addTab(self.tab4, self.tab4.title)
         # disable this tab by default because user input is needed to validate it
         self.tab4.setEnabled(False)
 
@@ -60,3 +61,4 @@ class TabWidget(QWidget):
         elif action == DataAction.PLOT:
             self.tab4.setEnabled(enabled)
             self.tabs.setCurrentIndex(3)
+            self.tab4.set_data_manager(self.tab2.get_data_manager())

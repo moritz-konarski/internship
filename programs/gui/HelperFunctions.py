@@ -29,6 +29,15 @@ class ExportDataType(Enum):
     HTML = ".html"
 
 
+class PlotDataType(Enum):
+    PDF = "pdf"
+    PNG = "png"
+    EPS = "eps"
+    SVG = "svg"
+    JPEG = "jpeg"
+
+
+
 class FileExtension(Enum):
     NETCDF = "*.nc"
     NETCDF4 = "*.nc4"

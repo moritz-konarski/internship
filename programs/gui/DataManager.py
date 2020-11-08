@@ -115,7 +115,7 @@ class DataManager(QThread):
                 self.is_3d = True
 
         self.selected_data_min = float(np.nanmin(data))
-        self.selected_data_min = float(np.nanmin(data))
+        self.selected_data_max = float(np.nanmax(data))
         self.time_counter = self.end_date_index - self.begin_date_index + 1
         print(self.time_counter)
         if self.plot_type == PlotType.TIME_SERIES:
@@ -182,8 +182,6 @@ class DataManager(QThread):
         data_object = DataObject(self.plot_type, self.var_name,
                                  self.metadata_dictionary['long_name'],
                                  self.metadata_dictionary['units'])
-        data_object.set_data_min_max(self.selected_data_min,
-                                     self.selected_data_max)
         data_object.set_start_time(self.get_datetime_from_index())
         data_frame_data = None
         if self.plot_type == PlotType.HEAT_MAP:
@@ -202,6 +200,10 @@ class DataManager(QThread):
                 data_frame_data = data['data'][self.time_index,
                                   self.lat_min_index:self.lat_max_index + 1,
                                   self.lon_min_index:self.lon_max_index + 1]
+
+            data_object.set_lats(data['lat'][self.lat_min_index:self.lat_max_index+1])
+            data_object.set_lons(data['lon'][self.lon_min_index:self.lon_max_index+1])
+            data_object.set_data_min_max(self.selected_data_min, self.selected_data_max)
             data_object.set_object_data_min_max(
                 float(np.nanmin(data_frame_data)),
                 float(np.nanmax(data_frame_data)))
@@ -234,6 +236,7 @@ class DataManager(QThread):
                                   self.lon_min_index]
 
             print("after shape if")
+            data_object.set_data_min_max(self.selected_data_min, self.selected_data_max)
             data_object.set_object_data_min_max(
                 float(np.nanmin(data_frame_data)),
                 float(np.nanmax(data_frame_data)))

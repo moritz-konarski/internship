@@ -12,6 +12,9 @@ class DataObject:
         self.long_name = long_name
         self.unit = unit
 
+        self.lats = None
+        self.lons = None
+
         self.start_time = None
         self.end_time = None
 
@@ -28,6 +31,12 @@ class DataObject:
 
         self.lon_min = None
         self.lon_max = None
+
+    def set_lons(self, lons):
+        self.lons = lons
+
+    def set_lats(self, lats):
+        self.lats = lats
 
     def set_data(self, data: pd.DataFrame):
         self.data = data
