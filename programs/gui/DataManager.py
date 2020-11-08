@@ -173,7 +173,7 @@ class DataManager(QThread):
                 self.data_progress.emit(100 * (self.time_index -self.begin_date_index) / self.total_files)
             else:
                 self.data_progress.emit(100 * ((
-                                                 self.time_index -self.begin_date_index) * self.lev_counter + self.lev_index) / self.total_files)
+                                                 self.time_index -self.begin_date_index) * self.lev_counter + self.lev_index - self.lev_max_index) / self.total_files)
         elif self.plot_type == PlotType.TIME_SERIES:
             if self.is_3d:
                 self.data_progress.emit(1)

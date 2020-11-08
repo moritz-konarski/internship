@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtWidgets import (QFileDialog, QMessageBox, QWidget, QProgressBar, QComboBox)
 
 from DataManager import DataManager
@@ -36,18 +37,18 @@ class ExportDataTab(QWidget):
     def init_ui(self):
         text = "Export"
         self.export_button = hf.create_button(self, text, self.margin,
-                                              10 + 5.75 * self.element_height,
+                                              10 + 2.25 * self.element_height,
                                               self.button_width,
                                               self.element_height)
         self.export_button.clicked.connect(self.export)
 
-        text = "Export Data Types"
+        text = "Export Data Type"
         hf.create_label(self, text, self.margin,
-                        10 + 3.5 * self.element_height, self.element_height)
+                        10, self.element_height)
 
         self.export_combobox = QComboBox(self)
         self.export_combobox.setGeometry(self.margin,
-                                         10 + 4.5 * self.element_height,
+                                         10 + 1 * self.element_height,
                                          self.button_width,
                                          self.element_height)
         self.export_combobox.addItems([x.value for x in ExportDataType])
@@ -55,12 +56,12 @@ class ExportDataTab(QWidget):
         text = "Cancel Export"
         self.cancel_export_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-                        10 + 5.75 * self.element_height, self.button_width,
+                        10 + 2.25 * self.element_height, self.button_width,
             self.element_height)
         self.cancel_export_button.clicked.connect(self.stop_thread)
 
         self.progress_bar = QProgressBar(self)
-        self.progress_bar.setGeometry(self.margin, 10 + 7 * self.element_height,
+        self.progress_bar.setGeometry(self.margin, 10 + 3.5 * self.element_height,
                                       self.empty_label_width,
                                       self.element_height)
 
@@ -95,6 +96,11 @@ class ExportDataTab(QWidget):
             self.dialog_box = None
             self.set_buttons_enabled(False)
             if self.show_destination_directory_dialog():
+
+                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported"\
+                                   + hf.get_dir_separator()
+
+                os.makedirs(self.destination_directory, exist_ok=True)
                 self.status_bar.showMessage("Exporting...")
                 if not self.data_manager.is_iterator_prepared:
                     self.data_manager.prepare_data_iterator()
