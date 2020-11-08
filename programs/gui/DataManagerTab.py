@@ -147,6 +147,9 @@ class DataManagerTab(QWidget):
 
         self.show()
 
+    def get_data_manager(self) -> DataManager:
+        return self.data_manager
+
     def resize_table(self):
         self.table.resizeColumnsToContents()
         self.table.setFixedWidth(1.02 * self.table.columnWidth(0) +
@@ -306,7 +309,7 @@ class DataManagerTab(QWidget):
             # self.popup = PrepareDataPopup(self)
             # self.popup.start()
             self.data_manager.preparation_finished.connect(
-                self.signal_data_prep_finished)
+                self.export_data_signal)
             self.data_manager.message.connect(self.show_status_bar_message)
             self.data_manager.start()
             # self.data_selection_signal.emit(True, DataAction.EXPORT)
@@ -321,7 +324,7 @@ class DataManagerTab(QWidget):
             # self.popup = PrepareDataPopup(self)
             # self.popup.start()
             self.data_manager.preparation_finished.connect(
-                self.signal_data_prep_finished)
+                self.plot_data_signal)
             self.data_manager.message.connect(self.show_status_bar_message)
             self.data_manager.start()
             # self.data_selection_signal.emit(True, DataAction.PLOT)
@@ -399,7 +402,10 @@ class DataManagerTab(QWidget):
     def show_status_bar_message(self, string: str):
         self.statusBar.showMessage(string)
 
-    def signal_data_prep_finished(self):
+    def export_data_signal(self):
+        self.data_selection_signal.emit(True, DataAction.EXPORT)
+
+    def plot_data_signal(self):
         self.data_selection_signal.emit(True, DataAction.PLOT)
 
     def show_source_directory_dialog(self):

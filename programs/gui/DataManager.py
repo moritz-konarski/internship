@@ -1,7 +1,8 @@
-import datetime
 import json
+from datetime import datetime, timedelta
 
 import numpy as np
+import pandas as pd
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 
 from DataObject import DataObject
@@ -13,6 +14,7 @@ class DataManager(QThread):
     error = pyqtSignal(str)
     message = pyqtSignal(str)
     preparation_finished = pyqtSignal()
+    data_progress = pyqtSignal(float)
 
     def __init__(self, path: str):
         super().__init__()
@@ -68,6 +70,8 @@ class DataManager(QThread):
         self.lev_index = None
         self.time_index = None
 
+        self.is_3d = None
+
     def prepare_data_iterator(self):
         data = None
         print("lat: " + str(self.lat_min_index))
@@ -88,11 +92,13 @@ class DataManager(QThread):
                        self.lev_max_index:self.lev_min_index + 1,
                        self.lat_min_index:self.lat_max_index + 1,
                        self.lon_min_index:self.lon_max_index + 1]
+                self.is_3d = False
             else:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
                        self.begin_date_index:self.end_date_index + 1,
                        self.lat_min_index: self.lat_max_index + 1,
                        self.lon_min_index:self.lon_max_index + 1]
+                self.is_3d = True
 
         elif self.plot_type == PlotType.TIME_SERIES:
             if len(self.shape) == 4:
@@ -100,17 +106,16 @@ class DataManager(QThread):
                        self.begin_date_index:self.end_date_index + 1,
                        self.lev_max_index:self.lev_min_index + 1,
                        self.lat_min_index, self.lon_min_index]
+                self.is_3d = False
             else:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
                        self.begin_date_index:self.end_date_index + 1,
                        self.lat_min_index, self.lon_min_index]
+                self.is_3d = True
 
         self.selected_data_min = float(np.nanmin(data))
         self.selected_data_min = float(np.nanmin(data))
-        if self.plot_type == PlotType.HEAT_MAP:
-            self.time_counter = self.end_date_index - self.begin_date_index + 1
-        elif self.plot_type == PlotType.TIME_SERIES:
-            self.time_counter = 1
+        self.time_counter = self.end_date_index - self.begin_date_index + 1
         print(self.time_counter)
         self.lev_counter = self.lev_min_index - self.lev_max_index + 1
         print(self.lev_counter)
@@ -129,54 +134,105 @@ class DataManager(QThread):
         else:
             self.prepare_data_iterator()
 
+    def __iter__(self):
+        return self
+
     def __next__(self) -> DataObject:
-        if self.time_index > self.end_date_index:
-            raise StopIteration
-        # TODO: create function from time index to time and then pass the times
+        self.is_iterator_prepared = False
+        print("iterator called in data manager")
+        print(self.time_index)
+        if self.plot_type == PlotType.HEAT_MAP:
+            if self.time_index > self.end_date_index:
+                raise StopIteration()
+        else:
+            if self.time_index == self.begin_date_index + 1:
+                raise StopIteration()
+        self.data_progress.emit(((
+                                         -self.begin_date_index + self.time_index) * self.lev_counter + self.lev_index) / self.total_files)
         data_object = DataObject(self.plot_type, self.var_name,
                                  self.metadata_dictionary['long_name'],
                                  self.metadata_dictionary['units'])
         data_object.set_data_min_max(self.selected_data_min,
                                      self.selected_data_max)
+        data_object.set_start_time(self.get_datetime_from_index())
+        data_frame_data = None
         if self.plot_type == PlotType.HEAT_MAP:
-            # TODO: set date
+            print("Heat map")
             data_object.set_lon_min_max(self.lon_min, self.lon_max)
             data_object.set_lat_min_max(self.lat_min, self.lat_max)
+
             if len(self.shape) == 4:
                 data = np.load(self.data_path, allow_pickle=True)
                 data_object.set_level(float(data['lev'][self.lev_index]))
-
-                # ['data'][
-                #       self.begin_date_index:self.end_date_index + 1,
-                #       self.lev_max_index:self.lev_min_index + 1,
-                #       self.lat_min_index:self.lat_max_index + 1,
-                #       self.lon_min_index:self.lon_max_index + 1]
+                data_frame_data = data['data'][self.time_index, self.lev_index,
+                                  self.lat_min_index:self.lat_max_index + 1,
+                                  self.lon_min_index:self.lon_max_index + 1]
             else:
                 data = np.load(self.data_path, allow_pickle=True)
-            data_object.set_object_data_min_max(float(np.nanmin(data)),
-                                                float(np.nanmax(data)))
-            # TODO: turn data into DataFrame
-            data_object.set_data(data)
+                data_frame_data = data['data'][self.time_index,
+                                  self.lat_min_index:self.lat_max_index + 1,
+                                  self.lon_min_index:self.lon_max_index + 1]
+            data_object.set_object_data_min_max(
+                float(np.nanmin(data_frame_data)),
+                float(np.nanmax(data_frame_data)))
+            data_frame = pd.DataFrame(data_frame_data)
+            data_object.set_data(data_frame)
 
         elif self.plot_type == PlotType.TIME_SERIES:
+            print("time series")
             data_object.set_start_time(self.begin_date)
             data_object.set_end_time(self.end_date)
             data_object.set_lon_min_max(self.lon_min, 0)
             data_object.set_lat_min_max(self.lat_min, 0)
+            time_range = pd.Series(
+                pd.date_range(self.metadata_dictionary['begin_date'] + " 0:00",
+                              periods=self.time_counter, freq='3H'))
             if len(self.shape) == 4:
+                print("shape 4")
                 data = np.load(self.data_path, allow_pickle=True)
                 data_object.set_level(float(data['lev'][self.lev_index]))
+                data_frame_data = data['data'][
+                                  self.begin_date_index: self.end_date_index + 1,
+                                  self.lev_index, self.lat_min_index,
+                                  self.lon_min_index]
             else:
+                print("shape 3")
                 data = np.load(self.data_path, allow_pickle=True)
-            data_object.set_object_data_min_max(float(np.nanmin(data)),
-                                                float(np.nanmax(data)))
-            # TODO: turn data into DataFrame
-            data_object.set_data(data)
+                data_frame_data = data['data'][
+                                  self.begin_date_index: self.end_date_index + 1,
+                                  self.lat_min_index,
+                                  self.lon_min_index]
 
-        if self.lev_index > self.lev_min_index:
-            self.lev_index = self.lev_max_index
+            print("after shape if")
+            data_object.set_object_data_min_max(
+                float(np.nanmin(data_frame_data)),
+                float(np.nanmax(data_frame_data)))
+            data_frame = pd.DataFrame(data_frame_data, index=time_range[:])
+            data_object.set_data(data_frame)
+
+        print("after if")
+        print("is 3d" + str(self.is_3d))
+
+        if self.is_3d:
             self.time_index += 1
+            print("lev none")
+        else:
+            if self.lev_index > self.lev_min_index:
+                self.lev_index = self.lev_max_index
+                self.time_index += 1
+                print("lev > 2")
+            else:
+                self.time_index += 1
+                print("lev 1")
+        print("end of iterator")
         return data_object
+
+    def get_datetime_from_index(self) -> datetime:
+        delta = timedelta(hours=int(self.time_index * (
+                24 / self.metadata_dictionary['values_per_day'])))
+        begin_time = hf.get_datetime_from_str(
+            self.metadata_dictionary['begin_date'] + " 0:00")
+        return begin_time + delta
 
     def set_data_action(self, action: DataAction):
         self.data_action = action
@@ -195,7 +251,7 @@ class DataManager(QThread):
                     " 0:00") or self.begin_date > hf.get_datetime_from_str(
                 self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
-            if isinstance(self.end_date, datetime.datetime):
+            if isinstance(self.end_date, datetime):
                 if self.begin_date > self.end_date:
                     raise Exception()
             self.is_iterator_prepared = False
@@ -229,7 +285,7 @@ class DataManager(QThread):
                     " 0:00") or self.end_date > hf.get_datetime_from_str(
                 self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
-            if isinstance(self.begin_date, datetime.datetime):
+            if isinstance(self.begin_date, datetime):
                 if self.begin_date > self.end_date:
                     raise Exception()
             self.is_iterator_prepared = False
