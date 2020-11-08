@@ -30,7 +30,7 @@ class DataObject:
         self.lon_max = None
 
     def set_data(self, data: pd.DataFrame):
-        pass
+        self.data = data
 
     def get_data(self) -> pd.DataFrame:
         return self.data

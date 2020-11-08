@@ -74,6 +74,7 @@ class DataManager(QThread):
 
     def prepare_data_iterator(self):
         data = None
+        self.data_progress.emit(0)
         print("lat: " + str(self.lat_min_index))
         print("lat: " + str(self.lat_max_index))
         print("lon: " + str(self.lon_min_index))
@@ -117,11 +118,21 @@ class DataManager(QThread):
         self.selected_data_min = float(np.nanmin(data))
         self.time_counter = self.end_date_index - self.begin_date_index + 1
         print(self.time_counter)
-        self.lev_counter = self.lev_min_index - self.lev_max_index + 1
-        print(self.lev_counter)
-        self.total_files = self.time_counter * self.lev_counter
-        print(self.total_files)
-        self.lev_index = self.lev_max_index
+        if self.plot_type == PlotType.TIME_SERIES:
+            if not self.is_3d:
+                self.lev_counter = self.lev_min_index - self.lev_max_index + 1
+                print(self.lev_counter)
+                self.total_files = self.lev_counter
+                print(self.total_files)
+                self.lev_index = self.lev_max_index
+            else:
+                self.total_files = 1
+        else:
+            self.lev_counter = self.lev_min_index - self.lev_max_index + 1
+            print(self.lev_counter)
+            self.total_files = self.time_counter * self.lev_counter
+            print(self.total_files)
+            self.lev_index = self.lev_max_index
         self.time_index = self.begin_date_index
         self.message.emit("Finished Data Preparation")
         self.is_iterator_prepared = True
@@ -129,12 +140,11 @@ class DataManager(QThread):
 
     @pyqtSlot()
     def run(self):
-        if self.is_iterator_prepared:
-            pass
-        else:
+        if not self.is_iterator_prepared:
             self.prepare_data_iterator()
 
     def __iter__(self):
+        self.data_progress.emit(0)
         return self
 
     def __next__(self) -> DataObject:
@@ -143,12 +153,28 @@ class DataManager(QThread):
         print(self.time_index)
         if self.plot_type == PlotType.HEAT_MAP:
             if self.time_index > self.end_date_index:
+                self.data_progress.emit(100)
                 raise StopIteration()
         else:
-            if self.time_index == self.begin_date_index + 1:
-                raise StopIteration()
-        self.data_progress.emit(((
-                                         -self.begin_date_index + self.time_index) * self.lev_counter + self.lev_index) / self.total_files)
+            if self.is_3d:
+                if self.time_index == self.begin_date_index + 1:
+                    self.data_progress.emit(100)
+                    raise StopIteration()
+            else:
+                if self.lev_index > self.lev_min_index:
+                    self.data_progress.emit(100)
+                    raise StopIteration()
+        if self.plot_type == PlotType.HEAT_MAP:
+            if self.is_3d:
+                self.data_progress.emit(100 * (self.time_index -self.begin_date_index) / self.total_files)
+            else:
+                self.data_progress.emit(100 * ((
+                                                 self.time_index -self.begin_date_index) * self.lev_counter + self.lev_index) / self.total_files)
+        elif self.plot_type == PlotType.TIME_SERIES:
+            if self.is_3d:
+                self.data_progress.emit(1)
+            else:
+                self.data_progress.emit(100 * (self.lev_index - self.lev_max_index) / self.lev_counter)
         data_object = DataObject(self.plot_type, self.var_name,
                                  self.metadata_dictionary['long_name'],
                                  self.metadata_dictionary['units'])
@@ -207,23 +233,26 @@ class DataManager(QThread):
             data_object.set_object_data_min_max(
                 float(np.nanmin(data_frame_data)),
                 float(np.nanmax(data_frame_data)))
+            print(data_frame_data)
             data_frame = pd.DataFrame(data_frame_data, index=time_range[:])
+            print(data_frame)
             data_object.set_data(data_frame)
 
         print("after if")
         print("is 3d" + str(self.is_3d))
 
-        if self.is_3d:
-            self.time_index += 1
-            print("lev none")
-        else:
-            if self.lev_index > self.lev_min_index:
-                self.lev_index = self.lev_max_index
+        if self.plot_type == PlotType.TIME_SERIES:
+            if self.is_3d:
                 self.time_index += 1
-                print("lev > 2")
+                print("lev none")
             else:
-                self.time_index += 1
-                print("lev 1")
+                if self.lev_index > self.lev_min_index:
+                    self.lev_index = self.lev_max_index
+                    self.time_index += 1
+                    print("lev > 2")
+                else:
+                    self.lev_index += 1
+                    print("lev 1")
         print("end of iterator")
         return data_object
 

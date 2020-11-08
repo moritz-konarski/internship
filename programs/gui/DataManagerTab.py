@@ -248,19 +248,30 @@ class DataManagerTab(QWidget):
                     self.table.item(2, 4).text())
                 b4 = self.data_manager.set_lon_min(
                     self.table.item(3, 4).text())
-                b5 = self.data_manager.set_lev_min(
-                    self.table.item(4, 4).text())
-                b6 = self.data_manager.set_lev_max(
-                    self.table.item(4, 5).text())
-                if b1 and b2 and b3 and b4 and b5 and b6:
-                    if self.data_manager.begin_date < self.data_manager.end_date:
-                        return True
+                if len(self.data_manager.shape) == 4:
+                    b5 = self.data_manager.set_lev_min(
+                        self.table.item(4, 4).text())
+                    b6 = self.data_manager.set_lev_max(
+                        self.table.item(4, 5).text())
+                    if b1 and b2 and b3 and b4 and b5 and b6:
+                        if self.data_manager.begin_date < self.data_manager.end_date:
+                            return True
+                        else:
+                            hf.show_error_message(
+                                self, "Please select a non-zero time range!")
+                            return False
                     else:
-                        hf.show_error_message(
-                            self, "Please select a non-zero time range!")
                         return False
                 else:
-                    return False
+                    if b1 and b2 and b3 and b4:
+                        if self.data_manager.begin_date < self.data_manager.end_date:
+                            return True
+                        else:
+                            hf.show_error_message(
+                                self, "Please select a non-zero time range!")
+                            return False
+                    else:
+                        return False
             else:
                 hf.show_error_message(self, "Select a source file!")
                 return False
@@ -279,14 +290,20 @@ class DataManagerTab(QWidget):
                     self.table.item(3, 4).text())
                 b6 = self.data_manager.set_lon_max(
                     self.table.item(3, 5).text())
-                b7 = self.data_manager.set_lev_min(
-                    self.table.item(4, 4).text())
-                b8 = self.data_manager.set_lev_max(
-                    self.table.item(4, 5).text())
-                if b1 and b2 and b3 and b4 and b5 and b6 and b7 and b8:
-                    return True
+                if len(self.data_manager.shape) == 4:
+                    b7 = self.data_manager.set_lev_min(
+                        self.table.item(4, 4).text())
+                    b8 = self.data_manager.set_lev_max(
+                        self.table.item(4, 5).text())
+                    if b1 and b2 and b3 and b4 and b5 and b6 and b7 and b8:
+                        return True
+                    else:
+                        return False
                 else:
-                    return False
+                    if b1 and b2 and b3 and b4 and b5 and b6:
+                        return True
+                    else:
+                        return False
             else:
                 hf.show_error_message(self, "Select a source file!")
                 return False
@@ -314,7 +331,7 @@ class DataManagerTab(QWidget):
             self.data_manager.start()
             # self.data_selection_signal.emit(True, DataAction.EXPORT)
         else:
-            hf.show_error_message("Could not start Extraction!")
+            hf.show_error_message(self, "Could not start Extraction!")
             return
 
     def plot_data(self):
