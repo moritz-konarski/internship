@@ -46,6 +46,11 @@ class DataManager(QThread):
         self.lon_min_index = None
         self.lon_max_index = None
 
+        self.lev_min = None
+        self.lev_max = None
+        self.lev_min_index = None
+        self.lev_max_index = None
+
     def set_begin_time(self, begin_time: str):
         try:
             self.begin_date = hf.get_datetime_from_str(begin_time)
@@ -95,8 +100,6 @@ class DataManager(QThread):
     def set_lat_min(self, text: str) -> bool:
         try:
             self.lat_min = float(text)
-            if self.lat_min < self.metadata_dictionary['lat_min'] or self.lat_min > self.metadata_dictionary['lat_max']:
-                raise Exception()
             self.find_closest_lat_min()
             if not self.lat_max is None:
                 if self.lat_max < self.lat_min:
@@ -111,8 +114,6 @@ class DataManager(QThread):
     def set_lat_max(self, text: str) -> bool:
         try:
             self.lat_max = float(text)
-            if self.lat_max < self.metadata_dictionary['lat_min'] or self.lat_max > self.metadata_dictionary['lat_max']:
-                raise Exception()
             self.find_closest_lat_max()
             if not self.lat_min is None:
                 if self.lat_max < self.lat_min:
@@ -153,8 +154,6 @@ class DataManager(QThread):
     def set_lon_min(self, text: str) -> bool:
         try:
             self.lon_min = float(text)
-            if self.lon_min < self.metadata_dictionary['lon_min'] or self.lon_min > self.metadata_dictionary['lon_max']:
-                raise Exception()
             self.find_closest_lon_min()
             if not self.lon_max is None:
                 if self.lon_max < self.lon_min:
@@ -169,8 +168,6 @@ class DataManager(QThread):
     def set_lon_max(self, text: str) -> bool:
         try:
             self.lon_max = float(text)
-            if self.lon_max < self.metadata_dictionary['lon_min'] or self.lon_max > self.metadata_dictionary['lon_max']:
-                raise Exception()
             self.find_closest_lon_max()
             if not self.lon_min is None:
                 if self.lon_max < self.lon_min:
@@ -207,6 +204,60 @@ class DataManager(QThread):
 
         self.lon_max = lons[best_index]
         self.lon_max_index = best_index
+
+    def set_lev_min(self, text: str) -> bool:
+        try:
+            self.lev_min = float(text)
+            self.find_closest_lev_min()
+            if not self.lev_max is None:
+                if self.lev_max < self.lev_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Minimum Level!")
+            self.lev_min = None
+            self.lev_min_index = 0
+            return False
+
+    def set_lev_max(self, text: str) -> bool:
+        try:
+            self.lev_max = float(text)
+            self.find_closest_lev_max()
+            if not self.lev_min is None:
+                if self.lev_max < self.lev_min:
+                    raise Exception()
+            return True
+        except:
+            self.error.emit("Incorrect Maximum Level!")
+            self.lev_max = None
+            self.lev_max_index = None
+            return False
+
+    def find_closest_lev_min(self):
+        levs = np.load(self.data_path, allow_pickle=True)['lev'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(levs)
+        for (i, opt) in enumerate(levs):
+            if abs(opt - self.lev_min) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lev_min)
+
+        self.lev_min = levs[best_index]
+        self.lev_min_index = best_index
+
+    def find_closest_lev_max(self):
+        levs = np.load(self.data_path, allow_pickle=True)['lev'][:]
+
+        best_index = -1
+        min_diff = np.nanmax(levs)
+        for (i, opt) in enumerate(levs):
+            if abs(opt - self.lev_max) < min_diff:
+                best_index = i
+                min_diff = abs(opt - self.lev_max)
+
+        self.lev_max = levs[best_index]
+        self.lev_max_index = best_index
 
     def check_time_constraints(self, start_time: datetime,
                                end_time: datetime) -> bool:

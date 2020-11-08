@@ -27,18 +27,18 @@ class TabWidget(QWidget):
         # enable / disable plotting and export tabs if the appropriate data has been submitted
         self.tab2.data_selection_signal.connect(self.enable_tabs)
 
-        # TODO: add an overlay that explains why it's deactivated, make modular dependent on plot type
-        # plotting tab, third tab
+        # TODO: add an overlay that explains why it's deactivated
+        # data export tab, 3rd tab
         self.tab3 = QWidget()
-        self.tabs.addTab(QWidget(), "Plot Data")
         # disable this tab by default because user input is needed to validate it
+        self.tabs.addTab(self.tab3, "Export Data")
         self.tab3.setEnabled(False)
 
-        # TODO: add an overlay that explains why it's deactivated
-        # data export tab, fourth tab
+        # TODO: add an overlay that explains why it's deactivated, make modular dependent on plot type
+        # plotting tab, 4th tab
         self.tab4 = QWidget()
+        self.tabs.addTab(self.tab4, "Plot Data")
         # disable this tab by default because user input is needed to validate it
-        self.tabs.addTab(self.tab4, "Export Data")
         self.tab4.setEnabled(False)
 
         # TODO: flesh out the help section
@@ -52,7 +52,9 @@ class TabWidget(QWidget):
         self.setLayout(self.layout)
 
     def enable_tabs(self, enabled: bool, action: DataAction):
-        if action == DataAction.PLOT:
+        if action == DataAction.EXPORT:
             self.tab3.setEnabled(enabled)
-        elif action == DataAction.EXPORT:
+            self.tabs.setCurrentIndex(2)
+        elif action == DataAction.PLOT:
             self.tab4.setEnabled(enabled)
+            self.tabs.setCurrentIndex(3)

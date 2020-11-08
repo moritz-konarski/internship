@@ -19,6 +19,10 @@ class DataAction(Enum):
     EXPORT = auto()
     PLOT = auto()
 
+class PlotType(Enum):
+    TIME_SERIES = auto()
+    HEAT_MAP = auto()
+
 
 class DataManagerTab(QWidget):
     data_selection_signal = pyqtSignal(bool, DataAction)
@@ -41,6 +45,9 @@ class DataManagerTab(QWidget):
         self.data_has_level = True
 
         self.is_updating = False
+
+        self.data_action = None
+        self.plot_type = None
 
         self.init_ui()
 
@@ -126,25 +133,19 @@ class DataManagerTab(QWidget):
         self.resize_table()
         self.table.cellChanged.connect(self.check_data_bounds)
 
-        text = "Plot Data"
-        self.plot_data_button = hf.create_button(
-            self, text, self.margin, 10 + 15.75 * self.element_height,
-            self.button_width, self.element_height)
-        self.plot_data_button.clicked.connect(self.plot_data)
-
         text = "Export Data"
         self.export_data_button = hf.create_button(
-            self, text, 2 * self.margin + self.button_width,
+            self, text, self.margin,
             10 + 15.75 * self.element_height, self.button_width,
             self.element_height)
 
-        self.export_data_button.clicked.connect(self.export_data)
+        text = "Plot Data"
+        self.plot_data_button = hf.create_button(
+            self, text, 2 * self.margin + self.button_width, 10 + 15.75 * self.element_height,
+            self.button_width, self.element_height)
+        self.plot_data_button.clicked.connect(self.plot_data)
 
-        text = "Ready"
-        self.statusBar = hf.create_status_bar(self, text, 0.5 * self.margin,
-                                              self.height - 4 * self.margin,
-                                              self.empty_label_width,
-                                              self.element_height)
+        self.export_data_button.clicked.connect(self.export_data)
 
         self.time_series_radio_button.toggled.connect(
             self.update_table_on_button_toggle)
@@ -167,6 +168,11 @@ class DataManagerTab(QWidget):
                                   self.table.rowHeight(4))
 
     def update_table_on_button_toggle(self):
+        if self.heat_map_radio_button.isChecked():
+            self.plot_type = PlotType.HEAT_MAP
+        else:
+            self.plot_type = PlotType.TIME_SERIES
+
         self.is_updating = True
         if self.time_series_radio_button.isChecked():
             self.table.item(2, 5).setFlags(Qt.ItemIsSelectable)
@@ -208,6 +214,53 @@ class DataManagerTab(QWidget):
                 if row == 3 and col == 5:
                     if self.data_manager.set_lon_max(self.table.item(row, col).text()):
                         self.table.item(row, col).setText(str(self.data_manager.lon_max))
+                if row == 4 and col == 4:
+                    if self.data_manager.set_lev_min(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(hf.round_number(self.data_manager.lev_min, 5)))
+                if row == 4 and col == 5:
+                    if self.data_manager.set_lev_max(self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(str(hf.round_number(self.data_manager.lev_max, 5)))
+
+
+    def check_data_bounds_on_button_press(self):
+        if self.plot_type == PlotType.TIME_SERIES:
+            if not self.is_updating and isinstance(self.data_manager, DataManager):
+                b1 = self.data_manager.set_begin_time(self.table.item(1, 4).text())
+                b2 = self.data_manager.set_end_time(self.table.item(1, 5).text())
+                b3 = self.data_manager.set_lat_min(self.table.item(2, 4).text())
+                b4 = self.data_manager.set_lon_min(self.table.item(3, 4).text())
+                b5 = self.data_manager.set_lev_min(self.table.item(4, 4).text())
+                b6 = self.data_manager.set_lev_max(self.table.item(4, 5).text())
+                if b1 and b2 and b3 and b4 and b5 and b6:
+                    if self.data_manager.begin_date < self.data_manager.end_date:
+                        return True
+                    else:
+                        hf.show_error_message(self, "Please select a non-zero time range!")
+                        return False
+                else:
+                    return False
+            else:
+                hf.show_error_message(self, "Select a source file!")
+                return False
+        elif self.plot_type == PlotType.HEAT_MAP:
+            if not self.is_updating and isinstance(self.data_manager, DataManager):
+                b1 = self.data_manager.set_begin_time(self.table.item(1, 4).text())
+                b2 = self.data_manager.set_end_time(self.table.item(1, 5).text())
+                b3 = self.data_manager.set_lat_min(self.table.item(2, 4).text())
+                b4 = self.data_manager.set_lat_max(self.table.item(2, 5).text())
+                b5 = self.data_manager.set_lon_min(self.table.item(3, 4).text())
+                b6 = self.data_manager.set_lon_max(self.table.item(3, 5).text())
+                b7 = self.data_manager.set_lev_min(self.table.item(4, 4).text())
+                b8 = self.data_manager.set_lev_max(self.table.item(4, 5).text())
+                if b1 and b2 and b3 and b4 and b5 and b6 and b7 and b8:
+                    return True
+                else:
+                    return False
+            else:
+                hf.show_error_message(self, "Select a source file!")
+                return False
+        else:
+            return False
 
     def show_error(self, message: str):
         hf.show_error_message(self, message)
@@ -219,12 +272,16 @@ class DataManagerTab(QWidget):
         self.update_table_on_button_toggle()
 
     def export_data(self):
-        self.data_selection_signal.emit(True, DataAction.EXPORT)
-        pass
+        if self.check_data_bounds_on_button_press():
+            self.data_selection_signal.emit(True, DataAction.EXPORT)
+        else: 
+            return
 
     def plot_data(self):
-        self.data_selection_signal.emit(True, DataAction.PLOT)
-        pass
+        if self.check_data_bounds_on_button_press():
+            self.data_selection_signal.emit(True, DataAction.PLOT)
+        else:
+            return
 
     def update_info(self):
         self.clear_table()
@@ -294,9 +351,6 @@ class DataManagerTab(QWidget):
         if isinstance(self.thread, DataProcessor):
             self.thread.stop()
 
-    def set_status_bar(self, status: str):
-        self.statusBar.showMessage(status)
-
     def is_cell_empty(self, row:int, col:int) -> bool:
         if not self.table.item(row, col) is None:
             return self.table.item(row, col).text() == "" or self.table.item(row, col).text() == "------"
@@ -304,7 +358,6 @@ class DataManagerTab(QWidget):
 
     def show_source_directory_dialog(self):
         msg = "Select Source Directory"
-        # self.statusBar.showMessage(msg)
         file_name = QFileDialog.getExistingDirectory(self, msg)
 
         if file_name:
@@ -324,32 +377,8 @@ class DataManagerTab(QWidget):
 
                 self.update_info()
             else:
-                error = QMessageBox(self)
-                error.setWindowTitle("Error!")
-                error.setText("The Directory is not a valid Source Directory!")
-                error.exec_()
+                hf.show_error_message(self, "The Directory is not a valid Source Directory!" )
                 return
         else:
-            error = QMessageBox(self)
-            error.setWindowTitle("Error!")
-            error.setText("Directory Selection Failed!")
-            error.exec_()
+            hf.show_error_message(self,"Directory Selection Failed!" )
             return
-
-    # TODO: implement this
-    def find_lat_or_lon_index(self, given: str) -> int:
-        val = float(given)
-        min = np.nanmin(options)
-        max = np.nanmax(options)
-
-        if val > max or val < min:
-            print("Latitute or Longitute out of range")
-            exit(-1)
-
-        best_index = -1
-        min_diff = max
-        for (i, opt) in enumerate(options):
-            if abs(opt - val) < min_diff:
-                best_index = i
-
-        return best_index
