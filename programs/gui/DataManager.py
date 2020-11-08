@@ -128,11 +128,14 @@ class DataManager(QThread):
             else:
                 self.total_files = 1
         else:
-            self.lev_counter = self.lev_min_index - self.lev_max_index + 1
-            print(self.lev_counter)
-            self.total_files = self.time_counter * self.lev_counter
-            print(self.total_files)
-            self.lev_index = self.lev_max_index
+            if not self.is_3d:
+                self.lev_counter = self.lev_min_index - self.lev_max_index + 1
+                print(self.lev_counter)
+                self.total_files = self.time_counter * self.lev_counter
+                print(self.total_files)
+                self.lev_index = self.lev_max_index
+            else:
+                self.total_files = self.time_counter
         self.time_index = self.begin_date_index
         self.message.emit("Finished Data Preparation")
         self.is_iterator_prepared = True
@@ -164,6 +167,7 @@ class DataManager(QThread):
                 if self.lev_index > self.lev_min_index:
                     self.data_progress.emit(100)
                     raise StopIteration()
+        # TODO: fix this counter
         if self.plot_type == PlotType.HEAT_MAP:
             if self.is_3d:
                 self.data_progress.emit(100 * (self.time_index -self.begin_date_index) / self.total_files)
@@ -247,6 +251,18 @@ class DataManager(QThread):
                 print("lev none")
             else:
                 if self.lev_index > self.lev_min_index:
+                    self.lev_index = self.lev_max_index
+                    self.time_index += 1
+                    print("lev > 2")
+                else:
+                    self.lev_index += 1
+                    print("lev 1")
+        elif self.plot_type == PlotType.HEAT_MAP:
+            if self.is_3d:
+                self.time_index += 1
+                print("lev none")
+            else:
+                if self.lev_index >= self.lev_min_index:
                     self.lev_index = self.lev_max_index
                     self.time_index += 1
                     print("lev > 2")

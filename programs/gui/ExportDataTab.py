@@ -79,6 +79,7 @@ class ExportDataTab(QWidget):
     def set_data_manager(self, data_manager: DataManager):
         self.data_manager = data_manager
         self.progress_bar.setValue(0)
+        self.set_buttons_enabled(True)
         self.status_bar.showMessage("Ready")
 
     def update_progress_bar(self, value: float):
@@ -103,6 +104,7 @@ class ExportDataTab(QWidget):
                     self.export_combobox.currentText(), self.destination_directory)
                 self.data_exporter.finished.connect(self.export_finished)
                 self.data_exporter.start()
+            return
         else:
             return
 
