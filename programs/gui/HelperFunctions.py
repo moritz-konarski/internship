@@ -3,7 +3,7 @@ import os
 import platform
 import re
 import datetime
-from enum import Enum
+from enum import Enum, auto
 from pathlib import Path
 
 from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar, QMessageBox
@@ -11,7 +11,15 @@ from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar, QMess
 import numpy as np
 from netCDF4 import Dataset
 
-#TODO: make the qt_text_width function only dependent on the element, not the text
+
+class PlotType(Enum):
+    TIME_SERIES = auto()
+    HEAT_MAP = auto()
+
+
+class DataAction(Enum):
+    EXPORT = auto()
+    PLOT = auto()
 
 
 class ExportDataType(Enum):
@@ -112,14 +120,10 @@ class HelperFunction:
             with open(metadata_path, 'r') as f:
                 metadata_dictionary = json.load(f)
         except:
-            print("try exit")
-            # TODO: exit out here
-            exit(-1)
-            pass
+            return False
 
         if metadata_dictionary is None:
-            # TODO: error out here
-            exit(-1)
+            return False
 
         var_name = metadata_dictionary['name']
         data_path = src_path + var_name + FileExtension.DATA_FILE.value
@@ -201,9 +205,8 @@ class HelperFunction:
 
     @staticmethod
     def get_datetime_from_str(string: str):
-        return datetime.datetime.strptime(string , "%Y-%m-%d %H:%M")
+        return datetime.datetime.strptime(string, "%Y-%m-%d %H:%M")
 
     @staticmethod
     def get_str_from_datetime(dt: datetime.datetime):
         return datetime.datetime.strftime(dt, "%Y-%m-%d %H:%M")
-

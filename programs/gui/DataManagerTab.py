@@ -1,27 +1,14 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import (QFileDialog, QLabel, QMessageBox, QPushButton,
-                             QRadioButton, QStatusBar, QTableWidget,
-                             QTableWidgetItem, QWidget)
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import (QFileDialog, QTableWidget, QTableWidgetItem,
+                             QWidget)
 
 from DataManager import DataManager
-from DataProcessor import DataProcessor
-from HelperFunctions import HelperFunction as hf
-from enum import Enum, auto
+from HelperFunctions import HelperFunction as hf, PlotType, DataAction
+
 
 # TODO:
-#  - finish data input
-#  - do error checking
 #  - convert npz to pandas DataFrames and then pass them to the export or plotting functions
-
-
-class DataAction(Enum):
-    EXPORT = auto()
-    PLOT = auto()
-
-class PlotType(Enum):
-    TIME_SERIES = auto()
-    HEAT_MAP = auto()
 
 
 class DataManagerTab(QWidget):
@@ -34,6 +21,7 @@ class DataManagerTab(QWidget):
         self.source_directory = ""
 
         self.thread = None
+        self.popup = None
         self.data_manager = None
 
         self.button_width = tab.button_width
@@ -96,7 +84,8 @@ class DataManagerTab(QWidget):
             self.update_table_on_button_toggle)
 
         text = "Select data parameters here:"
-        hf.create_label(self, text, self.margin, 10 + 7.75 * self.element_height, self.element_height)
+        hf.create_label(self, text, self.margin,
+                        10 + 7.75 * self.element_height, self.element_height)
 
         self.table = QTableWidget(self)
         self.table.setSizeAdjustPolicy(
@@ -135,14 +124,14 @@ class DataManagerTab(QWidget):
 
         text = "Export Data"
         self.export_data_button = hf.create_button(
-            self, text, self.margin,
-            10 + 15.75 * self.element_height, self.button_width,
-            self.element_height)
+            self, text, self.margin, 10 + 15.75 * self.element_height,
+            self.button_width, self.element_height)
 
         text = "Plot Data"
         self.plot_data_button = hf.create_button(
-            self, text, 2 * self.margin + self.button_width, 10 + 15.75 * self.element_height,
-            self.button_width, self.element_height)
+            self, text, 2 * self.margin + self.button_width,
+                        10 + 15.75 * self.element_height, self.button_width,
+            self.element_height)
         self.plot_data_button.clicked.connect(self.plot_data)
 
         self.export_data_button.clicked.connect(self.export_data)
@@ -150,6 +139,11 @@ class DataManagerTab(QWidget):
         self.time_series_radio_button.toggled.connect(
             self.update_table_on_button_toggle)
         self.time_series_radio_button.setChecked(True)
+
+        self.statusBar = hf.create_status_bar(self, "Ready", 0.5 * self.margin,
+                                              self.height - 4 * self.margin,
+                                              self.empty_label_width,
+                                              self.element_height)
 
         self.show()
 
@@ -197,45 +191,70 @@ class DataManagerTab(QWidget):
             col = self.table.currentColumn()
             if not self.is_cell_empty(row, col):
                 if row == 1 and col == 4:
-                    if self.data_manager.set_begin_time(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(hf.get_str_from_datetime(self.data_manager.begin_date))
+                    if self.data_manager.set_begin_time(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            hf.get_str_from_datetime(
+                                self.data_manager.begin_date))
                 if row == 1 and col == 5:
-                    if self.data_manager.set_end_time(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(hf.get_str_from_datetime(self.data_manager.end_date))
+                    if self.data_manager.set_end_time(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            hf.get_str_from_datetime(
+                                self.data_manager.end_date))
                 if row == 2 and col == 4:
-                    if self.data_manager.set_lat_min(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(self.data_manager.lat_min))
+                    if self.data_manager.set_lat_min(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(self.data_manager.lat_min))
                 if row == 2 and col == 5:
-                    if self.data_manager.set_lat_max(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(self.data_manager.lat_max))
+                    if self.data_manager.set_lat_max(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(self.data_manager.lat_max))
                 if row == 3 and col == 4:
-                    if self.data_manager.set_lon_min(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(self.data_manager.lon_min))
+                    if self.data_manager.set_lon_min(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(self.data_manager.lon_min))
                 if row == 3 and col == 5:
-                    if self.data_manager.set_lon_max(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(self.data_manager.lon_max))
+                    if self.data_manager.set_lon_max(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(self.data_manager.lon_max))
                 if row == 4 and col == 4:
-                    if self.data_manager.set_lev_min(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(hf.round_number(self.data_manager.lev_min, 5)))
+                    if self.data_manager.set_lev_min(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(hf.round_number(self.data_manager.lev_min, 5)))
                 if row == 4 and col == 5:
-                    if self.data_manager.set_lev_max(self.table.item(row, col).text()):
-                        self.table.item(row, col).setText(str(hf.round_number(self.data_manager.lev_max, 5)))
-
+                    if self.data_manager.set_lev_max(
+                            self.table.item(row, col).text()):
+                        self.table.item(row, col).setText(
+                            str(hf.round_number(self.data_manager.lev_max, 5)))
 
     def check_data_bounds_on_button_press(self):
         if self.plot_type == PlotType.TIME_SERIES:
-            if not self.is_updating and isinstance(self.data_manager, DataManager):
-                b1 = self.data_manager.set_begin_time(self.table.item(1, 4).text())
-                b2 = self.data_manager.set_end_time(self.table.item(1, 5).text())
-                b3 = self.data_manager.set_lat_min(self.table.item(2, 4).text())
-                b4 = self.data_manager.set_lon_min(self.table.item(3, 4).text())
-                b5 = self.data_manager.set_lev_min(self.table.item(4, 4).text())
-                b6 = self.data_manager.set_lev_max(self.table.item(4, 5).text())
+            if not self.is_updating and isinstance(self.data_manager,
+                                                   DataManager):
+                b1 = self.data_manager.set_begin_time(
+                    self.table.item(1, 4).text())
+                b2 = self.data_manager.set_end_time(
+                    self.table.item(1, 5).text())
+                b3 = self.data_manager.set_lat_min(
+                    self.table.item(2, 4).text())
+                b4 = self.data_manager.set_lon_min(
+                    self.table.item(3, 4).text())
+                b5 = self.data_manager.set_lev_min(
+                    self.table.item(4, 4).text())
+                b6 = self.data_manager.set_lev_max(
+                    self.table.item(4, 5).text())
                 if b1 and b2 and b3 and b4 and b5 and b6:
                     if self.data_manager.begin_date < self.data_manager.end_date:
                         return True
                     else:
-                        hf.show_error_message(self, "Please select a non-zero time range!")
+                        hf.show_error_message(
+                            self, "Please select a non-zero time range!")
                         return False
                 else:
                     return False
@@ -243,15 +262,24 @@ class DataManagerTab(QWidget):
                 hf.show_error_message(self, "Select a source file!")
                 return False
         elif self.plot_type == PlotType.HEAT_MAP:
-            if not self.is_updating and isinstance(self.data_manager, DataManager):
-                b1 = self.data_manager.set_begin_time(self.table.item(1, 4).text())
-                b2 = self.data_manager.set_end_time(self.table.item(1, 5).text())
-                b3 = self.data_manager.set_lat_min(self.table.item(2, 4).text())
-                b4 = self.data_manager.set_lat_max(self.table.item(2, 5).text())
-                b5 = self.data_manager.set_lon_min(self.table.item(3, 4).text())
-                b6 = self.data_manager.set_lon_max(self.table.item(3, 5).text())
-                b7 = self.data_manager.set_lev_min(self.table.item(4, 4).text())
-                b8 = self.data_manager.set_lev_max(self.table.item(4, 5).text())
+            if not self.is_updating and isinstance(self.data_manager,
+                                                   DataManager):
+                b1 = self.data_manager.set_begin_time(
+                    self.table.item(1, 4).text())
+                b2 = self.data_manager.set_end_time(
+                    self.table.item(1, 5).text())
+                b3 = self.data_manager.set_lat_min(
+                    self.table.item(2, 4).text())
+                b4 = self.data_manager.set_lat_max(
+                    self.table.item(2, 5).text())
+                b5 = self.data_manager.set_lon_min(
+                    self.table.item(3, 4).text())
+                b6 = self.data_manager.set_lon_max(
+                    self.table.item(3, 5).text())
+                b7 = self.data_manager.set_lev_min(
+                    self.table.item(4, 4).text())
+                b8 = self.data_manager.set_lev_max(
+                    self.table.item(4, 5).text())
                 if b1 and b2 and b3 and b4 and b5 and b6 and b7 and b8:
                     return True
                 else:
@@ -267,19 +295,36 @@ class DataManagerTab(QWidget):
 
     def clear_table(self):
         for row in range(1, 5):
-            for col in range(4,6):
+            for col in range(4, 6):
                 self.table.item(row, col).setText("")
         self.update_table_on_button_toggle()
 
     def export_data(self):
         if self.check_data_bounds_on_button_press():
-            self.data_selection_signal.emit(True, DataAction.EXPORT)
-        else: 
+            self.data_manager.set_data_action(self.data_action)
+            self.data_manager.set_plot_type(self.plot_type)
+            # self.popup = PrepareDataPopup(self)
+            # self.popup.start()
+            self.data_manager.preparation_finished.connect(
+                self.signal_data_prep_finished)
+            self.data_manager.message.connect(self.show_status_bar_message)
+            self.data_manager.start()
+            # self.data_selection_signal.emit(True, DataAction.EXPORT)
+        else:
+            hf.show_error_message("Could not start Extraction!")
             return
 
     def plot_data(self):
         if self.check_data_bounds_on_button_press():
-            self.data_selection_signal.emit(True, DataAction.PLOT)
+            self.data_manager.set_data_action(self.data_action)
+            self.data_manager.set_plot_type(self.plot_type)
+            # self.popup = PrepareDataPopup(self)
+            # self.popup.start()
+            self.data_manager.preparation_finished.connect(
+                self.signal_data_prep_finished)
+            self.data_manager.message.connect(self.show_status_bar_message)
+            self.data_manager.start()
+            # self.data_selection_signal.emit(True, DataAction.PLOT)
         else:
             return
 
@@ -309,18 +354,20 @@ class DataManagerTab(QWidget):
         self.table.item(3, 3).setText(data[1])
 
         if self.data_has_level:
-            self.table.item(4, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
-                                        | Qt.ItemIsEnabled)
-            self.table.item(4, 1).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
-                                        | Qt.ItemIsEnabled)
-            self.table.item(4, 2).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
-                                        | Qt.ItemIsEnabled)
-            self.table.item(4, 3).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
-                                        | Qt.ItemIsEnabled)
-            self.table.item(4, 4).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+            self.table.item(4,
+                            0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.table.item(4,
+                            1).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.table.item(4,
+                            2).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.table.item(4,
+                            3).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.table.item(4,
+                            4).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
                                         | Qt.ItemIsEnabled)
             self.table.item(4, 4).setText("")
-            self.table.item(4, 5).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
+            self.table.item(4,
+                            5).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEditable
                                         | Qt.ItemIsEnabled)
             self.table.item(4, 5).setText("")
 
@@ -343,18 +390,17 @@ class DataManagerTab(QWidget):
 
         self.resize_table()
 
-    @pyqtSlot(float)
-    def update_progress_bar(self, progress: float):
-        self.progressBar.setValue(progress)
-
-    def stop_thread(self):
-        if isinstance(self.thread, DataProcessor):
-            self.thread.stop()
-
-    def is_cell_empty(self, row:int, col:int) -> bool:
+    def is_cell_empty(self, row: int, col: int) -> bool:
         if not self.table.item(row, col) is None:
-            return self.table.item(row, col).text() == "" or self.table.item(row, col).text() == "------"
+            return self.table.item(row, col).text() == "" or self.table.item(
+                row, col).text() == "------"
         return False
+
+    def show_status_bar_message(self, string: str):
+        self.statusBar.showMessage(string)
+
+    def signal_data_prep_finished(self):
+        self.data_selection_signal.emit(True, DataAction.PLOT)
 
     def show_source_directory_dialog(self):
         msg = "Select Source Directory"
@@ -373,12 +419,13 @@ class DataManagerTab(QWidget):
                 if len(self.data_manager.shape) == 4:
                     self.data_has_level = True
                 else:
-                    self.data_has_level = False 
+                    self.data_has_level = False
 
                 self.update_info()
             else:
-                hf.show_error_message(self, "The Directory is not a valid Source Directory!" )
+                hf.show_error_message(
+                    self, "The Directory is not a valid Source Directory!")
                 return
         else:
-            hf.show_error_message(self,"Directory Selection Failed!" )
+            hf.show_error_message(self, "Directory Selection Failed!")
             return
