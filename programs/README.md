@@ -10,6 +10,6 @@ execute it.
 
 ## Command Line Program
 
-The program in this folder are presented to show my work, they are not up to
+The programs in this folder are presented to show my work, they are not up to
 date and they may not even work. The required anaconda environment file is
 provided in case there is interest in them.
