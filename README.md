@@ -34,25 +34,3 @@ Internship program at [AUCA](https://auca.kg) and
 2) Development of a library for working with NetCDF satellite data in Python 
 3) Development of a computer application visualizing NASA MERRA2 satellite 
 reanalysis data
-
-## TODO List
-
-- [ ] write GUI for downloader
-- [ ] add basic download completion checking using filenames
-- [ ] use \*.csv or \*.json to store metadata for the data
-- [ ] write class that provides access to the needed files for plotting
-    - [ ] get var list () -> [str]
-    - [ ] get var type
-    - [ ] get var unit
-    - [ ] get coordinate range (var) [lat\_min, lat\_max, lon\_min, lon\_max]
-    - [ ] get time range (var)
-    - [ ] get time series (start\_time, end\_time, var, area=[], lev?)
-    - [ ] get heat map (time, area, var, lev?)
-    - [ ] get all data within certain constraints: greater than, smaller than ...
-
-### Extra
-
-- [ ] to be more scientific, we should implement some better analysis features:
-    - statistics
-    - spectral analysis
-    - other time series analysis tools
