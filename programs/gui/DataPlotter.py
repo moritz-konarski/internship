@@ -1,16 +1,14 @@
+from textwrap import wrap
+
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
+import numpy as np
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 
 from DataManager import DataManager
 from DataObject import DataObject
 from HelperFunctions import PlotDataType, PlotType, HelperFunction as hf
-from textwrap import wrap
-import numpy as np
-
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 
 # city   longitude, latitude, name
 bishkek = (74.5698, 42.8746, "Bishkek")
@@ -18,6 +16,7 @@ almaty = (76.8512, 43.2220, "Almaty")
 kabul = (69.2075, 34.5553, "Kabul")
 tashkent = (69.2401, 41.2995, "Tashkent")
 dushanbe = (68.7870, 38.5598, "Dushanbe")
+
 
 class DataPlotter(QThread):
     is_plotting = pyqtSignal(bool)
@@ -38,11 +37,17 @@ class DataPlotter(QThread):
         self.inch_padding = 0.1
 
         self.plot_cities = True
+        self.use_local_min_max = False
 
-    def set_attributes(self, data_type: str,
-                       path: str):
+    def set_attributes(self, data_type: str, path: str):
         self.plot_file_type = data_type
         self.path = path
+
+    def set_plot_cities(self, enabled: bool):
+        self.plot_cities = enabled
+
+    def set_use_local_min_max(self, enabled: bool):
+        self.use_local_min_max = enabled
 
     def update_attributes(self, data_object: DataObject):
         if not self.is_running:
@@ -51,33 +56,34 @@ class DataPlotter(QThread):
             if len(self.data_manager.shape) == 4:
                 self.file_name = "Time Series " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + "-" + hf.get_str_from_datetime(
-                    data_object.end_time) + " (" + str(
-                    data_object.lat_min) + "N, " + str(
-                    data_object.lon_min) + "E) " + str(
-                    hf.round_number(data_object.level, 2)) + " hPa"
+                        data_object.end_time) + " (" + str(
+                            data_object.lat_min) + "N, " + str(
+                                data_object.lon_min) + "E) " + str(
+                                    hf.round_number(data_object.level,
+                                                    2)) + " hPa"
             else:
                 self.file_name = "Time Series " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + "-" + hf.get_str_from_datetime(
-                    data_object.end_time) + " (" + str(
-                    data_object.lat_min) + "N, " + str(
-                    data_object.lon_min) + "E)"
+                        data_object.end_time) + " (" + str(
+                            data_object.lat_min) + "N, " + str(
+                                data_object.lon_min) + "E)"
         elif data_object.plot_type == PlotType.HEAT_MAP:
             if len(self.data_manager.shape) == 4:
                 self.file_name = "Heat Map " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + " (" + str(
-                    data_object.lat_min) + "N, " + str(
-                    data_object.lon_min) + "E)-(" + str(
-                    data_object.lat_max) + "N, " + str(
-                    data_object.lon_max) + "E) " + str(
-
-                    hf.round_number(data_object.level, 2)) + " hPa"
+                        data_object.lat_min) + "N, " + str(
+                            data_object.lon_min) + "E)-(" + str(
+                                data_object.lat_max) + "N, " + str(
+                                    data_object.lon_max) + "E) " + str(
+                                        hf.round_number(data_object.level,
+                                                        2)) + " hPa"
             else:
                 self.file_name = "Heat Map " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + " (" + str(
-                    data_object.lat_min) + "N, " + str(
-                    data_object.lon_min) + "E)-(" + str(
-                    data_object.lat_max) + "N, " + str(
-                    data_object.lon_max) + "E)"
+                        data_object.lat_min) + "N, " + str(
+                            data_object.lon_min) + "E)-(" + str(
+                                data_object.lat_max) + "N, " + str(
+                                    data_object.lon_max) + "E)"
 
     def plot_files(self):
         self.is_plotting.emit(True)
@@ -107,8 +113,8 @@ class DataPlotter(QThread):
                 return
             if self.plot_file_type == PlotDataType.EPS.value:
                 with open(
-                        self.path + self.file_name + '.' + PlotDataType.EPS.value,
-                        'wb') as f:
+                        self.path + self.file_name + '.' +
+                        PlotDataType.EPS.value, 'wb') as f:
                     figure.savefig(f,
                                    format=PlotDataType.EPS.value,
                                    dpi=self.file_dpi,
@@ -117,8 +123,8 @@ class DataPlotter(QThread):
                                    pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.PDF.value:
                 with open(
-                        self.path + self.file_name + '.' + PlotDataType.PDF.value,
-                        'wb') as f:
+                        self.path + self.file_name + '.' +
+                        PlotDataType.PDF.value, 'wb') as f:
                     figure.savefig(f,
                                    format=PlotDataType.PDF.value,
                                    dpi=self.file_dpi,
@@ -127,8 +133,8 @@ class DataPlotter(QThread):
                                    pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.PNG.value:
                 with open(
-                        self.path + self.file_name + '.' + PlotDataType.PNG.value,
-                        'wb') as f:
+                        self.path + self.file_name + '.' +
+                        PlotDataType.PNG.value, 'wb') as f:
                     figure.savefig(f,
                                    format=PlotDataType.PNG.value,
                                    dpi=self.file_dpi,
@@ -137,8 +143,8 @@ class DataPlotter(QThread):
                                    pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.SVG.value:
                 with open(
-                        self.path + self.file_name + '.' + PlotDataType.SVG.value,
-                        'wb') as f:
+                        self.path + self.file_name + '.' +
+                        PlotDataType.SVG.value, 'wb') as f:
                     figure.savefig(f,
                                    format=PlotDataType.SVG.value,
                                    dpi=self.file_dpi,
@@ -147,8 +153,8 @@ class DataPlotter(QThread):
                                    pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.JPEG.value:
                 with open(
-                        self.path + self.file_name + '.' + PlotDataType.JPEG.value,
-                        'wb') as f:
+                        self.path + self.file_name + '.' +
+                        PlotDataType.JPEG.value, 'wb') as f:
                     figure.savefig(f,
                                    format=PlotDataType.JPEG.value,
                                    dpi=self.file_dpi,
@@ -179,15 +185,34 @@ class DataPlotter(QThread):
                      draw_labels=True,
                      linewidth=0.5)
 
-        res = float((data_object.data_max- data_object.data_min) / 50)
+        if self.use_local_min_max:
+            res = float(
+                (data_object.object_data_max - data_object.object_data_min) /
+                50)
 
-        clevs = np.arange(data_object.data_min, data_object.data_max + res, res, dtype=float)
-        plt.contourf(lons,
-                     lats,
-                     data_object.data,
-                     clevs,
-                     transform=ccrs.PlateCarree(),
-                     cmap=plt.cm.jet)
+            clevs = np.arange(data_object.object_data_min,
+                              data_object.object_data_max + res,
+                              res,
+                              dtype=float)
+            plt.contourf(lons,
+                         lats,
+                         data_object.data,
+                         clevs,
+                         transform=ccrs.PlateCarree(),
+                         cmap=plt.cm.jet)
+        else:
+            res = float((data_object.data_max - data_object.data_min) / 50)
+
+            clevs = np.arange(data_object.data_min,
+                              data_object.data_max + res,
+                              res,
+                              dtype=float)
+            plt.contourf(lons,
+                         lats,
+                         data_object.data,
+                         clevs,
+                         transform=ccrs.PlateCarree(),
+                         cmap=plt.cm.jet)
 
         cb = plt.colorbar(ax=ax,
                           orientation="vertical",
@@ -263,7 +288,11 @@ class DataPlotter(QThread):
                     horizontalalignment='center',
                     transform=ccrs.PlateCarree())
 
-        plt.title("\n".join(wrap(self.file_name, 60)), size=18, loc='left', pad=20, wrap=True)
+        plt.title("\n".join(wrap(self.file_name, 60)),
+                  size=18,
+                  loc='left',
+                  pad=20,
+                  wrap=True)
 
         cb.set_label(data_object.unit, size=12, rotation=90, labelpad=10)
 
@@ -279,11 +308,36 @@ class DataPlotter(QThread):
         ax.plot(data_object.data)
         plt.gcf().autofmt_xdate()
 
-        plt.title("\n".join(wrap(self.file_name, 60)), size=18, loc='left', pad=20, wrap=True)
+        plt.title("\n".join(wrap(self.file_name, 60)),
+                  size=18,
+                  loc='left',
+                  pad=20,
+                  wrap=True)
 
         plt.ylabel(data_object.unit)
-        plt.xlabel("Dates")
+        data_min = data_max = None
+        if self.use_local_min_max:
+            if data_object.object_data_min < 0:
+                data_min = 1.05 * data_object.object_data_min
+            else:
+                data_min = 0.95 * data_object.object_data_min
 
+            if data_object.object_data_max < 0:
+                data_max = 0.95 * data_object.object_data_max
+            else:
+                data_max = 1.05 * data_object.object_data_max
+        else:
+            if data_object.data_min < 0:
+                data_min = 1.05 * data_object.data_min
+            else:
+                data_min = 0.95 * data_object.data_min
+
+            if data_object.data_max < 0:
+                data_max = 0.95 * data_object.data_max
+            else:
+                data_max = 1.05 * data_object.data_max
+        plt.ylim(data_min, data_max)
+        plt.xlabel("Time")
         return fig
 
     @pyqtSlot()

@@ -1,26 +1,22 @@
 import os
-from PyQt5.QtWidgets import (QFileDialog, QMessageBox, QWidget, QProgressBar, QComboBox)
 
+from PyQt5.QtWidgets import (QFileDialog, QMessageBox, QWidget, QProgressBar,
+                             QComboBox)
+
+from DataExporter import DataExporter
 from DataManager import DataManager
-from DataPlotter import DataPlotter
-from HelperFunctions import HelperFunction as hf, PlotDataType
+from HelperFunctions import HelperFunction as hf, ExportDataType
 
 
-# TODO:
-#  - convert npz to pandas DataFrames and then pass them to the export or plotting functions
-
-
-class DataPlotTab(QWidget):
+class DataExporterTab(QWidget):
     def __init__(self, tab):
         super().__init__()
 
-        self.title = 'Plot Data'
+        self.title = 'Export Data'
         self.destination_directory = ""
         self.data_manager = None
 
-        self.dialog_box = None
-
-        self.data_plotter = None
+        self.data_exporter = None
 
         self.button_width = tab.button_width
         self.element_height = tab.element_height
@@ -33,39 +29,42 @@ class DataPlotTab(QWidget):
 
         self.set_buttons_enabled(True)
 
-
     def init_ui(self):
-        text = "Plot"
+        text = "Export"
         self.export_button = hf.create_button(self, text, self.margin,
                                               10 + 2.25 * self.element_height,
                                               self.button_width,
                                               self.element_height)
         self.export_button.clicked.connect(self.export)
 
-        text = "Plot File Type"
-        hf.create_label(self, text, self.margin,
-                        10, self.element_height)
+        text = "Export Data Type"
+        hf.create_label(self, text, self.margin, 10, self.element_height)
 
         self.export_combobox = QComboBox(self)
         self.export_combobox.setGeometry(self.margin,
                                          10 + 1 * self.element_height,
                                          self.button_width,
                                          self.element_height)
-        self.export_combobox.addItems([x.value for x in PlotDataType])
+        self.export_combobox.addItems([x.value for x in ExportDataType])
 
-        text = "Cancel Plotting"
+        text = "Cancel Export"
         self.cancel_export_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-                        10 + 2.25 * self.element_height, self.button_width,
+            10 + 2.25 * self.element_height, self.button_width,
             self.element_height)
         self.cancel_export_button.clicked.connect(self.stop_thread)
 
+        text = "Accurate Progress: 0%"
+        self.percent_label = hf.create_label_with_width(self, text, self.margin, 10 + 3.5 * self.element_height, self.empty_label_width, self.element_height)
+
         self.progress_bar = QProgressBar(self)
-        self.progress_bar.setGeometry(self.margin, 10 + 3.5 * self.element_height,
+        self.progress_bar.setGeometry(self.margin,
+                                      10 + 4.75 * self.element_height,
                                       self.empty_label_width,
                                       self.element_height)
 
-        self.status_bar = hf.create_status_bar(self, "Ready", 0.5 * self.margin,
+        self.status_bar = hf.create_status_bar(self, "Ready",
+                                               0.5 * self.margin,
                                                self.height - 4 * self.margin,
                                                self.empty_label_width,
                                                self.element_height)
@@ -73,43 +72,47 @@ class DataPlotTab(QWidget):
         self.show()
 
     def stop_thread(self):
-        self.data_plotter.stop()
-        self.status_bar.showMessage("Plotting Cancelled")
+        self.data_exporter.stop()
+        self.status_bar.showMessage("Export Cancelled")
         self.progress_bar.setValue(0)
+        self.percent_label.setText("Accurate Progress: 0%")
 
     def set_data_manager(self, data_manager: DataManager):
         self.data_manager = data_manager
         self.progress_bar.setValue(0)
+        self.percent_label.setText("Accurate Progress: 0%")
         self.set_buttons_enabled(True)
         self.status_bar.showMessage("Ready")
 
     def update_progress_bar(self, value: float):
-        print("updated bar: " + str(value))
         self.progress_bar.setValue(value)
+        self.percent_label.setText("Accurate Progress: " + str(hf.round_number(value, 4)))
 
     def export(self):
         message_box = QMessageBox(self)
-        answer = message_box.question(self, 'Attention', "This action will generate " + str(self.data_manager.total_files) + " files. Proceed?",
-                                      message_box.Yes | message_box.No)
+        answer = message_box.question(
+            self, 'Attention', "This action will generate " +
+            str(self.data_manager.total_files) + " files. Proceed?",
+            message_box.Yes | message_box.No)
         if answer == message_box.Yes:
-            print("plot started")
-            self.dialog_box = None
             self.set_buttons_enabled(False)
             if self.show_destination_directory_dialog():
 
-                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-plotted" \
-                                             + hf.get_dir_separator()
+                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported"\
+                                   + hf.get_dir_separator()
 
                 os.makedirs(self.destination_directory, exist_ok=True)
-                self.status_bar.showMessage("Plotting...")
+                self.status_bar.showMessage("Exporting...")
                 if not self.data_manager.is_iterator_prepared:
                     self.data_manager.prepare_data_iterator()
-                self.data_manager.data_progress.connect(self.update_progress_bar)
-                self.data_plotter = DataPlotter(self.data_manager)
-                self.data_plotter.set_attributes(
-                    self.export_combobox.currentText(), self.destination_directory)
-                self.data_plotter.finished.connect(self.export_finished)
-                self.data_plotter.start()
+                self.data_manager.data_progress.connect(
+                    self.update_progress_bar)
+                self.data_exporter = DataExporter(self.data_manager)
+                self.data_exporter.set_attributes(
+                    self.export_combobox.currentText(),
+                    self.destination_directory)
+                self.data_exporter.finished.connect(self.export_finished)
+                self.data_exporter.start()
             return
         else:
             return
@@ -129,7 +132,8 @@ class DataPlotTab(QWidget):
 
         if file_name:
             if hf.can_write_directory(file_name):
-                self.destination_directory = hf.format_directory_path(file_name)
+                self.destination_directory = hf.format_directory_path(
+                    file_name)
                 self.status_bar.showMessage("Destination Directory Selected")
                 return True
             else:

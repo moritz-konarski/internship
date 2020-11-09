@@ -7,10 +7,6 @@ from DataManager import DataManager
 from HelperFunctions import HelperFunction as hf, PlotType, DataAction
 
 
-# TODO:
-#  - convert npz to pandas DataFrames and then pass them to the export or plotting functions
-
-
 class DataManagerTab(QWidget):
     data_selection_signal = pyqtSignal(bool, DataAction)
 
@@ -20,8 +16,6 @@ class DataManagerTab(QWidget):
         self.title = 'Data Manager'
         self.source_directory = ""
 
-        self.thread = None
-        self.popup = None
         self.data_manager = None
 
         self.button_width = tab.button_width
@@ -130,7 +124,7 @@ class DataManagerTab(QWidget):
         text = "Plot Data"
         self.plot_data_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-                        10 + 15.75 * self.element_height, self.button_width,
+            10 + 15.75 * self.element_height, self.button_width,
             self.element_height)
         self.plot_data_button.clicked.connect(self.plot_data)
 

@@ -1,10 +1,13 @@
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
+
 from HelperFunctions import PlotType
 
 
 class DataObject:
-    def __init__(self, plot_type: PlotType, name: str, long_name: str, unit: str):
+    def __init__(self, plot_type: PlotType, name: str, long_name: str,
+                 unit: str):
         self.plot_type = plot_type
         self.data = None
 
@@ -94,7 +97,7 @@ class DataObject:
 
     def set_lat_min_max(self, min: float, max: float):
         self.lat_min = min
-        self.lat_max= max
+        self.lat_max = max
 
     def get_lat_min_max(self) -> (float, float):
         return self.lat_min, self.lat_max

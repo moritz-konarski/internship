@@ -1,14 +1,14 @@
+import datetime
 import json
 import os
 import platform
 import re
-import datetime
 from enum import Enum, auto
 from pathlib import Path
 
-from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar, QMessageBox
-
 import numpy as np
+from PyQt5.QtWidgets import QLabel, QPushButton, QRadioButton, QStatusBar, \
+    QMessageBox
 from netCDF4 import Dataset
 
 
@@ -24,7 +24,7 @@ class DataAction(Enum):
 
 class ExportDataType(Enum):
     CSV = ".csv"
-    ZIP = ".zip"  # via pickle
+    ZIP = ".zip"
     EXCEL = ".xlsx"
     HTML = ".html"
 
@@ -35,7 +35,6 @@ class PlotDataType(Enum):
     EPS = "eps"
     SVG = "svg"
     JPEG = "jpeg"
-
 
 
 class FileExtension(Enum):

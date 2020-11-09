@@ -13,7 +13,7 @@ class DataProcessorTab(QWidget):
         self.source_directory = ""
 
         self.long_variable_name = ""
-        self.thread = None
+        self.data_processor = None
 
         self.button_width = tab_window.button_width
         self.element_height = tab_window.element_height
@@ -75,8 +75,11 @@ class DataProcessorTab(QWidget):
 
         self.disable_extract_button()
 
+        text = "Accurate Progress: 0%"
+        self.percent_label = hf.create_label_with_width(self, text, self.margin, 10 + 7 * self.element_height, self.empty_label_width, self.element_height)
+
         self.progressBar = QProgressBar(self)
-        self.progressBar.setGeometry(self.margin, 10 + 7 * self.element_height,
+        self.progressBar.setGeometry(self.margin, 10 + 8.25 * self.element_height,
                                      self.empty_label_width,
                                      self.element_height)
 
@@ -90,6 +93,7 @@ class DataProcessorTab(QWidget):
 
     def update_progress_bar(self, progress: float):
         self.progressBar.setValue(progress)
+        self.percent_label.setText("Accurate Progress: " + str(hf.round_number(progress, 4)))
 
     def show_thread_error(self, message: str):
         hf.show_error_message(self, message)
@@ -106,9 +110,9 @@ class DataProcessorTab(QWidget):
         self.statusBar.showMessage(status)
 
     def stop_thread(self):
-        if isinstance(self.thread, DataProcessor):
-            self.thread.stop()
-            self.thread = None
+        if isinstance(self.data_processor, DataProcessor):
+            self.data_processor.stop()
+            self.data_processor = None
 
     def update_variable_info(self):
         if not self.variable_combobox.currentText(
@@ -121,15 +125,15 @@ class DataProcessorTab(QWidget):
         self.enable_extract_button()
 
         if self.show_destination_directory_dialog():
-            self.thread = DataProcessor(self.source_directory,
-                                        self.destination_directory,
-                                        self.variable_combobox.currentText())
-            self.thread.extraction_progress_update.connect(
+            self.data_processor = DataProcessor(self.source_directory,
+                                                self.destination_directory,
+                                                self.variable_combobox.currentText())
+            self.data_processor.extraction_progress_update.connect(
                 self.update_progress_bar)
-            self.thread.finished.connect(self.enable_extract_button)
-            self.thread.extraction_status_message.connect(self.set_status_bar)
-            self.thread.error.connect(self.show_thread_error)
-            self.thread.start()
+            self.data_processor.finished.connect(self.enable_extract_button)
+            self.data_processor.extraction_status_message.connect(self.set_status_bar)
+            self.data_processor.error.connect(self.show_thread_error)
+            self.data_processor.start()
 
     def show_source_directory_dialog(self):
         msg = "Select Source Directory"
