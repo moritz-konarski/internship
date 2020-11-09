@@ -27,16 +27,7 @@ class DataPlotterTab(QWidget):
 
         self.init_ui()
 
-        self.set_buttons_enabled(True)
-
     def init_ui(self):
-        text = "Plot"
-        self.export_button = hf.create_button(self, text, self.margin,
-                                              10 + 2.25 * self.element_height,
-                                              self.button_width,
-                                              self.element_height)
-        self.export_button.clicked.connect(self.export)
-
         text = "Plot File Type"
         hf.create_label(self, text, self.margin, 10, self.element_height)
 
@@ -47,32 +38,39 @@ class DataPlotterTab(QWidget):
                                          self.element_height)
         self.export_combobox.addItems([x.value for x in PlotDataType])
 
-        text = "Cancel Plotting"
-        self.cancel_export_button = hf.create_button(
-            self, text, 2 * self.margin + self.button_width,
-                        10 + 2.25 * self.element_height, self.button_width,
-            self.element_height)
-        self.cancel_export_button.clicked.connect(self.stop_thread)
-
         text = "Use Global Min Max"
         self.global_min_max_radio_button = hf.create_radio_button(
-            self, text, self.margin, 10 + 3.5 * self.element_height,
+            self, text, self.margin, 10 + 2.25 * self.element_height,
             self.button_width, self.element_height)
         self.global_min_max_radio_button.setChecked(True)
 
         text = "Use Local Min Max"
         self.local_min_max_radio_button = hf.create_radio_button(
             self, text, 2 * self.margin + self.button_width,
-                        10 + 3.5 * self.element_height, self.button_width,
+                        10 + 2.25 * self.element_height, self.button_width,
             self.element_height)
 
         self.plot_cities_check_box = QCheckBox(self)
         self.plot_cities_check_box.setText("Plot Cities")
         self.plot_cities_check_box.setGeometry(self.margin,
-                                               10 + 4.75 * self.element_height,
+                                               10 + 3.5 * self.element_height,
                                                self.button_width,
                                                self.element_height)
         self.plot_cities_check_box.setDisabled(True)
+
+        text = "Plot"
+        self.export_button = hf.create_button(self, text, self.margin,
+                                              10 + 4.75 * self.element_height,
+                                              self.button_width,
+                                              self.element_height)
+        self.export_button.clicked.connect(self.export)
+
+        text = "Cancel Plotting"
+        self.cancel_export_button = hf.create_button(
+            self, text, 2 * self.margin + self.button_width,
+                        10 + 4.75 * self.element_height, self.button_width,
+            self.element_height)
+        self.cancel_export_button.clicked.connect(self.stop_thread)
 
         text = "Accurate Progress: 0%"
         self.percent_label = hf.create_label_with_width(self, text, self.margin,
@@ -106,7 +104,6 @@ class DataPlotterTab(QWidget):
             self.plot_cities_check_box.setEnabled(True)
         self.progress_bar.setValue(0)
         self.percent_label.setText("Accurate Progress: 0%")
-        self.set_buttons_enabled(True)
         self.status_bar.showMessage("Ready")
 
     def update_progress_bar(self, value: float):
@@ -122,7 +119,6 @@ class DataPlotterTab(QWidget):
                                    self.data_manager.total_files) + " files. Proceed?",
                                message_box.Yes | message_box.No)
         if answer == message_box.Yes:
-            self.set_buttons_enabled(False)
             if self.show_destination_directory_dialog():
 
                 self.destination_directory = self.destination_directory + self.data_manager.var_name + "-plotted" \
@@ -150,11 +146,6 @@ class DataPlotterTab(QWidget):
 
     def export_finished(self):
         self.status_bar.showMessage("Finished!")
-        self.set_buttons_enabled(True)
-
-    def set_buttons_enabled(self, enabled: bool):
-        self.export_button.setEnabled(enabled)
-        self.cancel_export_button.setDisabled(enabled)
 
     def show_destination_directory_dialog(self) -> bool:
         msg = "Select Destination Directory"

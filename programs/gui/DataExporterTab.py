@@ -50,12 +50,15 @@ class DataExporterTab(QWidget):
         text = "Cancel Export"
         self.cancel_export_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-            10 + 2.25 * self.element_height, self.button_width,
+                        10 + 2.25 * self.element_height, self.button_width,
             self.element_height)
         self.cancel_export_button.clicked.connect(self.stop_thread)
 
         text = "Accurate Progress: 0%"
-        self.percent_label = hf.create_label_with_width(self, text, self.margin, 10 + 3.5 * self.element_height, self.empty_label_width, self.element_height)
+        self.percent_label = hf.create_label_with_width(self, text, self.margin,
+                                                        10 + 3.5 * self.element_height,
+                                                        self.empty_label_width,
+                                                        self.element_height)
 
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setGeometry(self.margin,
@@ -86,20 +89,22 @@ class DataExporterTab(QWidget):
 
     def update_progress_bar(self, value: float):
         self.progress_bar.setValue(value)
-        self.percent_label.setText("Accurate Progress: " + str(hf.round_number(value, 4)))
+        self.percent_label.setText(
+            "Accurate Progress: " + str(hf.round_number(value, 4)))
 
     def export(self):
         message_box = QMessageBox(self)
         answer = message_box.question(
             self, 'Attention', "This action will generate " +
-            str(self.data_manager.total_files) + " files. Proceed?",
-            message_box.Yes | message_box.No)
+                               str(
+                                   self.data_manager.total_files) + " files. Proceed?",
+                               message_box.Yes | message_box.No)
         if answer == message_box.Yes:
             self.set_buttons_enabled(False)
             if self.show_destination_directory_dialog():
 
-                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported"\
-                                   + hf.get_dir_separator()
+                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported" \
+                                             + hf.get_dir_separator()
 
                 os.makedirs(self.destination_directory, exist_ok=True)
                 self.status_bar.showMessage("Exporting...")

@@ -79,29 +79,29 @@ class DataManager(QThread):
         if self.plot_type == PlotType.HEAT_MAP:
             if len(self.shape) == 4:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lev_max_index:self.lev_min_index + 1,
-                    self.lat_min_index:self.lat_max_index + 1,
-                    self.lon_min_index:self.lon_max_index + 1]
+                       self.begin_date_index:self.end_date_index + 1,
+                       self.lev_max_index:self.lev_min_index + 1,
+                       self.lat_min_index:self.lat_max_index + 1,
+                       self.lon_min_index:self.lon_max_index + 1]
                 self.has_levels = False
             else:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lat_min_index:self.lat_max_index + 1,
-                    self.lon_min_index:self.lon_max_index + 1]
+                       self.begin_date_index:self.end_date_index + 1,
+                       self.lat_min_index:self.lat_max_index + 1,
+                       self.lon_min_index:self.lon_max_index + 1]
                 self.has_levels = True
 
         elif self.plot_type == PlotType.TIME_SERIES:
             if len(self.shape) == 4:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lev_max_index:self.lev_min_index + 1,
-                    self.lat_min_index, self.lon_min_index]
+                       self.begin_date_index:self.end_date_index + 1,
+                       self.lev_max_index:self.lev_min_index + 1,
+                       self.lat_min_index, self.lon_min_index]
                 self.has_levels = False
             else:
                 data = np.load(self.data_path, allow_pickle=True)['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lat_min_index, self.lon_min_index]
+                       self.begin_date_index:self.end_date_index + 1,
+                       self.lat_min_index, self.lon_min_index]
                 self.has_levels = True
 
         self.selected_data_min = float(np.nanmin(data))
@@ -182,14 +182,15 @@ class DataManager(QThread):
                 data = np.load(self.data_path, allow_pickle=True)
                 data_object.set_level(float(data['lev'][self.lev_index]))
                 data_frame_data = data['data'][
-                    self.time_index, self.lev_index,
-                    self.lat_min_index:self.lat_max_index + 1,
-                    self.lon_min_index:self.lon_max_index + 1]
+                                  self.time_index, self.lev_index,
+                                  self.lat_min_index:self.lat_max_index + 1,
+                                  self.lon_min_index:self.lon_max_index + 1]
             else:
                 data = np.load(self.data_path, allow_pickle=True)
                 data_frame_data = data['data'][
-                    self.time_index, self.lat_min_index:self.lat_max_index + 1,
-                    self.lon_min_index:self.lon_max_index + 1]
+                                  self.time_index,
+                                  self.lat_min_index:self.lat_max_index + 1,
+                                  self.lon_min_index:self.lon_max_index + 1]
 
             data_object.set_lats(
                 data['lat'][self.lat_min_index:self.lat_max_index + 1])
@@ -216,13 +217,14 @@ class DataManager(QThread):
                 data = np.load(self.data_path, allow_pickle=True)
                 data_object.set_level(float(data['lev'][self.lev_index]))
                 data_frame_data = data['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lev_index, self.lat_min_index, self.lon_min_index]
+                                  self.begin_date_index:self.end_date_index + 1,
+                                  self.lev_index, self.lat_min_index,
+                                  self.lon_min_index]
             else:
                 data = np.load(self.data_path, allow_pickle=True)
                 data_frame_data = data['data'][
-                    self.begin_date_index:self.end_date_index + 1,
-                    self.lat_min_index, self.lon_min_index]
+                                  self.begin_date_index:self.end_date_index + 1,
+                                  self.lat_min_index, self.lon_min_index]
 
             data_object.set_data_min_max(self.selected_data_min,
                                          self.selected_data_max)
@@ -275,7 +277,7 @@ class DataManager(QThread):
             if self.begin_date < hf.get_datetime_from_str(
                     self.metadata_dictionary['begin_date'] +
                     " 0:00") or self.begin_date > hf.get_datetime_from_str(
-                        self.metadata_dictionary['end_date'] + " 21:00"):
+                self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
             if isinstance(self.end_date, datetime):
                 if self.begin_date > self.end_date:
@@ -309,7 +311,7 @@ class DataManager(QThread):
             if self.end_date < hf.get_datetime_from_str(
                     self.metadata_dictionary['begin_date'] +
                     " 0:00") or self.end_date > hf.get_datetime_from_str(
-                        self.metadata_dictionary['end_date'] + " 21:00"):
+                self.metadata_dictionary['end_date'] + " 21:00"):
                 raise Exception()
             if isinstance(self.begin_date, datetime):
                 if self.begin_date > self.end_date:
@@ -522,14 +524,14 @@ class DataManager(QThread):
             self.metadata_dictionary['lat_min'],
             5)), str(hf.round_number(self.metadata_dictionary['lat_max'],
                                      5)), hf.format_variable_name(
-                                         self.metadata_dictionary['lat_units'])
+            self.metadata_dictionary['lat_units'])
 
     def get_data_lon_range_str(self) -> (str, str, str):
         return str(hf.round_number(
             self.metadata_dictionary['lon_min'],
             5)), str(hf.round_number(self.metadata_dictionary['lon_max'],
                                      5)), hf.format_variable_name(
-                                         self.metadata_dictionary['lon_units'])
+            self.metadata_dictionary['lon_units'])
 
     def get_data_lev_range_str(self) -> (str, str, str):
         return str(hf.round_number(

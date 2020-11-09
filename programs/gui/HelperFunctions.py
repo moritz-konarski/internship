@@ -161,7 +161,7 @@ class HelperFunction:
 
     @staticmethod
     def round_number(number, places):
-        return round(10**places * number) / 10**places
+        return round(10 ** places * number) / 10 ** places
 
     @staticmethod
     def create_label(parent, text: str, x_position: int, y_position: int,

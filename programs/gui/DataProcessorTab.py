@@ -56,7 +56,7 @@ class DataProcessorTab(QWidget):
         text = "Full Variable Name"
         self.variable_combobox_info_label = hf.create_label_with_width(
             self, text, 2 * self.margin + self.button_width,
-            10 + 4.55 * self.element_height, self.empty_label_width,
+                        10 + 4.55 * self.element_height, self.empty_label_width,
             self.element_height)
 
         text = "Extract"
@@ -69,17 +69,21 @@ class DataProcessorTab(QWidget):
         text = "Cancel Extraction"
         self.cancel_extraction_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-            10 + 5.75 * self.element_height, self.button_width,
+                        10 + 5.75 * self.element_height, self.button_width,
             self.element_height)
         self.cancel_extraction_button.clicked.connect(self.stop_thread)
 
         self.disable_extract_button()
 
         text = "Accurate Progress: 0%"
-        self.percent_label = hf.create_label_with_width(self, text, self.margin, 10 + 7 * self.element_height, self.empty_label_width, self.element_height)
+        self.percent_label = hf.create_label_with_width(self, text, self.margin,
+                                                        10 + 7 * self.element_height,
+                                                        self.empty_label_width,
+                                                        self.element_height)
 
         self.progressBar = QProgressBar(self)
-        self.progressBar.setGeometry(self.margin, 10 + 8.25 * self.element_height,
+        self.progressBar.setGeometry(self.margin,
+                                     10 + 8.25 * self.element_height,
                                      self.empty_label_width,
                                      self.element_height)
 
@@ -93,7 +97,8 @@ class DataProcessorTab(QWidget):
 
     def update_progress_bar(self, progress: float):
         self.progressBar.setValue(progress)
-        self.percent_label.setText("Accurate Progress: " + str(hf.round_number(progress, 4)))
+        self.percent_label.setText(
+            "Accurate Progress: " + str(hf.round_number(progress, 4)))
 
     def show_thread_error(self, message: str):
         hf.show_error_message(self, message)
@@ -131,7 +136,8 @@ class DataProcessorTab(QWidget):
             self.data_processor.extraction_progress_update.connect(
                 self.update_progress_bar)
             self.data_processor.finished.connect(self.enable_extract_button)
-            self.data_processor.extraction_status_message.connect(self.set_status_bar)
+            self.data_processor.extraction_status_message.connect(
+                self.set_status_bar)
             self.data_processor.error.connect(self.show_thread_error)
             self.data_processor.start()
 

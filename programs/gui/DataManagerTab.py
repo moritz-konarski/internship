@@ -124,7 +124,7 @@ class DataManagerTab(QWidget):
         text = "Plot Data"
         self.plot_data_button = hf.create_button(
             self, text, 2 * self.margin + self.button_width,
-            10 + 15.75 * self.element_height, self.button_width,
+                        10 + 15.75 * self.element_height, self.button_width,
             self.element_height)
         self.plot_data_button.clicked.connect(self.plot_data)
 
@@ -317,13 +317,11 @@ class DataManagerTab(QWidget):
         if self.check_data_bounds_on_button_press():
             self.data_manager.set_data_action(self.data_action)
             self.data_manager.set_plot_type(self.plot_type)
-            # self.popup = PrepareDataPopup(self)
-            # self.popup.start()
             self.data_manager.preparation_finished.connect(
                 self.export_data_signal)
             self.data_manager.message.connect(self.show_status_bar_message)
             self.data_manager.start()
-            # self.data_selection_signal.emit(True, DataAction.EXPORT)
+            self.data_selection_signal.emit(True, DataAction.EXPORT)
         else:
             hf.show_error_message(self, "Could not start Extraction!")
             return
@@ -332,13 +330,11 @@ class DataManagerTab(QWidget):
         if self.check_data_bounds_on_button_press():
             self.data_manager.set_data_action(self.data_action)
             self.data_manager.set_plot_type(self.plot_type)
-            # self.popup = PrepareDataPopup(self)
-            # self.popup.start()
             self.data_manager.preparation_finished.connect(
                 self.plot_data_signal)
             self.data_manager.message.connect(self.show_status_bar_message)
             self.data_manager.start()
-            # self.data_selection_signal.emit(True, DataAction.PLOT)
+            self.data_selection_signal.emit(True, DataAction.PLOT)
         else:
             return
 

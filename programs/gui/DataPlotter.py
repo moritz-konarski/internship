@@ -56,34 +56,34 @@ class DataPlotter(QThread):
             if len(self.data_manager.shape) == 4:
                 self.file_name = "Time Series " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + "-" + hf.get_str_from_datetime(
-                        data_object.end_time) + " (" + str(
-                            data_object.lat_min) + "N, " + str(
-                                data_object.lon_min) + "E) " + str(
-                                    hf.round_number(data_object.level,
-                                                    2)) + " hPa"
+                    data_object.end_time) + " (" + str(
+                    data_object.lat_min) + "N, " + str(
+                    data_object.lon_min) + "E) " + str(
+                    hf.round_number(data_object.level,
+                                    2)) + " hPa"
             else:
                 self.file_name = "Time Series " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + "-" + hf.get_str_from_datetime(
-                        data_object.end_time) + " (" + str(
-                            data_object.lat_min) + "N, " + str(
-                                data_object.lon_min) + "E)"
+                    data_object.end_time) + " (" + str(
+                    data_object.lat_min) + "N, " + str(
+                    data_object.lon_min) + "E)"
         elif data_object.plot_type == PlotType.HEAT_MAP:
             if len(self.data_manager.shape) == 4:
                 self.file_name = "Heat Map " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + " (" + str(
-                        data_object.lat_min) + "N, " + str(
-                            data_object.lon_min) + "E)-(" + str(
-                                data_object.lat_max) + "N, " + str(
-                                    data_object.lon_max) + "E) " + str(
-                                        hf.round_number(data_object.level,
-                                                        2)) + " hPa"
+                    data_object.lat_min) + "N, " + str(
+                    data_object.lon_min) + "E)-(" + str(
+                    data_object.lat_max) + "N, " + str(
+                    data_object.lon_max) + "E) " + str(
+                    hf.round_number(data_object.level,
+                                    2)) + " hPa"
             else:
                 self.file_name = "Heat Map " + data_object.long_name + " " + hf.get_str_from_datetime(
                     data_object.start_time) + " (" + str(
-                        data_object.lat_min) + "N, " + str(
-                            data_object.lon_min) + "E)-(" + str(
-                                data_object.lat_max) + "N, " + str(
-                                    data_object.lon_max) + "E)"
+                    data_object.lat_min) + "N, " + str(
+                    data_object.lon_min) + "E)-(" + str(
+                    data_object.lat_max) + "N, " + str(
+                    data_object.lon_max) + "E)"
 
     def plot_files(self):
         self.is_plotting.emit(True)
