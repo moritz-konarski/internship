@@ -1,29 +1,35 @@
 \documentclass[a4paper, 12pt, reqno]{article}
 
-\newcommand{\titl}{Internship Report}
+\newcommand{\titl}{Internship Report RS RAS}
 \newcommand{\auth}{Moritz M. Konarski}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage[
     margin=1in, 
-    showframe
+%    showframe
     ]{geometry}
 \usepackage[english]{babel}
 \usepackage[pdftitle={\titl}, pdfauthor={\auth}, final]{hyperref}
 \usepackage{graphicx}
+\usepackage{fancyhdr}
 \usepackage[document]{ragged2e}
 \setlength{\RaggedRightParindent}{0.25in}
-\usepackage{fancyhdr}
 \usepackage{afterpage}
 \usepackage{lastpage}
 \usepackage{float}
 \usepackage{subfiles}
-\renewcommand{\baselinestretch}{1.1}
+\renewcommand{\baselinestretch}{1.2}
 \usepackage[nottoc]{tocbibind}
 \usepackage{appendix}
-\usepackage{libertine}
-\usepackage{libertinust1math}
-\usepackage[T1]{fontenc}
+\usepackage{enumitem}
+\setlist{nolistsep}
+\usepackage[skip=4pt]{parskip}
+\usepackage{textcomp}
+
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -41,6 +47,7 @@
     \textsc{American University of Central Asia}\\[10pt]
     \textsc{\titl{}}\\ [1.5cm]
 
+    % TODO: make a note of what is in the picture
     \includegraphics[height=10cm]{../graphics/title_pic}
 
     \vspace{1.5cm}
@@ -76,11 +83,11 @@
 
 \subfile{../src/01_introduction}
 
-\subfile{../src/02_nasa_data}
+\subfile{../src/02_educational_internship}
 
-\subfile{../src/03_netcdf}
+\subfile{../src/03_industrial_internship_1}
 
-\subfile{../src/04_processing_lib}
+\subfile{../src/04_industrial_internship_2}
 
 \subfile{../src/05_plotting_lib}
 
