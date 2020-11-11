@@ -38,9 +38,13 @@ class DataProcessor(QThread):
         self.dest_dir = hf.format_directory_path(destination_dir)
 
         self.file_extension = FileExtension.NETCDF4.value
+        self.alt_file_extension = FileExtension.NETCDF.value
         self.extraction_progress = 0
         self.sorted_file_list = sorted(
             Path(self.src_dir).glob(self.file_extension))
+        if len(self.sorted_file_list) == 0:
+            self.sorted_file_list = sorted(
+                Path(self.src_dir).glob(self.alt_file_extension))
         self.variable_name = var_name
 
         self.tmp_data_file_path = ""
@@ -172,12 +176,12 @@ class DataProcessor(QThread):
         self.extraction_status_message.emit(
             DataProcessorStatus.CONVERTING_DATA_TYPES.value)
 
-        data = data.astype(np.float32, casting='safe')
-        time = time.astype(np.int32, casting='safe')
-        lat = lat.astype(np.float64, casting='safe')
-        lon = lon.astype(np.float64, casting='safe')
+        data = data.astype(data.dtype, casting='safe')
+        time = time.astype(time.dtype, casting='safe')
+        lat = lat.astype(lat.dtype, casting='safe')
+        lon = lon.astype(lon.dtype, casting='safe')
         if var_dims == 4:
-            lev = lev.astype(np.float64, casting='safe')
+            lev = lev.astype(lev.dtype, casting='safe')
 
         self.extraction_status_message.emit(
             DataProcessorStatus.REPLACING_FILL_VALUES.value)

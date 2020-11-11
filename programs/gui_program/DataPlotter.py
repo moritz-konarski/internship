@@ -315,28 +315,10 @@ class DataPlotter(QThread):
                   wrap=True)
 
         plt.ylabel(data_object.unit)
-        data_min = data_max = None
         if self.use_local_min_max:
-            if data_object.object_data_min < 0:
-                data_min = 1.05 * data_object.object_data_min
-            else:
-                data_min = 0.95 * data_object.object_data_min
-
-            if data_object.object_data_max < 0:
-                data_max = 0.95 * data_object.object_data_max
-            else:
-                data_max = 1.05 * data_object.object_data_max
+            plt.ylim(data_object.object_data_min, data_object.object_data_max)
         else:
-            if data_object.data_min < 0:
-                data_min = 1.05 * data_object.data_min
-            else:
-                data_min = 0.95 * data_object.data_min
-
-            if data_object.data_max < 0:
-                data_max = 0.95 * data_object.data_max
-            else:
-                data_max = 1.05 * data_object.data_max
-        plt.ylim(data_min, data_max)
+            plt.ylim(data_object.data_min, data_object.data_max)
         plt.xlabel("Time")
         return fig
 

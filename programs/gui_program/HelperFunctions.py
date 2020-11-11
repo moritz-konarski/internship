@@ -89,6 +89,9 @@ class HelperFunction:
         sorted_file_list = sorted(
             Path(src_path).glob(FileExtension.NETCDF4.value))
         if len(sorted_file_list) == 0:
+            sorted_file_list = sorted(
+                Path(src_path).glob(FileExtension.NETCDF.value))
+        if len(sorted_file_list) == 0:
             return ""
         with Dataset(sorted_file_list[0], 'r') as d:
             return HelperFunction.format_variable_name(
@@ -98,6 +101,9 @@ class HelperFunction:
     def get_available_variables(src_path: str) -> [str]:
         sorted_file_list = sorted(
             Path(src_path).glob(FileExtension.NETCDF4.value))
+        if len(sorted_file_list) == 0:
+            sorted_file_list = sorted(
+                Path(src_path).glob(FileExtension.NETCDF.value))
         var_info_list = []
         if HelperFunction.is_valid_nc_source_directory(src_path):
             with Dataset(sorted_file_list[0], 'r') as d:
@@ -110,6 +116,9 @@ class HelperFunction:
     def is_valid_nc_source_directory(src_path: str) -> bool:
         sorted_file_list = sorted(
             Path(src_path).glob(FileExtension.NETCDF4.value))
+        if len(sorted_file_list) == 0:
+            sorted_file_list = sorted(
+                Path(src_path).glob(FileExtension.NETCDF.value))
         if len(sorted_file_list) == 0:
             return False
         return True
