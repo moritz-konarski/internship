@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Satellite Data Modification and Plotting Program</title>
+	<link rel="stylesheet" type="text/css" href="assets/semantic/semantic.min.css">
+	<script src="assets/js/jquery-3.5.1.min.js"></script>
+	<script src="semantic/dist/semantic.min.js"></script>
+</head>
+<body>
+	<div class='ui container'>
+		<br>
+		<div>
+			<h1 class='ui centered header'>Satellite Data Modification and Plotting Program</h1>
+			<br>
+			<div class='ui vertical text menu'>
+				<a class='item'>Intro</a>
+				<a class='item' href="#data_processor">Data Processor</a>
+				<a class='item' href="#data_manager">Data Manager</a>
+				<a class='item' href="#data_exporter">Data Exporter</a>
+				<a class='item' href="#data_plotter">Data Plotter</a>
+			</div>
+		</div>
+		<br>
+
+		<!-- Intro -->
+		<div class="ui green segment"> 
+			<h3>Introduction</h3>
+			<p>
+				This program is meant to convert netCDF files into numpy npz files. These files can then be graphed using this program or exported as CSV or other files. The following help file will explain how to use the program.
+			</p>
+		</div>
+		<!-- Menu1 -->
+		<div class="ui green segment" id="data_processor">
+			<h3>Data Processor</h3>
+			<p>
+				The Data Processor is responsible for converting netCDF files into NPZ files. It extracts the specified variable and metadata. To select a source directory, press the <b>Select Source Directory</b> button. The source directory must contain netCDF files (*.nc4 or *.nc). 
+			</p>
+			<img src="images/data_processor_01.png" alt="">
+			<p>
+				To select a variable to extract, select it from the combo box. The full name of the variable will be displayed for convenience. To begin the extraction and choose a destination directory, press the <b>Extract</b> button. Press <b>Cancel Extraction</b> to stop the extraction before it is complete.
+			</p>
+			<img src="images/data_processor_02.png" alt="">
+			<p>
+				The data will be saved in a new folder in the destination directory that is named the same as the variable. Attention: if the source directory contains many netCDF files, the extraction process might take multiple minutes.
+			</p>
+			<img src="images/data_processor_03.png" alt="">
+		</div>
+		<div class="ui red segment" id="data_manager">
+			<h3>Data Manager</h3>
+			<p>
+				The Data Manager is responsible for selecting a subset of the data extracted using the Data Processor. It is also responsible for selecting the type of data that should be used. The available options are time series and heat map. To select a source directory (the one created by the Data Processor) press the <b>Select Source Directory</b> button. 
+				
+			</p>
+			<img src="images/data_manager_01.png" alt="">
+			<p>
+				Next, select which type of data you want to use. Then use the table to enter the minimum and maximum values you want your data to have. Here the minimum and maximum values that the data contains are shown and all input is validated. The table automatically adjusts to the type of data requested. Finally, click on either the <b>Export Data</b> or the <b>Plot Data</b> button to start the associated processes. Take note that you may always come back to this tab and change some of the values because they are saved while the data export or data plotting happens.
+			</p>
+			<img src="images/data_manager_02.png" alt="">
+		</div>
+		<div class="ui blue segment" id="data_exporter">
+			<h3>Data Exporter</h3>
+			<p>
+				Exporting Data is the process of saving the data extracted using the Data Processor in a different format. This might be desirable in case one would like to perform some analysis this program does not support or wishes to share this data in a more common format. To export data, simply select the file type you want to export to and click <b>Export</b>. The data selected in the data manager will be exported to the selelcted file type. It will be saved in a folder called <b>variable name-exported</b> which will be created in the folder you select after clicking <b>Export</b>. If you chose heat map data, for each time step in your time selection one file containing the corresponding information will be saved. If your data has pressure levels, each of them will be saved in a separate file. For time series data each pressure level is saved to separate file. This can quickly lead to large numbers of files and thus a popup window will inform you how many files will be created so the parameters can be adjusted if needed.
+			</p>
+			<img src="images/data_exporter.png" alt="">
+		</div>
+		<div class="ui magenta segment" id="data_plotter">
+			<h3>Data Plotter</h3>
+			<p>
+				The Data Plotter creates graphs based on the in the Data Manager selected data. The user may choose which file type the graphs should be saved as. Then a choice has to be made whether to use global or local minimum and maximum values. Using global min and max values means that all graphs will have the same scale while local min and max are unique to each file. For heat map data there is an additional option to add the larger cities of the region to the graph. If time series data was selected, each pressure level (if applicable) will be graphed separately. If heat map data was selected, for each time step and for each pressure level per time step (if applicable) a graph will be generated. Because this can lead to large numbers of files, a popup will warn the user how many files would be created. The files will be saved in a directory called <b>variable name-plotted</b> in the destination directory the user chooses after clicking <b>Plot</b>.
+			</p>
+			<img src="images/data_plotter.png" alt="">
+		</div>
+	</div>
+</body>
+</html>

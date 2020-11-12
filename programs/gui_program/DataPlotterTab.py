@@ -63,7 +63,7 @@ class DataPlotterTab(QWidget):
                                               10 + 4.75 * self.element_height,
                                               self.button_width,
                                               self.element_height)
-        self.export_button.clicked.connect(self.export)
+        self.export_button.clicked.connect(self.plot)
 
         text = "Cancel Plotting"
         self.cancel_export_button = hf.create_button(
@@ -86,7 +86,7 @@ class DataPlotterTab(QWidget):
 
         self.status_bar = hf.create_status_bar(self, "Ready",
                                                0.5 * self.margin,
-                                               self.height - 4 * self.margin,
+                                               self.height - 5.2 * self.margin,
                                                self.empty_label_width,
                                                self.element_height)
 
@@ -111,38 +111,42 @@ class DataPlotterTab(QWidget):
         self.percent_label.setText(
             "Accurate Progress: " + str(hf.round_number(value, 4)))
 
-    def export(self):
-        message_box = QMessageBox(self)
-        answer = message_box.question(
-            self, 'Attention', "This action will generate " +
-                               str(
-                                   self.data_manager.total_files) + " files. Proceed?",
-                               message_box.Yes | message_box.No)
-        if answer == message_box.Yes:
-            if self.show_destination_directory_dialog():
+    def plot(self):
+        if self.data_manager.is_iterator_prepared:
+            message_box = QMessageBox(self)
+            answer = message_box.question(
+                self, 'Attention', "This action will generate " +
+                                   str(
+                                       self.data_manager.total_files) + " files. Proceed?",
+                                   message_box.Yes | message_box.No)
+            if answer == message_box.Yes:
+                if self.show_destination_directory_dialog():
 
-                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-plotted" \
-                                             + hf.get_dir_separator()
+                    self.destination_directory = self.destination_directory + self.data_manager.var_name + "-plotted" \
+                                                 + hf.get_dir_separator()
 
-                os.makedirs(self.destination_directory, exist_ok=True)
-                self.status_bar.showMessage("Plotting...")
-                if not self.data_manager.is_iterator_prepared:
-                    self.data_manager.prepare_data_iterator()
-                self.data_manager.data_progress.connect(
-                    self.update_progress_bar)
-                self.data_plotter = DataPlotter(self.data_manager)
-                self.data_plotter.set_attributes(
-                    self.export_combobox.currentText(),
-                    self.destination_directory)
-                self.data_plotter.set_use_local_min_max(
-                    self.local_min_max_radio_button.isChecked())
-                self.data_plotter.set_plot_cities(
-                    self.plot_cities_check_box.isChecked())
-                self.data_plotter.finished.connect(self.export_finished)
-                self.data_plotter.start()
-            return
+                    os.makedirs(self.destination_directory, exist_ok=True)
+                    self.status_bar.showMessage("Plotting...")
+                    if not self.data_manager.is_iterator_prepared:
+                        self.data_manager.prepare_data_iterator()
+                    self.data_manager.data_progress.connect(
+                        self.update_progress_bar)
+                    self.data_plotter = DataPlotter(self.data_manager)
+                    self.data_plotter.set_attributes(
+                        self.export_combobox.currentText(),
+                        self.destination_directory)
+                    self.data_plotter.set_use_local_min_max(
+                        self.local_min_max_radio_button.isChecked())
+                    self.data_plotter.set_plot_cities(
+                        self.plot_cities_check_box.isChecked())
+                    self.data_plotter.finished.connect(self.export_finished)
+                    self.data_plotter.start()
+                return
+            else:
+                return
         else:
-            return
+            hf.show_error_message(self, "Data is not ready, please wait a little.")
+            self.data_manager.prepare_data_iterator()
 
     def export_finished(self):
         self.status_bar.showMessage("Finished!")

@@ -150,7 +150,6 @@ class DataManager(QThread):
                 if self.lev_index > self.lev_min_index:
                     self.data_progress.emit(100)
                     raise StopIteration()
-        # TODO: fix this counter
         if self.plot_type == PlotType.HEAT_MAP:
             if self.has_levels:
                 self.data_progress.emit(

@@ -68,7 +68,7 @@ class DataExporterTab(QWidget):
 
         self.status_bar = hf.create_status_bar(self, "Ready",
                                                0.5 * self.margin,
-                                               self.height - 4 * self.margin,
+                                               self.height - 5.2 * self.margin,
                                                self.empty_label_width,
                                                self.element_height)
 
@@ -93,34 +93,38 @@ class DataExporterTab(QWidget):
             "Accurate Progress: " + str(hf.round_number(value, 4)))
 
     def export(self):
-        message_box = QMessageBox(self)
-        answer = message_box.question(
-            self, 'Attention', "This action will generate " +
-                               str(
-                                   self.data_manager.total_files) + " files. Proceed?",
-                               message_box.Yes | message_box.No)
-        if answer == message_box.Yes:
-            self.set_buttons_enabled(False)
-            if self.show_destination_directory_dialog():
+        if self.data_manager.is_iterator_prepared:
+            message_box = QMessageBox(self)
+            answer = message_box.question(
+                self, 'Attention', "This action will generate " +
+                                   str(
+                                       self.data_manager.total_files) + " files. Proceed?",
+                                   message_box.Yes | message_box.No)
+            if answer == message_box.Yes:
+                self.set_buttons_enabled(False)
+                if self.show_destination_directory_dialog():
 
-                self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported" \
-                                             + hf.get_dir_separator()
+                    self.destination_directory = self.destination_directory + self.data_manager.var_name + "-exported" \
+                                                 + hf.get_dir_separator()
 
-                os.makedirs(self.destination_directory, exist_ok=True)
-                self.status_bar.showMessage("Exporting...")
-                if not self.data_manager.is_iterator_prepared:
-                    self.data_manager.prepare_data_iterator()
-                self.data_manager.data_progress.connect(
-                    self.update_progress_bar)
-                self.data_exporter = DataExporter(self.data_manager)
-                self.data_exporter.set_attributes(
-                    self.export_combobox.currentText(),
-                    self.destination_directory)
-                self.data_exporter.finished.connect(self.export_finished)
-                self.data_exporter.start()
-            return
+                    os.makedirs(self.destination_directory, exist_ok=True)
+                    self.status_bar.showMessage("Exporting...")
+                    if not self.data_manager.is_iterator_prepared:
+                        self.data_manager.prepare_data_iterator()
+                    self.data_manager.data_progress.connect(
+                        self.update_progress_bar)
+                    self.data_exporter = DataExporter(self.data_manager)
+                    self.data_exporter.set_attributes(
+                        self.export_combobox.currentText(),
+                        self.destination_directory)
+                    self.data_exporter.finished.connect(self.export_finished)
+                    self.data_exporter.start()
+                return
+            else:
+                return
         else:
-            return
+            hf.show_error_message(self, "Data is not ready, please wait a little.")
+            self.data_manager.prepare_data_iterator()
 
     def export_finished(self):
         self.status_bar.showMessage("Finished!")

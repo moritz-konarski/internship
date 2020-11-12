@@ -135,7 +135,7 @@ class DataManagerTab(QWidget):
         self.time_series_radio_button.setChecked(True)
 
         self.statusBar = hf.create_status_bar(self, "Ready", 0.5 * self.margin,
-                                              self.height - 4 * self.margin,
+                                              self.height - 5.2 * self.margin,
                                               self.empty_label_width,
                                               self.element_height)
 

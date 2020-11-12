@@ -1,10 +1,12 @@
 from textwrap import wrap
+import math
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
+from matplotlib.backends.backend_pdf import PdfPages
 
 from DataManager import DataManager
 from DataObject import DataObject
@@ -30,6 +32,8 @@ class DataPlotter(QThread):
         self.data_manager = data_manager
         self.is_running = False
 
+        self.pdf_writer = None
+
         self.figure_width = 9.5
         self.figure_height = 6
         self.file_dpi = 300
@@ -42,6 +46,16 @@ class DataPlotter(QThread):
     def set_attributes(self, data_type: str, path: str):
         self.plot_file_type = data_type
         self.path = path
+        self.file_name = "Heat Map " + self.data_manager.metadata_dictionary[
+            'long_name'] + " " + hf.get_str_from_datetime(
+            self.data_manager.begin_date) + " to " + hf.get_str_from_datetime(
+            self.data_manager.end_date) + " (" + str(
+            self.data_manager.lat_min) + "N, " + str(
+            self.data_manager.lon_min) + "E)-(" + str(
+            self.data_manager.lat_max) + "N, " + str(
+            self.data_manager.lon_max) + "E)"
+        self.pdf_writer = PdfPages(
+            self.path + self.file_name + "." + PlotDataType.PDF.value)
 
     def set_plot_cities(self, enabled: bool):
         self.plot_cities = enabled
@@ -122,15 +136,21 @@ class DataPlotter(QThread):
                                    bbox_inches='tight',
                                    pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.PDF.value:
-                with open(
-                        self.path + self.file_name + '.' +
-                        PlotDataType.PDF.value, 'wb') as f:
-                    figure.savefig(f,
-                                   format=PlotDataType.PDF.value,
-                                   dpi=self.file_dpi,
-                                   transparent=self.is_background_transparent,
-                                   bbox_inches='tight',
-                                   pad_inches=self.inch_padding)
+                if self.data_manager.plot_type == PlotType.HEAT_MAP:
+                    self.pdf_writer.savefig(dpi=self.file_dpi,
+                                            transparent=self.is_background_transparent,
+                                            bbox_inches='tight',
+                                            pad_inches=self.inch_padding)
+                else:
+                    with open(
+                            self.path + self.file_name + '.' +
+                            PlotDataType.PDF.value, 'wb') as f:
+                        figure.savefig(f,
+                                       format=PlotDataType.PDF.value,
+                                       dpi=self.file_dpi,
+                                       transparent=self.is_background_transparent,
+                                       bbox_inches='tight',
+                                       pad_inches=self.inch_padding)
             elif self.plot_file_type == PlotDataType.PNG.value:
                 with open(
                         self.path + self.file_name + '.' +
@@ -162,6 +182,7 @@ class DataPlotter(QThread):
                                    bbox_inches='tight',
                                    pad_inches=self.inch_padding)
         self.is_plotting.emit(False)
+        self.pdf_writer.close()
         self.finished.emit()
 
     def plot_heat_map(self, data_object: DataObject):
@@ -169,7 +190,7 @@ class DataPlotter(QThread):
         lats = data_object.lats
         lons = data_object.lons
 
-        fig = plt.figure(figsize=(self.figure_width, self.figure_height))
+        figure = plt.figure(figsize=(self.figure_width, self.figure_height))
 
         emin = data_object.lon_min
         emax = data_object.lon_max
@@ -190,10 +211,13 @@ class DataPlotter(QThread):
                 (data_object.object_data_max - data_object.object_data_min) /
                 50)
 
-            clevs = np.arange(data_object.object_data_min,
-                              data_object.object_data_max + res,
-                              res,
-                              dtype=float)
+            if not res == 0 and math.isnan(res) is False:
+                clevs = np.arange(data_object.object_data_min,
+                                  data_object.object_data_max + res,
+                                  res,
+                                  dtype=float)
+            else:
+                clevs = np.arange(0, 2)
             plt.contourf(lons,
                          lats,
                          data_object.data,
@@ -203,10 +227,13 @@ class DataPlotter(QThread):
         else:
             res = float((data_object.data_max - data_object.data_min) / 50)
 
-            clevs = np.arange(data_object.data_min,
-                              data_object.data_max + res,
-                              res,
-                              dtype=float)
+            if not res == 0 and math.isnan(res) is False:
+                clevs = np.arange(data_object.data_min,
+                                  data_object.data_max + res,
+                                  res,
+                                  dtype=float)
+            else:
+                clevs = np.arange(0, 2)
             plt.contourf(lons,
                          lats,
                          data_object.data,
@@ -296,7 +323,7 @@ class DataPlotter(QThread):
 
         cb.set_label(data_object.unit, size=12, rotation=90, labelpad=10)
 
-        return fig
+        return figure
 
     def plot_time_series(self, data_object: DataObject):
         plt.style.use('seaborn-whitegrid')
