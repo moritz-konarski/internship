@@ -4,6 +4,8 @@
 
 \section{Educational Internship}
 
+\subsection{NASA Remote Sensing Data}
+
 NASA Remote Sensing data is available via the Earth Science Data Systems (ESDS)
 Program (see \href{https://earthdata.nasa.gov/esds}{here}). The program covers the
 data acquisition, processing, and distribution with the goal to enable the
@@ -43,7 +45,10 @@ variables but is restricted to a latitude of 34\textdegree{}N to
 restricts the area to Kyrgyzstan and sections of all surrounding countries.
 Additionally, the file size is reduced to a manageable 6 MB per file so that
 a whole year of data only takes up 2.2 GB (in 365 files), the same space two
-files of the complete data would take up.\\
+files of the complete data would take up.
+
+\subsection{The netCDF Data Format}
+
 The M2I3NPASM data is provided in a file format called the Network Common Data 
 Form 
 (netCDF). NetCDF is made up of a data format and libraries that can read and
@@ -98,8 +103,9 @@ The files furthermore contain metadata for each of the
 measured variables. The most important of these are the fill values
 that identify missing data, the long name, a full version 
 of the short variable name abbreviation, and the units of the variable.
-\newline
 % cite p.4-5, https://gmao.gsfc.nasa.gov/pubs/docs/Bosilovich785.pdf
+
+\subsection{NetCDF Libraries}
 
 Because I am working with the Python programming language for my internship
 I require a netCDF library that works in that programming language. Unidata
