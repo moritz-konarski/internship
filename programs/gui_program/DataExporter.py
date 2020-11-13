@@ -3,6 +3,7 @@ from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
 from DataManager import DataManager
 from DataObject import DataObject
 from HelperFunctions import ExportDataType, PlotType, HelperFunction as hf
+import platform
 
 
 class DataExporter(QThread):
@@ -57,6 +58,8 @@ class DataExporter(QThread):
                     data_object.lon_min) + "E)-(" + str(
                     data_object.lat_max) + "N, " + str(
                     data_object.lon_max) + "E)"
+        if platform.system() == 'Windows':
+            self.file_name = self.file_name.replace(":", "-")
 
     def export_files(self):
         self.is_exporting.emit(True)

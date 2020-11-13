@@ -50,7 +50,7 @@ class FileExtension(Enum):
 
 class DirectorySeparator(Enum):
     UNIX = "/"
-    WINDOWS = "\\"
+    WINDOWS = "/"
 
 
 class HelperFunction:

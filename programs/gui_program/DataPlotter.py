@@ -1,5 +1,6 @@
 from textwrap import wrap
 import math
+import platform
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -54,6 +55,8 @@ class DataPlotter(QThread):
             self.data_manager.lon_min) + "E)-(" + str(
             self.data_manager.lat_max) + "N, " + str(
             self.data_manager.lon_max) + "E)"
+        if platform.system() == 'Windows':
+            self.file_name = self.file_name.replace(":", "-")
         self.pdf_writer = PdfPages(
             self.path + self.file_name + "." + PlotDataType.PDF.value)
 
@@ -98,6 +101,8 @@ class DataPlotter(QThread):
                     data_object.lon_min) + "E)-(" + str(
                     data_object.lat_max) + "N, " + str(
                     data_object.lon_max) + "E)"
+        if platform.system() == 'Windows':
+            self.file_name = self.file_name.replace(":", "-")
 
     def plot_files(self):
         self.is_plotting.emit(True)
