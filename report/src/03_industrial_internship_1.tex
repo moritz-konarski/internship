@@ -124,12 +124,12 @@ dictionary, and then saved as a JSON file.
 % TODO: cite documentation
 % TODO: explain numpy
 
-\subsubsection{Improving the Data Extraction and Plotting -- 07.10. to
-21.10.2020}
+\subsubsection{Improving the Program -- 07.10. to 22.10.2020}
 
 After both basic versions of a heat map plotting program and a data extraction
 program were developed, I worked on making them work together and
-iteratively improving them.
+iteratively improving them. I also started to develop a graphical user
+interface (GUI).
 
 \paragraph{Data Processing.}
 
@@ -174,7 +174,187 @@ If this is not done, any operation involving a \texttt{NaN} value will itself
 result in \texttt{NaN}. Now the \texttt{NaN} values are left out of
 computations and will not invalidate the results.
 
-\subsubsection{Starting a GUI -- 22.10. to 30.10.}
+\paragraph{GUI.}
 
+To create a GUI I needed to become familiar with the basics of \texttt{PyQt5},
+the graphics library used in this project. PyQt5 is a Python library that
+offers bindings to the C++-based Qt library. Qt covers, among others, wireless 
+connectivity, web browsing, and traditional user interface (UI) development. 
+% cite: https://pypi.org/project/PyQt5/
+Only the UI development part of the library will be used in this project.
+A simple GUI in PyQt5 can be created in a few lines of code. The only
+requirement is to create a \texttt{QApplication}, which is the main application
+that is run when the code is executed. If one also wants to display something
+to the user, a GUI element needs to be created. One of the simplest such object
+is a button, which simply get a text and an action that is performed when it is
+clicked. The action is performs is a normal Python function and can thus do
+anything a Python function could do -- display text, open another window, or
+create a graph.
+
+\subsubsection{Developing a GUI -- 22.10. to 09.11.}
+
+Now that I had developed a working data processor program, a working
+plotting program, and a very basic GUI, I could start putting the three of them
+together to create a functional GUI. In general this process involved
+re--writing my existing programs in an object-oriented programming (OOP) style. This was
+necessary because as individual programs they were procedural, meaning they
+would execute a set number of commands in a set order and then exit. Now 
+though, a new command
+could be called at any time or values might need to be modified while the
+program is running, so OOP was a good idea. Additionally, PyQt5 is written
+using an OOP approach, so it is just natural to use one, too. OOP also allows
+code to be organized into smaller, purpose-built classes that make code
+management simpler. During this process I discovered many bugs in the original
+programs that had not come up before and I was forced to rethink and improve my
+existing programs. The following paragraphs give an overview of this process.
+
+\paragraph{A better way to plot dates.} In the procedural version of the time
+series plotting program I needed to create an array of time and date pairs to
+use as $x$ axis data for the time series plot. From the included metadata
+I could read the number of measurements per day and through the user--specified
+start and end date I had a time range. Thus I could find the number of
+measurements for the time range. For each of these values for which I only knew
+the index in they array, I now needed to create a piece of text that has the
+date and time of the measurements. I painstakingly wrote long and hard-to-read
+code that performed this task but still had some problems. Most notably, to set
+the values on the axis, I manually specified them which meant that all of them
+were displayed -- having one label for each day when graphing data for a whole 
+year is very messy. I found that a simpler way to do this was to use a feature
+of the \texttt{pandas} library. This mathematical and statistical library has
+a series feature that can also create a series of dates. I simply needed to
+specify the beginning and end dates and times and then the interval of time
+between each measurement and a series would be generated in a single line of
+code. This made my code much more readable and correct. 
+
+\paragraph{Optimizing the data processor.} The procedural version of the data
+processor reads every netCDF source file in one-by-one and then copies the
+desired data from it to a \texttt{numpy} array. Each of these arrays then needs
+to be added to a larger array that saves all the data until it is finally saved
+as an NPZ file. The simplest way to do this is to create an original array,
+load the first piece of data into it and then use the
+\texttt{ndarray.append(array)}
+function (\texttt{ndarray} is the \texttt{numpy} name for a multi-dimensional
+array) which takes the \texttt{ndarray} and appends \texttt{array} to the end of
+it. This works perfectly well, but it is very slow. While developing a GUI for
+the data processor it was so slow that my operating system was giving me
+warnings that my program must have crashed because it was not responding. The
+reason for this dismal performance was that the \texttt{append} function does
+not append in-place. That means that each time the function is called, all the
+data from both the \texttt{ndarray} and the \texttt{array} are copied to a new
+location. If this is done many times and especially as the main array gets
+larger this operation is very slow. Thus my goal was to append the array
+in-place -- meaning that I would not have to copy all the data each time -- and
+I tried to find a function that would enable this. Because I could not find one
+I decided to use the following approach. I know at the very beginning of the
+processing how many files will be processed. I also know how many measurements
+from each file I will need to copy. Thus I can create one large, empty,
+appropriately sized array before the copying starts and then simply put the
+data from each file in the place that it belongs. This keeps the data from
+being copied each iteration and thus dramatically improved the speed of the
+program.
+
+\paragraph{Threading.} Even after optimizing the data processor and speeding it
+up considerably, I was still getting warnings about my program freezing while
+it was running. Additionally, when I tried to update the progress bar that
+I planned to use to show the user how far the extraction had progressed, it did
+not work but jumped to 100\% once the process had completed. After researching
+online and reading the documentation I realized that while my data processing
+was going on, the event loop that controls the program was being blocked. The
+even loop is the loop that continuously checks if a button has been pressed
+etc. If this loop is blocked my program becomes unresponsive, which is what
+lead to warnings about it freezing and the progress bar not updating. The
+solution to this problem is to use separate processes to do the time intensive
+tasks and to have the main program simply run the event loop and keep the
+program responsive. PyQt5 has a feature called \texttt{QThread} which is
+a process that can run on its own. It is started from the main program but then
+runs in parallel with it until it is completed or otherwise stops. While it is
+running, a \texttt{QThread} can send messages to the main program through
+\texttt{pyqtSignal}s, which can contain any data type Python supports, from
+\texttt{None} (for a simple indication that something happened) to text (maybe
+a status indicator). If the data processor is started as a thread it no longer
+freezes the main program and when a \texttt{pyqtSignal} is used to send
+progress information to the main program the progress bar can be properly
+updated. This way of implementing more time intensive processes worked so well
+that I used if for every single such case afterwards.
+
+\paragraph{Deciding on the GUI structure.} After I had created a simple GUI
+that fit the needs of the data processor -- directory selection, variable
+selection, button to start processing, and a progress bar -- I needed to decide
+how to move forward with the GUI. I could develop small but separate GUIs for
+each step in the process, create a main menu where buttons would move the user
+to the desired window or popped up a new one, but I decided to implement it
+using tabs (like tabs in a web browser). Tabs would have the advantage that
+I would only need a single main window and wouldn't have to switch between
+multiple independent windows. This would also enable the user to look at more
+than one tab, e.g. plan which data to select while some data was being
+processed. To create these tabs I used the PyQt5 \texttt{QTabWidget} which
+makes the creation and management of tabs easy. It allows, for example, to get
+an index of which tab is currently activated and it can also activate
+a specific tab to move the user to a new tab.
+
+\paragraph{HelperFunctions for buttons and labels.} My GUI is made up of a 
+relatively
+small number of UI elements. The most common ones are the label (which simply
+displays text) and the button (as mentioned above). There are at least two of
+both on every single tab in my program. While creating them is not hard, it
+does take a couple lines of code. The basic lines needed are the
+initialization, setting the desired text, and setting its size and position.
+This would take about 3 lines of code (although some of these commands can be
+combined in the initialization). Because I found myself writing these 3 lines
+of code over and over again I created a class called
+\texttt{HelperFunctions.py} that contained two functions that created a button
+or a label in one line. The function itself uses the exact same commands that
+I was using in my code, but now I didn't have to type them anymore. This step
+made my code more readable and smaller in size.
+
+\paragraph{A table to select data parameters.} After the data has been
+processed from netCDF files to NPZ files, the program should allow the user to
+export or plot a part or all of the data. This requires the user to be able to
+specify which range of dates, latitudes, longitudes, and levels they want to
+export or plot. The GUI for the selection should be precise but also simple and
+intuitive. I decided to do this in the form of a table. This table allows me to
+display the dimensions name, its units, and the minimum and maximum possible
+values. Then there are empty fields where the user must enter the minimum and
+maximum values he wants their subset of data to have. Choosing a table for this
+purpose means that all the relevant data can be displayed together in a compact
+fashion.
+
+\subsubsection{Fixing Bugs -- 10.11. to 13.11.}
+
+\paragraph{NetCDF file recognition.} When I submitted the finished program to
+my supervisor, he pointed out that my program did not handle all netCDF files
+correctly. The files that I had downloaded and worked with had the file
+extension \texttt{.nc4} (for netCDF4) and my program only recognized these. The
+files he wanted to use had the extension \texttt{.nc}, but my program rejected
+them even though they were valid netCDF files. To fix this bug I had to not
+only check for files with the \texttt{.nc4} extension, but also for those with
+the \texttt{.nc} extension. Thankfully, this bug was an easy fix.
+
+\paragraph{Help file in the browser.} My original help section was simply
+another tab that had subtabs with a paragraph of text that briefly explained
+the purpose and usage of each of the components. My supervisor pointed out that
+this was not very helpful nor nice to look at and he provided my with a website
+template that I used to create a better--looking help section. This help
+section is available in the top menu bar of the window. The website opens in
+a tab in a browser and now contains pictures of the tabs of the program for
+illustration.
+
+\paragraph{Save all plot pdfs to a single file.} When my program creates
+multiple files during the plotting phase, each plot is saved in its own file.
+For most file types this is the only way this works, but for the PDF format
+there are other options. My program still saved each plot to its individual
+PDF. My supervisor pointed out that the better way to do this is to save the
+plots to one single PDF file that contains one plot per page. I implemented
+this approach and it increased reduces the number of created PDF files and
+makes them easier to manage.
+
+\paragraph{Fix the bug on Windows.} I developed my GUI on Linux and thus
+I wanted to make sure it would also work on Windows. I installed all the
+necessary libraries and started my program. The error I encountered came from
+the fact that Windows does not allow a colon (":") to be part of a file name
+while Linux does. The problem arose when files that had time values in them
+were saved (a file of time "12:00" for example). On Linux this works fine, but
+on Windows it generates an error. To fix this error, I replaced the colons by
+dashes ("-") when the platform is Windows.
 
 \end{document}
