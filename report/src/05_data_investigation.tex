@@ -4,14 +4,105 @@
 
 \section{Data Investigation}
 
-I think that you should have Results section in your report where you will
-analyze those satellite data. May be seasonal variations. Day/Night min max
-values or spatial variations. Or even vertical structure of air temperature
-I suggest you to explore vertical structure of air temperature. Show tropopause
-zone. Show vertical gradient of temperature and why it is so. Show stratopause
-zone and explain inverse of gradient due to ozone layer. There is a lot of info
-about these zones and you can easily find it, and add good photos, graphs from
-Internet to have more interesting presentation. It will be not just software
-work but also with some scientific taste.
+In this section I will use my program and the skills I learned during this
+internship to explore the vertical structure of air pressure, as per my
+supervisor's suggestion. I will show the tropopause zone, the vertical gradient
+of the air temperature and explain why it is like it is, and the inverse
+gradient caused by the ozone layer.
+
+\subsection{The Troposphere and Tropopause}
+
+The Troposphere is the lowest layer of the atmosphere -- starting on the surface
+it reaches to an average height of 12 km.
+The air pressure in the troposphere decreases non-linearly as the height above 
+the surface increases.
+The temperature in the troposphere also generally decreases when the pressure
+decreases. At the top of the troposphere the temperature is -63\textdegree{}C
+or about 210K. 
+% cite: https://mi-pub.cen.uni-hamburg.de/fileadmin/files/forschung/theomet/docs/Lucarini_pdf/2008_Lucarini_Tropopause_EncycClimCange.pdf
+The pressure range of the troposphere is about 1000 hPa to 200 hPa according to >>>>.\newline
+% cite http://www.pilotfriend.com/av_weather/meteo/atmos.htm#:~:text=The%20troposphere%20has%20the%20following,.%20to%205.92%20in.).
+The boundary between the troposphere and the next layer of the atmosphere,
+the stratosphere, is called the tropopause. The tropopause can be demarcated
+by multiple factors. One factor is the inversion of the temperature gradient of
+the troposphere, meaning that the temperature starts to increase with
+a decrease in pressure, not to decrease like before.
+% cite: https://mi-pub.cen.uni-hamburg.de/fileadmin/files/forschung/theomet/docs/Lucarini_pdf/2008_Lucarini_Tropopause_EncycClimCange.pdf
+Another metric by which to define the tropopause is by a sharp increase in
+potential vorticity, a measure of the rotation of the air masses. 
+% cite: https://mi-pub.cen.uni-hamburg.de/fileadmin/files/forschung/theomet/docs/Lucarini_pdf/2008_Lucarini_Tropopause_EncycClimCange.pdf
+The third factor indicating the tropopause is the abrupt increase of the ozone
+mixing ratio. The ozone mixing ratio is a measure of how much ozone is part of
+the air by either mass or volume.\newline
+% cite http://irina.eas.gatech.edu/ATOC3500_Fall1998/Lecture3.pdf
+To investigate these behaviors, I modified my plotting program to plot all
+pressure levels of a certain variable for a specific date and time and
+position. The following subsections use these plots to explain the behavior
+above. To be comparable, all plots are using the exact same data: M2I3NPASM
+data for the 01.09.2019 at 12:00 for the position (40\textdegree{}N,
+70\textdegree{}E).
+
+\subsubsection{Air Temperature}
+
+As stated above, the air temperature is expected to drop continuously as the
+pressure decreases from 1000 hPa to about 200 hPa. After that, in the
+tropopause, the temperature is expected to sharply increase. \figref{temp}
+illustrates this behavior.
+\begin{figure}[H]
+\center
+    \includegraphics[width=\textwidth]{../graphics/temperature}
+    \vspace{-20pt}
+    \caption{Air Temperature by Air Pressure}
+    \label{temp}
+\end{figure}
+We see that after about 200 hPa the temperature decreases to about 210K and
+then sharply increases, as expected.
+
+\subsubsection{Potential Vorticity}
+
+The second indicator of the tropopause is a sharp increase in the potential
+vorticity that should occur around 200 hPa. The satellite data includes Ertel's
+Potential Vorticity (EPV), which shall he used here. \figref{epv} illustrates 
+the shart increase in potential vorticity. The $x$ axis is $\log_{10}$-based to
+make the transition more clear.
+\begin{figure}[H]
+\center
+    \includegraphics[width=\textwidth]{../graphics/epv_log}
+    \vspace{-20pt}
+    \caption{Ertel's Potential Vorticity by Air Pressure on a $\log_{10}$ scale}
+    \label{epv}
+\end{figure}
+
+\subsubsection{Ozone Mixing Ratio}
+
+The third marker of the tropopause is the increases ozone mass mixing ratio,
+represented by the \texttt{O3} variable of the M2I3NPASM dataset. In
+\figref{ozone} we see that as the pressure approaches approximately 10 hPa, the
+ozone mass mixing ratio increases sharply.
+\begin{figure}[H]
+\center
+    \includegraphics[width=\textwidth]{../graphics/ozone_log}
+    \vspace{-20pt}
+    \caption{Ozone Mass Mixing Ratio by Air Pressure on a $\log_{10}$ scale}
+    \label{ozone}
+\end{figure}
+\figref{ozone} supports our assumptions about the ozone mass mixing behavior in
+the tropopause.
+
+\subsection{Reasons for Temperature Inversion}
+
+According to >>>>, the temperature inversion in the tropopause is caused by
+% cite https://link.springer.com/referenceworkentry/10.1007%2F978-3-642-11274-4_1579#:~:text=Mixing%20is%20generally%20rapid%20in,other%20molecules%20on%20different%20planets.
+heating as a result of sunlight absorption by molecules and aerosols in the
+tropopause.\\
+As \figref{ozone} showed, the ozone mass mixing ratio increases sharply as the
+pressure decreases to about 10 hPa. While most ozone is contained in the
+stratosphere, where it absorbs ultraviolet radiation, some is also contained
+in the troposphere, as shown. Ozone absorbs ultraviolet radioation and heat is
+resealed in the process.
+% cite https://www.nasa.gov/pdf/752034main_Ozone_Hole_Poster.pdf
+The ozone in the troposphere might absorb ultraviolet light that got through
+the troposphere and release heat in the process which in turn warms up the
+tropopause.
 
 \end{document}

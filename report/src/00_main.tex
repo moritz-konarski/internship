@@ -6,7 +6,7 @@
 \usepackage{amssymb}
 \usepackage[
     margin=1in, 
-    showframe
+%    showframe
     ]{geometry}
 \usepackage[english]{babel}
 \usepackage[pdftitle={\titl}, pdfauthor={\auth}, final]{hyperref}
@@ -25,6 +25,8 @@
 \setlist{nolistsep}
 \usepackage[skip=4pt]{parskip}
 \usepackage{textcomp}
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
 
 \tolerance=1
 \emergencystretch=\maxdimen
@@ -38,6 +40,7 @@
 \fancyhead[L]{\titl}
 
 \newcommand{\figref}[1]{\figurename~\ref{#1}}
+\newcommand{\tabref}[1]{\tablename~\ref{#1}}
 
 \begin{document}
 
@@ -100,9 +103,9 @@
 \bibliographystyle{ieeetr}
 \bibliography{../src/bibliography}
 
-\newpage
-\appendix
-\appendixpage
-\subfile{../src/07_appendix}
+%\newpage
+%\appendix
+%\appendixpage
+%\subfile{../src/07_appendix}
 
 \end{document}
