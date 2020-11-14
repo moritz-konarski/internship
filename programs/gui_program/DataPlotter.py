@@ -57,8 +57,10 @@ class DataPlotter(QThread):
             self.data_manager.lon_max) + "E)"
         if platform.system() == 'Windows':
             self.file_name = self.file_name.replace(":", "-")
-        self.pdf_writer = PdfPages(
-            self.path + self.file_name + "." + PlotDataType.PDF.value)
+        if self.plot_file_type == PlotDataType.PDF.value and \
+                self.data_manager.plot_type == PlotType.HEAT_MAP:
+            self.pdf_writer = PdfPages(
+                self.path + self.file_name + "." + PlotDataType.PDF.value)
 
     def set_plot_cities(self, enabled: bool):
         self.plot_cities = enabled
@@ -187,7 +189,9 @@ class DataPlotter(QThread):
                                    bbox_inches='tight',
                                    pad_inches=self.inch_padding)
         self.is_plotting.emit(False)
-        self.pdf_writer.close()
+        if self.plot_file_type == PlotDataType.PDF.value and \
+                self.data_manager.plot_type == PlotType.HEAT_MAP:
+            self.pdf_writer.close()
         self.finished.emit()
 
     def plot_heat_map(self, data_object: DataObject):
