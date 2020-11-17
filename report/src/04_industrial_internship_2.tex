@@ -4,13 +4,40 @@
 
 \section{Python Satellite Data Program}
 
-This section details how to setup and use the program and how it works.
-First, the setup is discussed and then each of the successive stages are
+This section details how to set up and use the program and how it works.
+First, the setup is discussed and then each of the successive stages is
 detailed. The information about different functions and ways to use Python and
 the libraries are taken from the documentation. Because many different
-libraries and elements work together, I will not point out every single one but
-name the required one here.
-% TODO: put all the libraries here
+libraries and elements work together, I will not go into detail for every 
+single one but list the required ones and a quick description in Table
+\ref{tab:01}. They are 
+listed in no particular order.
+\begin{table}[H]
+    \center
+\begin{tabular}{| l | l | l |}\hline
+    Name & Reference        & Purpose       \\\hline\hline
+    PyQt5 & \cite{pyqt} & creation of GUI, handling of threading\\\hline
+    os &\cite{py-os}   & creating and checking directories\\\hline
+    numpy &\cite{py-numpy} & managing data and manipulating arrays\\\hline
+    pandas& \cite{pandas}  & exporting data, providing data to plot, creating
+                            date series\\\hline
+    json &\cite{py-json}   & reading and writing JSON files\\\hline
+    datetime &\cite{py-datetime} & date objects, converting dates, difference
+                                  between dates\\\hline
+    textwrap& \cite{py-textwrap} & wrapping text at $n$ characters for titles\\\hline
+    math &\cite{py-math}         & testing for \texttt{NaN}\\\hline
+    cartopy &\cite{py-cartopy}   & creation of maps, borders, transforming maps\\\hline
+    matplotlib & \cite{py-mpl}    & creating plots, saving plots to files\\\hline
+    netCDF4 &\cite{netcdf4}      & reading netCDF files\\\hline
+    pathlib &\cite{pathlib}      & working with file paths, getting current path\\\hline
+    re &\cite{py-re}             & regular expressions to modify file names\\\hline
+    webbrowser & \cite{browser}   & library to open a web page in a local browser\\\hline
+    sys &\cite{py-sys}           & required to pass system arguments to PyQt5\\\hline
+    warnings & \cite{warnings}    & ignoring warnings from netCDF4 that I cannot control\\\hline
+\end{tabular}
+    \caption{Table of required libraries}
+    \label{tab:01}
+\end{table}
 
 \subsection{Setup}
 
@@ -28,17 +55,31 @@ can provide it upon request. \\
 Setting up the anaconda environment is simple.
 Navigate to the \texttt{programs} folder in my internship repository. Then,
 open that folder in a terminal (it must be \texttt{cmd.exe} on windows,
-Powershell will not work). In the terminal, type \texttt{conda env create
---file internship\_gui.yml} (on Windows, use \texttt{conda env create
---file internship\_gui\_win.yml}). This command will create a Python
+Powershell will not work). In the terminal, type \\
+\texttt{conda env create --file internship\_gui.yml} \\
+\noindent
+On Windows, use \\
+\texttt{conda env create --file internship\_gui\_win.yml}. \\
+\noindent
+This command will create a Python
 environment with all the required dependencies for my program. The installation
 might take a while. The resulting environment
 will have the same name as the file it was created from. To use the environment
-is has to be activated with \texttt{conda activate internship\_gui} (or 
-\texttt{conda activate internship\_gui\_win}. Once the environment is
+is has to be activated with \\
+\texttt{conda activate internship\_gui} \\
+\noindent
+or \\
+\texttt{conda activate internship\_gui\_win} \\
+\noindent
+on Windows. Once the environment is
 activated, navigate to the \texttt{gui\_program} folder. To execute the
-program, run the command \texttt{python3 main.py} (\texttt{python main.py} on
-Windows). You should see a window that looks like \figref{dp01}.
+program, run the command \\
+\texttt{python3 main.py} \\
+\noindent
+or on Windows:\\
+\texttt{python main.py}. \\
+\noindent
+You should see a window that looks like \figref{dp01}.
 \begin{figure}[H]
     \center
     \includegraphics[width=0.75\textwidth]{../graphics/dp01}
@@ -50,7 +91,7 @@ Windows). You should see a window that looks like \figref{dp01}.
 
 The first screen of the program is the Data Processor as seen in \figref{dp01}.
 The purpose of the Data Processor is to take netCDF files as input, extract
-a single variable from them and save it to a NPZ file. It is made up of two
+a single variable from them and save it to an NPZ file. It is made up of two
 classes, the \texttt{DataProcessor.py} class, a \texttt{QThread} that performs the
 processing, and the \texttt{DataProcessorTab.py} class which handles the UI. 
 The steps to using it are the following:
@@ -67,21 +108,21 @@ The steps to using it are the following:
                 \label{dp02}
             \end{figure}
     \item After \textbf{Choose} is clicked, the directory is checked to
-        make sure it actually contains netCDF files. Then, the available
+        make sure it contains netCDF files. Then, the available
         variables are extracted from the first file. They are displayed in
-        a drop-down list in their short form and then the selected one's
+        a drop--down list in their short form and then the selected one's
         full name is displayed (see \figref{dp03}). Here the user must 
         choose one of the variables to extract. 
         \begin{figure}[H]
             \center
             \includegraphics[width=0.75\textwidth]{../graphics/dp03}
             \caption{Data Processor with loaded source Directory}
-            \label{dp04}
+            \label{dp03}
         \end{figure}
     \item When the choice is made, click \textbf{Extract}. A popup asking
         for a destination directory will appear where the user should
         indicate where the files should be saved. In case the extraction
-        takes too long or the user changes their mind, the \textbf{Cancle
+        takes too long or the user changes their mind, the \textbf{Cancel
         Extraction} button will stop the extraction process. \figref{dp04}
         shows the extraction process.
         \begin{figure}[H]
@@ -116,7 +157,7 @@ The data subset is defined by setting minimum and maximum values for the
 dimensions of the data. The type of data is either a time series, where
 a location is fixed and all data for that point is available, or a heat map
 where a range of latitude and longitude is selected and then all data for that
-is selection is used. The Data Manager, much like the Data Processor, has two
+selection is used. The Data Manager, much like the Data Processor, has two
 parts, the \texttt{DataManager.py}, responsible for providing the data, and the
 \texttt{DataManagerTab.py}, which is responsible for the GUI. The Data Manager
 is used like this:
@@ -182,13 +223,13 @@ go back to the Data Manager tab and press \textbf{Plot Data}.
 \end{figure}
 
 If the user pressed the \textbf{Export Data} button, they will be taken to the
-Export Data tab. Again, this tabs functionality is coded in the
+Export Data tab. Again, this tab's functionality is coded in the
 \texttt{DataExporter.py} class and the GUI is in the
 \texttt{DataExporterTab.py} class. \figref{de01} shows what the user sees. To
 use the data manager, the following actions are required:
 \begin{enumerate}
     \item The user is required to choose one of the 4 options of export data
-        types from the drop-down list seen in \figref{de01}. The available
+        types from the drop--down list seen in \figref{de01}. The available
         options are \texttt{.cvs} (comma separated values), \texttt{.zip}
         (compressed file), \texttt{.xlsx} (an MS Excel file), or \texttt{.html}
         (a website file to be opened in the browser). 
@@ -219,10 +260,10 @@ use the data manager, the following actions are required:
         \end{figure}
 \end{enumerate}
 When heat map data is being exported, a file will be created for each time step
-and for each level in each time step. This may lead to the large number of
-files that the warning message (\figref{de02}) is meant for.\\
-When time series data is being exported, a file will be generated for each
-level but because time series have a time span, all selected time values will
+and for each level in each time step. This may lead to a large number of
+files -- which the warning message (\figref{de02}) is meant for.\\
+When time--series data is being exported, a file will be generated for each
+level but because time--series have a time span, all selected time values will
 be in one file. This leads to a manageable number of files.\\
 The exported files will be saved in files with the following file names:
 \begin{itemize}
@@ -232,7 +273,7 @@ The exported files will be saved in files with the following file names:
         omitted if the data does not include it). An example of this type of
         file name is \texttt{Heat Map Ertels Potential Vorticity 2019-09-01
         00:00 (34.0N, 65.0E)-(48.0N, 83.125E) 1.0 hPa}.
-    \item \textbf{Time series}: \texttt{Time Series <long variable name>
+    \item \textbf{Time--series}: \texttt{Time Series <long variable name>
         <start date and time>-<end date and time> <latitude and longitude> 
         <pressure level>.<file type>} (the pressure will be
         omitted if the data does not include it). An example of this type of
@@ -272,7 +313,7 @@ off to save space.
 
 If the user chooses to push the \textbf{Plot Data} button in the Data Manager
 tab, they will be shown the Data Plot tab. As with all other tabs, the UI is
-handled by a class called \texttt{DataPlotterTab.py} and the plotting itself is
+handled by a class called \texttt{DataPlotterTab.py}, and the plotting itself is
 handled by the \texttt{DataPlotter.py}. The GUI the user will see if they chose
 to plot heat map data is illustrated in \figref{dpl01}. If the user chose time
 series data, \figref{dpl02} will be shown (the \textbf{Plot Cities} check box
@@ -287,7 +328,7 @@ The steps to using this tab are very similar to the Data
 Exporter tab; they are:
 \begin{enumerate}
     \item The user chooses one of the 5 options of plot data
-        types from the drop-down list seen in \figref{dpl01}. The available
+        types from the drop--down list seen in \figref{dpl01}. The available
         options are \texttt{.pdf} (portable document format), \texttt{.png}
         (portable network graphics), \texttt{.eps} (encapsulated PostScript), 
         \texttt{.svg} (scalable vector graphics), or \texttt{.jpeg}. 
@@ -296,7 +337,7 @@ Exporter tab; they are:
         that if the user selected a range of 2 days, the minimum and maximum 
         values of all measurements in these 2 days are used as the axis limits.
         If the user chooses local minima and maxima, the minimum and maximum
-        value for each individual plot will be used. The former makes is easier
+        value for each plot will be used. The former makes is easier
         to compare multiple plots with each other, while the latter creates
         more fitting individual plots.
     \item If the user is plotting heat map data they can choose whether or not
@@ -327,7 +368,7 @@ and for each level in each time step unless the plot data type is PDF. If PDF
 is chosen all the plots will be put into one large PDF file with a page for
 each of the plots. If PDF is not the file type, a large number of
 files may be generated.\\
-When time series data is being plotted, a file will be generated for each
+When time--series data is being plotted, a file will be generated for each
 level but because time series have a time span, all selected time values will
 be in one file. This leads to a manageable number of files.\\
 The exported files will be saved in files with the save files names as
@@ -363,10 +404,10 @@ plotting enabled.
 The last and maybe most important section of the program is the help section.
 It can be accessed by clicking on the text \textbf{Help} in the menu bar at the
 top of the program window as seen in every figure of the program window, e.g.
-\figref{dpl03}. This will open a local html file in a browser tab. This website
+\figref{dpl03}. This will open a local HTML file in a browser tab. This website
 is based on a template given to me by my supervisor to create the help
 section. It contains a table of contents, a short introduction to what the
-program does, and then a short description of what each of the 4 tabs do,
+program does, and then a short description of what each of the 4 tabs does,
 similar to the one provided in this section. In \figref{help} the menu and
 introduction are shown as they appear in a browser.
 \begin{figure}[H]
