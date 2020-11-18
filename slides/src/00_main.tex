@@ -1,0 +1,106 @@
+\documentclass[
+    hyperref={
+        colorlinks=true,
+        menucolor=black,
+        anchorcolor=green,
+        linkcolor=.,
+        citecolor=red,
+        pdftitle={RS RAS Internship Presentation},
+        pdfauthor={Moritz M. Konarski}
+    }
+]{beamer}
+
+\mode<presentation>
+{
+  \usetheme{Goettingen}
+  \usecolortheme{seahorse}
+  \usefonttheme{serif}
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[english]{babel}
+\usepackage{subfiles}
+\renewcommand{\baselinestretch}{1.2}
+\usepackage{textcomp}
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+
+\makeatletter
+\patchcmd{\@listI}{\itemsep3\p@}{\itemsep10pt}{}{}
+\makeatother
+
+\newcommand{\figref}[1]{\figurename~\ref{#1}}
+\newcommand{\tabref}[1]{\tablename~\ref{#1}}
+
+\newcommand{\makefig}[4]{                                                       
+    \begin{figure}[#1]                                                          
+        \captionsetup{justification=centering}                                  
+        \includegraphics[width=#2]{#3}                                          
+        \caption{#4}                                                            
+        \label{fig:#3}                                                          
+    \end{figure}                                                                
+}
+
+\AtBeginSection[]{
+    \begin{frame}
+        \vfill
+        \centering
+        \begin{beamercolorbox}[sep=8pt,center,shadow=false,rounded=false]{title}
+            \usebeamerfont{title}\insertsectionhead\par
+        \end{beamercolorbox}
+        \vfill
+    \end{frame}
+}
+
+\setbeamertemplate{frametitle}[default][center]
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+ 
+\title[RS RAS Internship]{RS RAS Internship Report}
+\author[M. Konarski]{Moritz M. Konarski}
+\institute[AUCA]{Applied Mathematics Department \\
+    American University of Central Asia}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\subfile{../src/01_introduction}
+
+\subfile{../src/02_educational_internship}
+
+%\subfile{../src/03_industrial_internship_1}
+
+%\subfile{../src/04_industrial_internship_2}
+
+%\subfile{../src/05_data_investigation}
+
+%\subfile{../src/06_conclusion}
+
+\section*{Q and A}
+
+\tiny
+\begin{frame}[allowframebreaks]{References}
+    \bibliographystyle{abbrv}
+    \bibliography{../src/bibliography}
+\end{frame}
+
+\end{document}
