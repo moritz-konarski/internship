@@ -105,15 +105,18 @@ def timeseries(src_folder: str, graph_datetime_start: str,
             lats) + "N, " + str(lons) + "E)" + "\non " \
                 + start_graph_datetime.strftime("%d.%m.%Y %H:%M") + \
                 " log scale"
+    # this works
+    ax.plot(data, src['lev'])
 
-    ax.plot(src['lev'][:], data)
 
     plt.title(title, size=18, loc='left', pad=20)
 
-    plt.ylabel(meta_dict['units'])
-    plt.xlabel("Pressure hPa")
+    plt.xlabel(meta_dict['units'])
+    plt.ylabel("Pressure hPa")
     if is_log:
-        plt.xscale("log")
+        plt.yscale("log")
+    
+    plt.gca().invert_yaxis()
     
     if is_log:
         with open('plot_log' + '.' + file_format, 'wb') as f:
