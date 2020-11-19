@@ -3,6 +3,24 @@
 Internship program at [AUCA](https://auca.kg) and 
 [RAS RS](http://www.gdirc.kg/en/) 2020.
 
+## Table of Contents
+
+### diary
+
+Contains my internship diary that keeps track of my activities during the internship.
+
+### programs
+
+Contains the programs I wrote during my internship.
+
+### report
+
+Contains the sources of my internship report.
+
+### slides
+
+Contains the sources of my intership presentation.
+
 ## Data
 
 [inst3_3d_asm_Np (M2I3NPASM)](https://disc.gsfc.nasa.gov/datasets/M2I3NPASM_5.12.4/summary): Assimilated Meteorological Fields
