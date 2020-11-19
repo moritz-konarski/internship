@@ -146,13 +146,13 @@ class DataManagerTab(QWidget):
 
     def resize_table(self):
         self.table.resizeColumnsToContents()
-        self.table.setFixedWidth(1.02 * self.table.columnWidth(0) +
+        self.table.setFixedWidth(1.05 * self.table.columnWidth(0) +
                                  self.table.columnWidth(1) +
                                  self.table.columnWidth(2) +
                                  self.table.columnWidth(3) +
                                  self.table.columnWidth(4) +
                                  self.table.columnWidth(5))
-        self.table.setFixedHeight(1.07 * self.table.rowHeight(0) +
+        self.table.setFixedHeight(1.1 * self.table.rowHeight(0) +
                                   self.table.rowHeight(1) +
                                   self.table.rowHeight(2) +
                                   self.table.rowHeight(3) +

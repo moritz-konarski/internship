@@ -352,9 +352,11 @@ class DataPlotter(QThread):
 
         plt.ylabel(data_object.unit)
         if self.use_local_min_max:
-            plt.ylim(data_object.object_data_min, data_object.object_data_max)
+            if not math.isnan(data_object.object_data_min) and not math.isnan(data_object.object_data_max):
+                plt.ylim(data_object.object_data_min, data_object.object_data_max)
         else:
-            plt.ylim(data_object.data_min, data_object.data_max)
+            if not math.isnan(data_object.data_min) and not math.isnan(data_object.data_max):
+                plt.ylim(data_object.data_min, data_object.data_max)
         plt.xlabel("Time")
         return fig
 
